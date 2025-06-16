@@ -608,6 +608,12 @@ const NewJob = () => {
           res.data,
         ],
       });
+      setNewCustomInterviewQuestion((prev) => {
+        return {
+          order_number: prev.order_number ? prev.order_number + 1 : 0,
+          question: "",
+        };
+      });
 
       toast.success("Custom question saved successfully");
     } catch (error: any) {
@@ -1470,9 +1476,10 @@ const NewJob = () => {
                           </div>
                         </div>
                         <Button
-                          variant="outline"
+                          variant="secondary"
                           size="sm"
                           onClick={handleSaveTestCase}
+                          className="w-full"
                         >
                           Save Test Case
                         </Button>
@@ -1676,18 +1683,18 @@ const NewJob = () => {
                               ))}
                             </div>
 
-                            <div className="flex justify-end">
+                            {/* <div className="flex justify-end">
                               <Button
                                 variant="destructive"
                                 size="sm"
-                                // onClick={() =>
-                                //   handleMcqQuestionDelete(index)
-                                // }
+                                onClick={() =>
+                                  handleMcqQuestionDelete(index)
+                                }
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
                                 Delete Question
                               </Button>
-                            </div>
+                            </div> */}
                           </div>
                         </CardContent>
                       </Card>
@@ -1929,7 +1936,7 @@ const NewJob = () => {
                                         newQuizOptions[3],
                                       ]);
                                     }}
-                                    placeholder={`Option 2`}
+                                    placeholder={`Option 3`}
                                   />
                                 </div>
                                 <div className="flex items-center gap-2">
@@ -1949,7 +1956,7 @@ const NewJob = () => {
                                         },
                                       ]);
                                     }}
-                                    placeholder={`Option 3`}
+                                    placeholder={`Option 4`}
                                   />
                                 </div>
                               </RadioGroup>
@@ -2165,16 +2172,16 @@ const NewJob = () => {
                                   </SelectContent>
                                 </Select>
                               </div>
-                              <div className="flex justify-end">
+                              {/* <div className="flex justify-end">
                                 <Button
                                   variant="destructive"
                                   size="sm"
-                                  // onClick={() => handleCustomQuestionDelete(index)}
+                                  onClick={() => handleCustomQuestionDelete(index)}
                                 >
                                   <Trash2 className="h-4 w-4 mr-2" />
                                   Delete Question
                                 </Button>
-                              </div>
+                              </div> */}
                             </div>
                           </CardContent>
                         </Card>

@@ -112,7 +112,9 @@ const DSAPlayground = () => {
           setCompilationStatus(errorMessage);
           setRunStatus("failed");
         } else if (data.status === "error") {
-          setCompilationStatus(`Error: ${data.error || "Unknown error occurred"}`);
+          setCompilationStatus(
+            `Error: ${data.error || "Unknown error occurred"}`
+          );
           setRunStatus("error");
         }
       }
@@ -154,7 +156,8 @@ const DSAPlayground = () => {
   const handleNext = () => {
     if (currentQuestionIndex < dsaQuestions.length - 1) {
       setCurrentQuestionIndex((prev) => prev + 1);
-      console.log("Go to next question: index", currentQuestionIndex + 1);
+      setCompilationStatus("");
+      setRunStatus("");
     }
   };
 

@@ -129,14 +129,14 @@ class CreateInterview(BaseModel):
     first_name: str
     last_name: str
     email: str
-    phone: str
-    work_experience: int
-    education: str
-    skills: str
-    location: str
-    linkedin_url: str
-    portfolio_url: Optional[str] = ""
-    resume_text: str
+    phone: Optional[str] = None
+    work_experience: Optional[int] = None
+    education: Optional[str] = None
+    skills: Optional[str] = None
+    location: Optional[str] = None
+    linkedin_url: Optional[str] = None
+    portfolio_url: Optional[str] = None
+    resume_text: Optional[str] = None
     job_id: int
 
 

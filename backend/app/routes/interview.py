@@ -6,6 +6,7 @@ import random
 import shutil
 import subprocess
 import time
+import uuid
 from typing import Literal, LiteralString
 from fastapi import (
     APIRouter,
@@ -933,3 +934,32 @@ async def create_interview_question_response(
     return services.interview_question_response.create_interview_question_response(
         response_data, interview_id, db
     )
+
+
+@router.post("/generate-private-link/{interview_id}")
+async def generate_private_link(interview_id: int, db: Session = Depends(database.get_db), recruiter_id=Depends(authorize_recruiter)):
+    stmt = select(Interview).where(Interview.id == interview_id)
+    result = db.execute(stmt)
+    interview = result.scalar_one_or_none()
+    if not interview:
+        raise HTTPException(status_code=404, detail="Interview not found")
+    token = str(uuid.uuid4())
+    interview.private_link_token = token
+    db.commit()
+    return {"private_link": f"/interview/private/{token}"}
+
+@router.get("/private/{token}")
+async def get_interview_by_private_link(token: str, db: Session = Depends(database.get_db)):
+    stmt = select(Interview).where(Interview.private_link_token == token)
+    result = db.execute(stmt)
+    interview = result.scalar_one_or_none()
+    if not interview:
+        raise HTTPException(status_code=404, detail="Invalid or expired private link")
+    return {
+        "id": interview.id,
+        "first_name": interview.first_name,
+        "last_name": interview.last_name,
+        "email": interview.email,
+        "status": interview.status,
+        "job_id": interview.job_id,
+    }

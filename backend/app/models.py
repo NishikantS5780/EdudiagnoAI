@@ -243,6 +243,7 @@ class Interview(Base):
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
     job_id = Column(Integer, ForeignKey("jobs.id", ondelete="CASCADE"), nullable=False)
+    private_link_token = Column(String, unique=True, index=True, nullable=True)
 
     job = relationship("Job", back_populates="interviews")
     question_and_responses = relationship(
