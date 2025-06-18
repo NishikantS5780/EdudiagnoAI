@@ -39,8 +39,7 @@ import {
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import VideoJS from "@/components/common/VideoJs";
-import { interviewAPI } from "@/services/interviewApi";
-import { jobAPI } from "@/services/jobApi";
+import { companyApi } from "@/services/companyApi";
 
 interface ScoreBreakdown {
   technicalSkills: number;
@@ -124,7 +123,7 @@ const InterviewDetail = () => {
           throw "Invalid interview";
         }
 
-        const res = await interviewAPI.getInterview(id);
+        const res = await companyApi.getInterview(id);
 
         if (!res.data) {
           toast.error("Interview not found");
@@ -136,7 +135,7 @@ const InterviewDetail = () => {
 
         // Fetch job details
         if (res.data.job_id) {
-          const jobResponse = await jobAPI.getCurrentRecruiterJob(
+          const jobResponse = await companyApi.getAiInterviewedJobById(
             res.data.job_id.toString()
           );
           const jobData = jobResponse.data;
@@ -167,7 +166,7 @@ const InterviewDetail = () => {
         }
 
         // Fetch questions and responses
-        const qrResponse = await interviewAPI.getInterviewQuestionsAndResponses(
+        const qrResponse = await companyApi.getInterviewQuestionsAndResponses(
           id!
         );
         setQuestionsAndResponses(qrResponse.data);
@@ -197,7 +196,7 @@ const InterviewDetail = () => {
 
         // First get the job_id from the interview
         const interviewResponse = await fetch(
-          `${baseUrl}/interview/recruiter-view?id=${id}`,
+          `${baseUrl}/company/interview?id=${id}`,
           {
             method: "GET",
             headers: {
@@ -222,7 +221,7 @@ const InterviewDetail = () => {
 
         // Try to get job_id from different possible locations
         const jobId =
-          interviewData.job_id ||
+          interviewData.ai_interviewed_job_id ||
           interviewData.jobId ||
           (interviewData.job && interviewData.job.id);
 
@@ -239,7 +238,7 @@ const InterviewDetail = () => {
         console.log("Using job_id:", jobId);
 
         // Get quiz questions using job_id
-        const questionsUrl = `${baseUrl}/quiz-question?job_id=${jobId}`;
+        const questionsUrl = `${baseUrl}/company/quiz-question?ai_interviewed_job_id=${jobId}`;
         console.log("Fetching questions from:", questionsUrl);
 
         const questionsRes = await fetch(questionsUrl, {
@@ -269,7 +268,7 @@ const InterviewDetail = () => {
         setQuizQuestions(quizQuestions);
 
         // Get quiz responses
-        const responsesUrl = `${baseUrl}/quiz-response/recruiter-view?interview_id=${id}`;
+        const responsesUrl = `${baseUrl}/company/quiz-response?interview_id=${id}`;
         console.log("Fetching responses from:", responsesUrl);
 
         const responsesRes = await fetch(responsesUrl, {
@@ -432,13 +431,13 @@ const InterviewDetail = () => {
             <div className="flex items-center gap-4">
               <Avatar className="h-14 w-14">
                 <AvatarFallback className="text-lg">
-                  {interview.first_name?.[0]}
-                  {interview.last_name?.[0]}
+                  {interview.firstname?.[0]}
+                  {interview.lastname?.[0]}
                 </AvatarFallback>
               </Avatar>
               <div>
                 <CardTitle className="text-xl">
-                  {interview.first_name} {interview.last_name}
+                  {interview.firstname} {interview.lastname}
                 </CardTitle>
                 <CardDescription>{interview.email}</CardDescription>
               </div>

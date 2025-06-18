@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Loader2, Mail } from "lucide-react";
 import { toast } from "sonner";
-import { interviewAPI } from "@/services/interviewApi";
+import { interviewApi } from "@/services/interviewApi";
 
 interface EmailVerificationStageProps {
   resumeEmail: string;
@@ -36,7 +36,7 @@ export function EmailVerificationStage({
 
     setIsSendingOtp(true);
     try {
-      await interviewAPI.sendOtp(email);
+      await interviewApi.sendOtp(email);
       setOtpSent(true);
       toast.success("OTP sent to your email");
     } catch (error: any) {
@@ -49,7 +49,7 @@ export function EmailVerificationStage({
   const handleVerifyOtp = async () => {
     setIsVerifying(true);
     try {
-      await interviewAPI.verifyOtp(email, otp);
+      await interviewApi.verifyOtp(email, otp);
       toast.success("Email verified successfully");
       onVerified();
     } catch (error: any) {

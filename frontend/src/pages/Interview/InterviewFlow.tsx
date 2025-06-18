@@ -5,7 +5,7 @@ import { ResumeUploadStage } from "@/components/interview/stages/ResumeUploadSta
 import { useInterviewResponseProcessor } from "@/components/interview/InterviewResponseProcessor";
 import { Button } from "@/components/ui/button";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
-import { jobAPI } from "@/services/jobApi";
+import { interviewApi } from "@/services/interviewApi";
 
 export function InterviewFlow() {
   const [urlSearchParams, setUrlSearchParams] = useSearchParams();
@@ -29,7 +29,7 @@ export function InterviewFlow() {
           return;
         }
 
-        const response = await jobAPI.candidateGetJob(jobId);
+        const response = await interviewApi.getAiInterviewedJob(jobId);
         const data = response.data;
         setJobId(data.id);
         setJobTitle(data.title);

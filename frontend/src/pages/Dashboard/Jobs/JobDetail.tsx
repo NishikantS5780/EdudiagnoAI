@@ -29,9 +29,9 @@ import { JobData } from "@/types/job";
 import { InterviewData } from "@/types/interview";
 import DsaManagement from "@/components/jobs/DsaManagement";
 import McqManagement from "@/components/jobs/McqManagement";
-import { jobAPI } from "@/services/jobApi";
+import { companyApi } from "@/services/companyApi";
 import InterviewQuestionManagement from "@/components/jobs/InterviewQuestionManagement";
-import { interviewAPI } from "@/services/interviewApi";
+import { interviewApi } from "@/services/interviewApi";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -55,7 +55,7 @@ const JobDetail = () => {
         toast.error("Job ID is required");
         return;
       }
-      const response = await jobAPI.getCurrentRecruiterJob(id);
+      const response = await companyApi.getAiInterviewedJobById(id);
       const data = response.data;
       setJob({
         id: data.id,
@@ -89,7 +89,7 @@ const JobDetail = () => {
 
   const fetchInterviews = async () => {
     try {
-      const response = await interviewAPI.getInterviews({ job_id: id });
+      const response = await interviewApi.getInterviews({ job_id: id });
       const formattedInterviews = response.data.interviews.map(
         (interview: any) => interview
       );
@@ -111,7 +111,7 @@ const JobDetail = () => {
 
     if (window.confirm("Are you sure you want to delete this job?")) {
       try {
-        await jobAPI.deleteJob(job.id.toString());
+        await companyApi.deleteAiInterviewedJob(job.id.toString());
         toast.success("Job deleted successfully");
         navigate("/dashboard/jobs");
       } catch (error) {
@@ -126,7 +126,7 @@ const JobDetail = () => {
     }
     if (window.confirm("Are you sure you want to delete this interview?")) {
       try {
-        await interviewAPI.deleteInterview(id.toString());
+        await interviewApi.deleteInterview(id.toString());
         toast.success("Interview deleted successfully");
         await fetchInterviews();
       } catch (error) {
@@ -172,7 +172,7 @@ const JobDetail = () => {
 
     try {
       setLoading(true);
-      await jobAPI.updateJob(job.id.toString(), job);
+      await companyApi.updateAiInterviewedJob(job.id.toString(), job);
       toast.success("Job details updated successfully");
       fetchJobDetails();
       setIsEditMode(false);

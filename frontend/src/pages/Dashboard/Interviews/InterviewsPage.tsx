@@ -62,8 +62,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { interviewAPI } from "@/services/interviewApi";
-import { jobAPI } from "@/services/jobApi";
+import { interviewApi } from "@/services/interviewApi";
+import { companyApi } from "@/services/companyApi";
 
 const InterviewsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -81,20 +81,20 @@ const InterviewsPage = () => {
   const itemsPerPage = 10;
 
   useEffect(() => {
-    interviewAPI
+    interviewApi
       .getInterviews({
         start: (currentPage - 1) * itemsPerPage,
         limit: itemsPerPage,
       })
       .then(async (res) => {
         const jobIds = res.data.interviews.map(
-          (interview: any) => interview.job_id
+          (interview: any) => interview.ai_interviewed_job_id
         ) as number[];
         const uniqueJobIds = Array.from(new Set(jobIds));
 
         const jobTitlePromises = uniqueJobIds.map(async (jobId) => {
           try {
-            const jobRes = await jobAPI.getCurrentRecruiterJob(
+            const jobRes = await companyApi.getAiInterviewedJobById(
               jobId.toString()
             );
             return { jobId, title: jobRes.data.title };
@@ -123,15 +123,16 @@ const InterviewsPage = () => {
 
     try {
       setIsLoading(true);
-      await interviewAPI.deleteInterview(interviewToDelete?.toString());
+      await companyApi.deleteInterview(interviewToDelete?.toString());
       toast.success("Interview deleted successfully");
     } catch (error) {
+      console.log(error)
       toast.error("Failed to delete interview");
     } finally {
       setIsLoading(false);
       setInterviewToDelete(null);
 
-      interviewAPI
+      interviewApi
         .getInterviews({
           start: (currentPage - 1) * itemsPerPage,
           limit: itemsPerPage,
@@ -290,10 +291,10 @@ const InterviewsPage = () => {
                     if (searchQuery) {
                       const searchLower = searchQuery.toLowerCase();
                       const matches =
-                        interview.first_name
+                        interview.firstname
                           ?.toLowerCase()
                           .includes(searchLower) ||
-                        interview.last_name
+                        interview.lastname
                           ?.toLowerCase()
                           .includes(searchLower) ||
                         interview.email?.toLowerCase().includes(searchLower);
@@ -314,10 +315,10 @@ const InterviewsPage = () => {
                           <Avatar>
                             <AvatarImage
                               src={undefined}
-                              alt={interview.first_name}
+                              alt={interview.firstname}
                             />
                             <AvatarFallback>
-                              {interview.first_name?.[0]}
+                              {interview.lastname?.[0]}
                             </AvatarFallback>
                           </Avatar>
                           <div>
@@ -325,7 +326,7 @@ const InterviewsPage = () => {
                               to={`/dashboard/interviews/${interview.id}`}
                               className="font-medium hover:underline"
                             >
-                              {interview.first_name} {interview.last_name}
+                              {interview.firstname} {interview.lastname}
                             </Link>
                             <div className="text-xs text-muted-foreground">
                               {interview.email}
@@ -334,8 +335,8 @@ const InterviewsPage = () => {
                         </div>
                       </TableCell>
                       <TableCell>
-                        {(!!interview.job_id &&
-                          jobTitlesMap[interview.job_id]) ||
+                        {(!!interview.ai_interviewed_job_id &&
+                          jobTitlesMap[interview.ai_interviewed_job_id]) ||
                           "Unknown"}
                       </TableCell>
                       <TableCell>

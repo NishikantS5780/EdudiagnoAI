@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Trash2, Edit, Trash } from "lucide-react";
 import { toast } from "sonner";
 import { DSAQuestion, TestCase } from "@/types/job";
-import { dsaAPI } from "@/services/dsaApi";
+import { companyApi } from "@/services/companyApi";
 
 interface DsaManagementProps {
   jobId: number;
@@ -34,7 +34,7 @@ const DsaManagement = ({ jobId }: DsaManagementProps) => {
 
   const fetchQuestions = async () => {
     try {
-      const response = await dsaAPI.getDSAQuestion(jobId.toString());
+      const response = await companyApi.getDSAQuestion(jobId.toString());
       setQuestions(response.data);
     } catch (error) {
       toast.error("Failed to fetch questions");
@@ -47,7 +47,7 @@ const DsaManagement = ({ jobId }: DsaManagementProps) => {
 
   const handleSaveNewQuestion = async () => {
     try {
-      const response = await dsaAPI.createDSAQuestion(
+      const response = await companyApi.createDSAQuestion(
         jobId.toString(),
         newQuestion
       );
@@ -127,7 +127,7 @@ const DsaManagement = ({ jobId }: DsaManagementProps) => {
       return;
     }
     try {
-      await dsaAPI.deleteQuestion(id);
+      await companyApi.deleteDSAQuestion(id);
 
       toast.success("Question delete successfully");
       await fetchQuestions();
@@ -141,7 +141,7 @@ const DsaManagement = ({ jobId }: DsaManagementProps) => {
       if (!editingQuestion) {
         return;
       }
-      await dsaAPI.update(editingQuestion);
+      await companyApi.updateDSAQuestion(editingQuestion);
 
       toast.success("Changes saved successfully");
       await fetchQuestions();
@@ -154,7 +154,7 @@ const DsaManagement = ({ jobId }: DsaManagementProps) => {
     if (!editingQuestion?.id || !editingNewTestCase) return;
 
     try {
-      await dsaAPI.createTestCase(editingNewTestCase, editingQuestion.id);
+      await companyApi.createTestCase(editingNewTestCase, editingQuestion.id);
       setEditingNewTestCase({ input: "", expected_output: "" });
       toast.success("Test case added successfully");
       await fetchQuestions();
@@ -169,7 +169,7 @@ const DsaManagement = ({ jobId }: DsaManagementProps) => {
     }
 
     try {
-      await dsaAPI.deleteTestCase(id);
+      await companyApi.deleteTestCase(id);
       toast.success("Test case deleted successfully");
       await fetchQuestions();
     } catch (error) {

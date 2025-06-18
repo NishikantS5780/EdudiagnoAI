@@ -37,7 +37,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import html2canvas from "html2canvas";
 import { RecruiterData } from "@/types/recruiter";
-import { interviewAPI } from "@/services/interviewApi";
+import { interviewApi } from "@/services/interviewApi";
 import { config } from "@/config";
 import axios from "axios";
 
@@ -251,7 +251,7 @@ export default function VideoInterview() {
       // Start text-to-speech conversion
       const text_to_speech = async () => {
         try {
-          const response = await interviewAPI.textToSpeech(currentQuestion);
+          const response = await interviewApi.textToSpeech(currentQuestion);
           // Create and prepare audio element before setting speech state
           const newAudio = new Audio(
             "data:audio/mpeg;base64," + response.data.audio_base64
@@ -325,7 +325,7 @@ export default function VideoInterview() {
 
   useEffect(() => {
     const getCandidateData = async () => {
-      const res = await interviewAPI.candidateGetInterview();
+      const res = await interviewApi.candidateGetInterview();
       const data = res.data;
       setInterviewData({
         id: data.id,
@@ -517,7 +517,7 @@ export default function VideoInterview() {
         });
 
         // Use the /audio/to-text endpoint
-        const response = await interviewAPI.speechToText(audioFile);
+        const response = await interviewApi.speechToText(audioFile);
 
         if (response.data && response.data.transcript) {
           return response.data.transcript;
@@ -554,7 +554,7 @@ export default function VideoInterview() {
             setShowEditDialog(false);
 
             // Then submit to backend
-            interviewAPI
+            interviewApi
               .submitTextResponse(currentQuestionIndex, responseToSubmit)
               .then(() => {
                 console.log("Response submitted successfully");
@@ -601,7 +601,7 @@ export default function VideoInterview() {
       setHasRecordedCurrentQuestion(true);
       setCurrentResponse(responseToSubmit);
       // Submit to backend
-      await interviewAPI.submitTextResponse(
+      await interviewApi.submitTextResponse(
         currentQuestionIndex,
         responseToSubmit
       );
@@ -677,7 +677,7 @@ export default function VideoInterview() {
       };
 
       // Call the API to analyze the transcript
-      const response = await interviewAPI.generateFeedback(
+      const response = await interviewApi.generateFeedback(
         userTranscript,
         jobData?.requirements || ""
       );
@@ -1296,7 +1296,7 @@ export default function VideoInterview() {
       <header className="border-b bg-background/95 backdrop-blur-sm p-4 flex items-center justify-between sticky top-0 z-10">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-md bg-muted flex items-center justify-center">
-            {companyData?.name[0]}
+            {companyData && companyData.name && companyData?.name[0]}
           </div>
           <div>
             <h1 className="font-semibold">{jobData?.title}</h1>
@@ -1443,7 +1443,7 @@ export default function VideoInterview() {
                           addUserMessage(skipResponse);
                           setHasRecordedCurrentQuestion(true);
                           setCurrentResponse(skipResponse);
-                          interviewAPI.submitTextResponse(currentQuestionIndex, skipResponse)
+                          interviewApi.submitTextResponse(currentQuestionIndex, skipResponse)
                             .then(() => {
                               console.log("Skip response submitted successfully");
                             })

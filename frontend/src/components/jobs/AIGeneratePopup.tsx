@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
-import { jobAPI } from "@/services/jobApi";
+import { companyApi } from "@/services/companyApi";
 
 interface AIGeneratePopupProps {
   title: string;
@@ -114,7 +114,7 @@ const AIGeneratePopup: React.FC<AIGeneratePopupProps> = ({
       let content = "";
 
       if (fieldLabel === "Description") {
-        const response = await jobAPI.generateDescription(
+        const response = await companyApi.generateAiInterviewedJobDescription(
           jobTitle,
           department,
           location,
@@ -124,7 +124,7 @@ const AIGeneratePopup: React.FC<AIGeneratePopupProps> = ({
         );
         content = response.data.description;
       } else if (fieldLabel === "Requirements") {
-        const response = await jobAPI.generateRequirements(
+        const response = await companyApi.generateAiInterviewedJobRequirements(
           jobTitle,
           department,
           location,

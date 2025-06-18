@@ -1,9 +1,9 @@
 from fastapi import Request, HTTPException
 from app.lib.errors import CustomException
-from app.utils import jwt
+from app.lib import jwt
 
 
-def authorize_recruiter(request: Request):
+def authorize_company(request: Request):
     try:
         authorization_header = request.headers.get("authorization")
         if not authorization_header:

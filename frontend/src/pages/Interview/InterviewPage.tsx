@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { CandidateJobData } from "@/types/job";
-import { jobAPI } from "@/services/jobApi";
+import { interviewApi } from "@/services/interviewApi";
 
 const InterviewPage = () => {
   const [urlSearchParams, setUrlSearchParams] = useSearchParams();
@@ -30,7 +30,7 @@ const InterviewPage = () => {
           return;
         }
         
-        const response = await jobAPI.candidateGetJob(jobId);
+        const response = await interviewApi.getAiInterviewedJob(jobId);
         const data = response.data;
 
         console.log('Raw API Response:', data);

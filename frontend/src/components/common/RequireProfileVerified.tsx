@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { AuthContext } from "@/context/AuthContext";
+import { AuthContext } from "@/context/AppContext";
 import { toast } from "sonner";
 
 interface RequireProfileCompletionProps {

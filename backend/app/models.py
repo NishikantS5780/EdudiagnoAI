@@ -12,42 +12,344 @@ from sqlalchemy.orm import relationship
 from .database import Base
 
 
-class Recruiter(Base):
-    __tablename__ = "recruiters"
+class Company(Base):
+    __tablename__ = "companies"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True)
-    email = Column(String, unique=True, index=True, nullable=False)
+    name = Column(String, unique=True, nullable=False)
+    password_hash = Column(String, nullable=False)
+    email = Column(String, unique=True, nullable=False)
     email_otp = Column(String)
     email_otp_expiry = Column(DateTime)
     email_verified = Column(Boolean, default=False)
-    password_hash = Column(String, nullable=False)
     phone = Column(String)
-    designation = Column(String)
-    company_name = Column(String)
-    company_logo = Column(String)
+    country_code = Column(String)  # e.g., +1 for US, +91 for India
+    phone_otp = Column(String)
+    phone_otp_expiry = Column(DateTime)
+    phone_verified = Column(Boolean, default=False)
     website = Column(String)
     industry = Column(String)
     min_company_size = Column(Integer)
     max_company_size = Column(Integer)
-    country = Column(String, default="United States")
+    country = Column(String)
     state = Column(String)
     city = Column(String)
     zip = Column(String)
     address = Column(String)
+    banner_url = Column(String)
+    logo_url = Column(String)
+    rating = Column(Integer, default=0)  # Average rating from job seekers
+    ratings_count = Column(Integer, default=0)  # Number of ratings received
+    tagline = Column(String)
+    tags = Column(String)  # Comma-separated tags for company
+    about_us = Column(String)
+    about_us_poster_url = Column(String)
+    foundation_year = Column(Integer)
+    website_url = Column(String)
     verified = Column(Boolean)
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 
     # Relationships
+    ai_interviewed_jobs = relationship("AiInterviewedJob", back_populates="company")
     jobs = relationship("Job", back_populates="company")
+
+
+class JobSeeker(Base):
+    __tablename__ = "job_seekers"
+
+    id = Column(Integer, primary_key=True, index=True)
+    firstname = Column(String, nullable=False)
+    lastname = Column(String, nullable=False)
+    gender = Column(String)
+    date_of_birth = Column(DateTime)
+    password_hash = Column(String, nullable=False)
+    email = Column(String, unique=True, nullable=False)
+    email_otp = Column(String)
+    email_otp_expiry = Column(DateTime)
+    email_verified = Column(Boolean, default=False)
+    country_code = Column(String)  # +1 for US, +91 for India
+    phone = Column(String, unique=True)
+    phone_otp = Column(String)
+    phone_otp_expiry = Column(DateTime)
+    phone_verified = Column(Boolean, default=False)
+    dob = Column(DateTime)
+    current_location = Column(String)
+    home_town = Column(String)
+    country = Column(String)
+    career_preference_internships = Column(Boolean, default=False)
+    career_preference_jobs = Column(Boolean, default=False)
+    min_duration_months = Column(Integer)
+    preferred_work_location = Column(String)
+    work_experience_yrs = Column(Integer, default=0)
+    updates_subscription = Column(Boolean, default=False)
+    key_skills = Column(String)  # Comma-separated list of key skills
+    languages = Column(String)  # Comma-separated list of languages spoken
+    profile_summary = Column(String)
+    awards_and_accomplishments = Column(String)
+    resume_url = Column(String)
+    profile_picture_url = Column(String)
+
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+
+    hsc_education = relationship(
+        "HSCEducation", back_populates="job_seeker", uselist=False
+    )
+    ssc_education = relationship(
+        "SSCEducation", back_populates="job_seeker", uselist=False
+    )
+    higher_education = relationship(
+        "HigherEducation", back_populates="job_seeker", uselist=False
+    )
+    internships = relationship("Internship", back_populates="job_seeker")
+    projects = relationship("Project", back_populates="job_seeker")
+    certifications = relationship("Certification", back_populates="job_seeker")
+    clubs_and_committees = relationship("ClubAndCommittee", back_populates="job_seeker")
+    competitive_exams = relationship("CompetitiveExam", back_populates="job_seeker")
+    employment_details = relationship("EmploymentDetail", back_populates="job_seeker")
+    academic_achievements = relationship(
+        "AcademicAchievement", back_populates="job_seeker"
+    )
+    job_applications = relationship("JobApplication", back_populates="job_seeker")
+
+
+class HSCEducation(Base):
+    __tablename__ = "hsc_educations"
+
+    id = Column(Integer, primary_key=True, index=True)
+    job_seeker_id = Column(
+        Integer, ForeignKey("job_seekers.id", ondelete="CASCADE"), unique=True
+    )
+    examination_board = Column(String)
+    medium_of_study = Column(String)
+    actual_percentage = Column(String)
+    passing_year = Column(Integer)
+
+    job_seeker = relationship("JobSeeker", back_populates="hsc_education")
+
+
+class SSCEducation(Base):
+    __tablename__ = "ssc_educations"
+
+    id = Column(Integer, primary_key=True, index=True)
+    job_seeker_id = Column(
+        Integer, ForeignKey("job_seekers.id", ondelete="CASCADE"), unique=True
+    )
+    examination_board = Column(String)
+    medium_of_study = Column(String)
+    actual_percentage = Column(String)
+    passing_year = Column(Integer)
+
+    job_seeker = relationship("JobSeeker", back_populates="ssc_education")
+
+
+class HigherEducation(Base):
+    __tablename__ = "higher_educations"
+
+    id = Column(Integer, primary_key=True, index=True)
+    job_seeker_id = Column(Integer, ForeignKey("job_seekers.id", ondelete="CASCADE"))
+    qualification = Column(String)  # e.g., Graduate/Diploma, Postgraduate, Doctorate
+    course_name = Column(String)
+    specialization = Column(String)
+    college_name = Column(String)
+    grading_system = Column(String)  # e.g., CGPA, Percentage
+    grading_system_value = Column(String)
+    starting_year = Column(Integer)
+    passing_year = Column(Integer)
+    course_type = Column(String)  # e.g., Full-time, Part-time
+
+    job_seeker = relationship("JobSeeker", back_populates="higher_education")
+    clubs_and_committees = relationship("ClubAndCommittee", back_populates="education")
+
+
+class Internship(Base):
+    __tablename__ = "internship_experiences"
+
+    id = Column(Integer, primary_key=True, index=True)
+    job_seeker_id = Column(
+        Integer, ForeignKey("job_seekers.id", ondelete="CASCADE"), nullable=False
+    )
+    company_name = Column(String)
+    starting_month = Column(Integer)
+    starting_year = Column(Integer)
+    ending_month = Column(Integer)
+    ending_year = Column(Integer)
+    project_name = Column(String)
+    work_description = Column(String)
+    key_skills = Column(String)
+    project_url = Column(String)
+
+    job_seeker = relationship("JobSeeker", back_populates="internships")
+
+
+class Project(Base):
+    __tablename__ = "projects"
+
+    id = Column(Integer, primary_key=True, index=True)
+    job_seeker_id = Column(
+        Integer, ForeignKey("job_seekers.id", ondelete="CASCADE"), nullable=False
+    )
+    project_name = Column(String)
+    starting_month = Column(Integer)
+    starting_year = Column(Integer)
+    ending_month = Column(Integer)
+    ending_year = Column(Integer)
+    project_description = Column(String)
+    key_skills = Column(String)
+    project_url = Column(String)
+
+    job_seeker = relationship("JobSeeker", back_populates="projects")
+
+
+class Certification(Base):
+    __tablename__ = "certifications"
+
+    id = Column(Integer, primary_key=True, index=True)
+    job_seeker_id = Column(
+        Integer, ForeignKey("job_seekers.id", ondelete="CASCADE"), nullable=False
+    )
+    certification_name = Column(String)
+    certification_provider = Column(String)
+    completion_id = Column(String)
+    certification_url = Column(String)
+    starting_month = Column(Integer)
+    starting_year = Column(Integer)
+    ending_month = Column(Integer)
+    ending_year = Column(Integer)
+    certificate_expires = Column(Boolean, default=False)
+
+    job_seeker = relationship("JobSeeker", back_populates="certifications")
+
+
+class ClubAndCommittee(Base):
+    __tablename__ = "clubs_and_committees"
+
+    id = Column(Integer, primary_key=True, index=True)
+    job_seeker_id = Column(
+        Integer, ForeignKey("job_seekers.id", ondelete="CASCADE"), nullable=False
+    )
+    committee_name = Column(String)
+    position = Column(String)
+    education_id = Column(
+        Integer, ForeignKey("higher_educations.id", ondelete="CASCADE")
+    )
+    starting_month = Column(Integer)
+    starting_year = Column(Integer)
+    ending_month = Column(Integer)
+    ending_year = Column(Integer)
+    is_currently_working = Column(Boolean, default=False)
+    responsibility_description = Column(String)
+
+    job_seeker = relationship("JobSeeker", back_populates="clubs_and_committees")
+    education = relationship("HigherEducation", back_populates="clubs_and_committees")
+
+
+class CompetitiveExam(Base):
+    __tablename__ = "competitive_exams"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(
+        Integer, ForeignKey("job_seekers.id", ondelete="CASCADE"), nullable=False
+    )
+    exam_label = Column(String)  # e.g., GRE, GMAT, SAT
+    score = Column(String)
+
+    job_seeker = relationship("JobSeeker", back_populates="competitive_exams")
+
+
+class EmploymentDetail(Base):
+    __tablename__ = "employment_details"
+
+    id = Column(Integer, primary_key=True, index=True)
+    job_seeker_id = Column(
+        Integer, ForeignKey("job_seekers.id", ondelete="CASCADE"), nullable=False
+    )
+    experience_years = Column(Integer)
+    experience_months = Column(Integer)
+    company_name = Column(String)
+    designation = Column(String)
+    starting_month = Column(Integer)
+    starting_year = Column(Integer)
+    ending_month = Column(Integer)
+    ending_year = Column(Integer)
+    is_currently_working = Column(Boolean)
+    work_description = Column(String)
+
+    job_seeker = relationship("JobSeeker", back_populates="employment_details")
+
+
+class AcademicAchievement(Base):
+    __tablename__ = "academic_achievements"
+
+    id = Column(Integer, primary_key=True, index=True)
+    job_seeker_id = Column(
+        Integer, ForeignKey("job_seekers.id", ondelete="CASCADE"), nullable=False
+    )
+    qualification = Column(String)  # e.g., B.Tech, M.Tech, PhD
+    achievements = Column(String)  # e.g., scholarships, awards
+
+    job_seeker = relationship("JobSeeker", back_populates="academic_achievements")
 
 
 class Job(Base):
     __tablename__ = "jobs"
+    id = Column(Integer, primary_key=True, index=True)
+    company_id = Column(
+        Integer, ForeignKey("companies.id", ondelete="CASCADE"), nullable=False
+    )
+    job_title = Column(String)
+    job_role = Column(String)
+    job_location = Column(String)
+    job_locality = Column(String)
+    work_mode = Column(String)  # e.g., remote, hybrid, on-site
+    min_work_experience = Column(Integer)
+    max_work_experience = Column(Integer)
+    min_salary_per_month = Column(Integer)
+    max_salary_per_month = Column(Integer)
+    additional_benefits = Column(String)
+    skills = Column(String)
+    qualification = Column(String)  # e.g., GRADUATE/DIPLOMA, POSTGRADUATE, DOCTORATE
+    gender_preference = Column(String)  # e.g., ANY, MA
+    candidate_prev_industry = Column(String)
+    languages = Column(String)
+    education_degree = Column(String)
+    job_description = Column(String)
+    about_company = Column(String)
+    posted_at = Column(DateTime, default=func.now())
+
+    company = relationship("Company", back_populates="jobs")
+    job_applications = relationship("JobApplication", back_populates="job")
+
+
+class JobApplication(Base):
+    __tablename__ = "job_applications"
 
     id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, nullable=False)
+    job_seeker_id = Column(
+        Integer, ForeignKey("job_seekers.id", ondelete="CASCADE"), nullable=False
+    )
+    job_id = Column(Integer, ForeignKey("jobs.id", ondelete="CASCADE"), nullable=False)
+    status = Column(
+        String, default="applied"
+    )  # applied, shortlisted, rejected, accepted
+    resume_url = Column(String)
+    applied_at = Column(DateTime, default=func.now())
+
+    # Relationships
+    job_seeker = relationship("JobSeeker", back_populates="job_applications")
+    job = relationship("Job", back_populates="job_applications")
+
+    __table_args__ = (
+        UniqueConstraint("job_seeker_id", "job_id", name="uq_job_seeker_job"),
+    )
+
+
+class AiInterviewedJob(Base):
+    __tablename__ = "ai_interviewed_jobs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String)
     description = Column(String)
     department = Column(String)
     city = Column(String)
@@ -68,69 +370,77 @@ class Job(Base):
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
     company_id = Column(
-        Integer, ForeignKey("recruiters.id", ondelete="CASCADE"), nullable=False
+        Integer, ForeignKey("companies.id", ondelete="CASCADE"), nullable=False
     )
 
     # Relationships
-    company = relationship("Recruiter", back_populates="jobs")
+    company = relationship("Company", back_populates="ai_interviewed_jobs")
     interviews = relationship(
         "Interview",
-        back_populates="job",
+        back_populates="ai_interviewed_job",
     )
     quiz_questions = relationship(
         "QuizQuestion",
-        back_populates="job",
+        back_populates="ai_interviewed_job",
     )
     dsa_questions = relationship(
         "DSAQuestion",
-        back_populates="job",
+        back_populates="ai_interviewed_job",
     )
-    interview_questions = relationship("InterviewQuestion", back_populates="job")
+    interview_questions = relationship(
+        "InterviewQuestion", back_populates="ai_interviewed_job"
+    )
 
 
 class InterviewQuestion(Base):
     __tablename__ = "interview_questions"
 
     id = Column(Integer, primary_key=True, index=True)
-    question = Column(String, nullable=False)
-    question_type = Column(
-        String, nullable=False
-    )  # technical, behavioral, problem_solving, custom
+    question = Column(String)
+    question_type = Column(String)  # technical, behavioral, problem_solving, custom
     order_number = Column(Integer)
-    job_id = Column(
+    ai_interviewed_job_id = Column(
         Integer,
-        ForeignKey("jobs.id", ondelete="CASCADE"),
+        ForeignKey("ai_interviewed_jobs.id", ondelete="CASCADE"),
         nullable=False,
     )
 
-    __table_args__ = (UniqueConstraint("order_number", "job_id", name="uq_order_job"),)
+    __table_args__ = (
+        UniqueConstraint("order_number", "ai_interviewed_job_id", name="uq_order_job"),
+    )
 
     # Relationships
-    job = relationship("Job", back_populates="interview_questions")
-    responses = relationship("InterviewQuestionResponse", back_populates="question")
+    ai_interviewed_job = relationship(
+        "AiInterviewedJob", back_populates="interview_questions"
+    )
+    interview_question_responses = relationship(
+        "InterviewQuestionResponse", back_populates="interview_question"
+    )
 
 
 class InterviewQuestionResponse(Base):
     __tablename__ = "interview_question_responses"
 
     answer = Column(String)
-    question_id = Column(
+    interview_question_id = Column(
         Integer,
         ForeignKey("interview_questions.id", ondelete="CASCADE"),
         primary_key=True,
         nullable=False,
     )
-    created_at = Column(DateTime, default=func.now())
     interview_id = Column(
         Integer,
         ForeignKey("interviews.id", ondelete="CASCADE"),
         primary_key=True,
         nullable=False,
     )
+    created_at = Column(DateTime, default=func.now())
 
     # Relationships
-    question = relationship("InterviewQuestion", back_populates="responses")
-    interview = relationship("Interview", back_populates="question_responses")
+    interview_question = relationship(
+        "InterviewQuestion", back_populates="interview_question_responses"
+    )
+    interview = relationship("Interview", back_populates="interview_question_responses")
 
 
 class QuizQuestion(Base):
@@ -141,18 +451,22 @@ class QuizQuestion(Base):
     type = Column(String)
     category = Column(String)
     time_seconds = Column(Integer)
-    created_at = Column(DateTime, default=func.now())
     image_url = Column(String)
-    job_id = Column(Integer, ForeignKey("jobs.id", ondelete="CASCADE"))
-
-    job = relationship("Job", back_populates="quiz_questions")
-    options = relationship(
-        "QuizOption",
-        back_populates="question",
+    ai_interviewed_job_id = Column(
+        Integer, ForeignKey("ai_interviewed_jobs.id", ondelete="CASCADE")
     )
-    responses = relationship(
+    created_at = Column(DateTime, default=func.now())
+
+    ai_interviewed_job = relationship(
+        "AiInterviewedJob", back_populates="quiz_questions"
+    )
+    quiz_options = relationship(
+        "QuizOption",
+        back_populates="quiz_question",
+    )
+    quiz_responses = relationship(
         "QuizResponse",
-        back_populates="question",
+        back_populates="quiz_question",
     )
 
 
@@ -162,12 +476,14 @@ class QuizOption(Base):
     id = Column(Integer, primary_key=True)
     label = Column(String)
     correct = Column(Boolean, default=False)
-    question_id = Column(Integer, ForeignKey("quiz_questions.id", ondelete="CASCADE"))
+    quiz_question_id = Column(
+        Integer, ForeignKey("quiz_questions.id", ondelete="CASCADE")
+    )
 
-    question = relationship("QuizQuestion", back_populates="options")
-    responses = relationship(
+    quiz_question = relationship("QuizQuestion", back_populates="quiz_options")
+    quiz_responses = relationship(
         "QuizResponse",
-        back_populates="option",
+        back_populates="quiz_option",
     )
 
 
@@ -180,16 +496,20 @@ class DSAQuestion(Base):
     difficulty = Column(String)
     time_minutes = Column(Integer)
     created_at = Column(DateTime, default=func.now())
-    job_id = Column(Integer, ForeignKey("jobs.id", ondelete="CASCADE"))
-
-    job = relationship("Job", back_populates="dsa_questions")
-    test_cases = relationship(
-        "DSATestCase",
-        back_populates="question",
+    ai_interviewed_job_id = Column(
+        Integer, ForeignKey("ai_interviewed_jobs.id", ondelete="CASCADE")
     )
-    responses = relationship(
+
+    ai_interviewed_job = relationship(
+        "AiInterviewedJob", back_populates="dsa_questions"
+    )
+    dsa_test_cases = relationship(
+        "DSATestCase",
+        back_populates="dsa_question",
+    )
+    dsa_responses = relationship(
         "DSAResponse",
-        back_populates="question",
+        back_populates="dsa_question",
     )
 
 
@@ -203,30 +523,32 @@ class DSATestCase(Base):
         Integer, ForeignKey("dsa_questions.id", ondelete="CASCADE")
     )
 
-    question = relationship("DSAQuestion", back_populates="test_cases")
-    responses = relationship(
+    dsa_question = relationship("DSAQuestion", back_populates="dsa_test_cases")
+    dsa_test_case_responses = relationship(
         "DSATestCaseResponse",
-        back_populates="test_case",
+        back_populates="dsa_test_case",
     )
 
 
 class Interview(Base):
     __tablename__ = "interviews"
-    __table_args__ = (UniqueConstraint("email", "job_id", name="uq_email_job"),)
 
     id = Column(Integer, primary_key=True, index=True)
     status = Column(String, default="incomplete")  # incomplete, completed
-    first_name = Column(String, nullable=False)
-    last_name = Column(String, nullable=False)
+    firstname = Column(String, nullable=False)
+    lastname = Column(String, nullable=False)
     email = Column(String, nullable=False)
-    email_verified = Column(String, default=False)
     email_otp = Column(String)
     email_otp_expiry = Column(DateTime)
+    email_verified = Column(String, default=False)
     phone = Column(String)
-    work_experience = Column(Integer)
+    phone_otp = Column(String)
+    phone_otp_expiry = Column(DateTime)
+    phone_verified = Column(Boolean, default=False)
+    work_experience_yrs = Column(Integer)
     education = Column(String)
-    skills = Column(String)
-    location = Column(String)
+    skills = Column(String)  # Comma-separated list of skills
+    city = Column(String)
     linkedin_url = Column(String)
     portfolio_url = Column(String)
     resume_url = Column(String)
@@ -242,12 +564,20 @@ class Interview(Base):
     report_file_url = Column(String)
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
-    job_id = Column(Integer, ForeignKey("jobs.id", ondelete="CASCADE"), nullable=False)
-    private_link_token = Column(String, unique=True, index=True, nullable=True)
+    ai_interviewed_job_id = Column(
+        Integer,
+        ForeignKey("ai_interviewed_jobs.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    private_link_token = Column(String, unique=True)
 
-    job = relationship("Job", back_populates="interviews")
-    question_and_responses = relationship(
+    ai_interviewed_job = relationship("AiInterviewedJob", back_populates="interviews")
+    interview_question_and_responses = relationship(
         "InterviewQuestionAndResponse",
+        back_populates="interview",
+    )
+    interview_question_responses = relationship(
+        "InterviewQuestionResponse",
         back_populates="interview",
     )
     quiz_responses = relationship(
@@ -258,8 +588,12 @@ class Interview(Base):
         "DSAResponse",
         back_populates="interview",
     )
-    question_responses = relationship(
+    interview_question_responses = relationship(
         "InterviewQuestionResponse", back_populates="interview"
+    )
+
+    __table_args__ = (
+        UniqueConstraint("email", "ai_interviewed_job_id", name="uq_email_job"),
     )
 
 
@@ -267,9 +601,7 @@ class InterviewQuestionAndResponse(Base):
     __tablename__ = "interview_question_and_responses"
 
     question = Column(String, nullable=False)
-    question_type = Column(
-        String, nullable=False
-    )  # technical, behavioral, problem_solving, custom
+    question_type = Column(String)  # technical, behavioral, problem_solving, custom
     order_number = Column(Integer, primary_key=True)
     answer = Column(String)
     created_at = Column(DateTime, default=func.now())
@@ -281,7 +613,9 @@ class InterviewQuestionAndResponse(Base):
     )
 
     # Relationships
-    interview = relationship("Interview", back_populates="question_and_responses")
+    interview = relationship(
+        "Interview", back_populates="interview_question_and_responses"
+    )
 
 
 class DSAResponse(Base):
@@ -291,18 +625,20 @@ class DSAResponse(Base):
     code = Column(String)
     passed = Column(Boolean, default=False)
     interview_id = Column(Integer, ForeignKey("interviews.id", ondelete="CASCADE"))
-    question_id = Column(Integer, ForeignKey("dsa_questions.id", ondelete="CASCADE"))
+    dsa_question_id = Column(
+        Integer, ForeignKey("dsa_questions.id", ondelete="CASCADE")
+    )
 
     interview = relationship("Interview", back_populates="dsa_responses")
-    question = relationship("DSAQuestion", back_populates="responses")
-    test_case_responses = relationship(
+    dsa_question = relationship("DSAQuestion", back_populates="dsa_responses")
+    dsa_test_case_responses = relationship(
         "DSATestCaseResponse",
-        back_populates="interview_dsa_response",
+        back_populates="dsa_response",
     )
 
     __table_args__ = (
         UniqueConstraint(
-            "interview_id", "question_id", name="uq_interview_and_question"
+            "interview_id", "dsa_question_id", name="uq_interview_and_question"
         ),
     )
 
@@ -319,11 +655,11 @@ class DSATestCaseResponse(Base):
         Integer, ForeignKey("dsa_test_cases.id", ondelete="CASCADE"), primary_key=True
     )
 
-    interview_dsa_response = relationship(
+    dsa_response = relationship(
         "DSAResponse",
-        back_populates="test_case_responses",
+        back_populates="dsa_test_case_responses",
     )
-    test_case = relationship("DSATestCase", back_populates="responses")
+    dsa_test_case = relationship("DSATestCase", back_populates="dsa_test_case_responses")
 
 
 class QuizResponse(Base):
@@ -332,16 +668,16 @@ class QuizResponse(Base):
     interview_id = Column(
         Integer, ForeignKey("interviews.id", ondelete="CASCADE"), primary_key=True
     )
-    question_id = Column(
+    quiz_question_id = Column(
         Integer, ForeignKey("quiz_questions.id", ondelete="CASCADE"), primary_key=True
     )
-    option_id = Column(
+    quiz_option_id = Column(
         Integer, ForeignKey("quiz_options.id", ondelete="CASCADE"), primary_key=True
     )
 
     interview = relationship("Interview", back_populates="quiz_responses")
-    question = relationship("QuizQuestion", back_populates="responses")
-    option = relationship("QuizOption", back_populates="responses")
+    quiz_question = relationship("QuizQuestion", back_populates="quiz_responses")
+    quiz_option = relationship("QuizOption", back_populates="quiz_responses")
 
 
 class Country(Base):

@@ -37,12 +37,6 @@ function CodeExecutionPanel({
   const [executionError, setSyntaxError] = React.useState("");
   const [runStatus, setRunStatus] = React.useState("");
   const [successRate, setSuccessRate] = React.useState("0%");
-  const apiKey = import.meta.env.VITE_FERMION_API_KEY;
-
-  if (!apiKey) {
-    console.error("Fermion API key is not set in environment variables");
-    setCodeError("API configuration error. Please contact support.");
-  }
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();

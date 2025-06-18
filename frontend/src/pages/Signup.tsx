@@ -22,7 +22,7 @@ import LoadingSpinner from "@/components/common/LoadingSpinner";
 import { cn } from "@/lib/utils";
 import RegularLayout from "@/components/layout/RegularLayout";
 import { CommandList } from "cmdk";
-import { authAPI } from "@/services/authApi";
+import { companyApi } from "@/services/companyApi";
 
 interface Country {
   id: number;
@@ -153,8 +153,6 @@ const SignUp = () => {
       !name.trim() ||
       !email.trim() ||
       !password.trim() ||
-      !companyName.trim() ||
-      !designation.trim() ||
       !industry.trim() ||
       !phone.trim() ||
       !selectedCountry?.name.trim() ||
@@ -190,13 +188,11 @@ const SignUp = () => {
     setIsLoading(true);
 
     try {
-      await authAPI.signupRecruiter({
+      await companyApi.register({
         name,
         email,
         password,
         phone,
-        designation,
-        company_name: companyName,
         industry,
         country: selectedCountry.name,
         state: selectedState.name,
@@ -255,13 +251,13 @@ const SignUp = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
               {/* Basic Information */}
               <div className="space-y-4">
                 <h3 className="font-medium">Basic Information</h3>
 
                 <div className="space-y-2">
-                  <Label htmlFor="name">Full Name</Label>
+                  <Label htmlFor="name">Company Name</Label>
                   <Input
                     id="name"
                     type="text"
@@ -304,36 +300,6 @@ const SignUp = () => {
                     aria-required="true"
                   />
                 </div>
-              </div>
-
-              {/* Company Information */}
-              <div className="space-y-4">
-                <h3 className="font-medium">Company Information</h3>
-
-                <div className="space-y-2">
-                  <Label htmlFor="companyName">Company Name</Label>
-                  <Input
-                    id="companyName"
-                    type="text"
-                    value={companyName}
-                    onChange={(e) => setCompanyName(e.target.value)}
-                    required
-                    aria-required="true"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="designation">Your Designation</Label>
-                  <Input
-                    id="designation"
-                    type="text"
-                    value={designation}
-                    onChange={(e) => setDesignation(e.target.value)}
-                    required
-                    aria-required="true"
-                  />
-                </div>
-
                 <div className="space-y-2">
                   <Label htmlFor="industry">Industry</Label>
                   <Input
@@ -346,6 +312,7 @@ const SignUp = () => {
                   />
                 </div>
               </div>
+
             </div>
 
             {/* Address Information */}

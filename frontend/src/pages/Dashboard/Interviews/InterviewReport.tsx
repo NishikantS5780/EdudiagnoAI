@@ -10,8 +10,8 @@ import { Download } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import html2canvas from "html2canvas";
 import { MCQResponse, MCQuestion } from "@/types/job";
-import { interviewAPI } from "@/services/interviewApi";
-import { quizAPI } from "@/services/quizApi";
+import { interviewApi } from "@/services/interviewApi";
+import { companyApi } from "@/services/companyApi";
 
 interface InterviewReportProps {
   jobTitle: string;
@@ -36,7 +36,7 @@ const InterviewReport = ({ jobTitle }: InterviewReportProps) => {
         if (!id) {
           return;
         }
-        const response = await interviewAPI.getInterview(id.toString());
+        const response = await companyApi.getInterview(id.toString());
 
         if (!response.data) {
           toast.error("Interview not found");
@@ -44,8 +44,8 @@ const InterviewReport = ({ jobTitle }: InterviewReportProps) => {
           return;
         }
 
-        const quizResponse = await quizAPI.getQuizQuestions(id as string);
-        const quizQuestionsResponse = await quizAPI.getQuizQuestions(
+        const quizResponse = await companyApi.getQuizQuestionByAiInterviewedJobId(id as string);
+        const quizQuestionsResponse = await companyApi.getQuizResponsesByInterviewId(
           id as string
         );
 
@@ -135,8 +135,8 @@ const InterviewReport = ({ jobTitle }: InterviewReportProps) => {
       <div style="text-align: center; margin-bottom: 40px; border-bottom: 2px solid #2563eb; padding-bottom: 20px;">
         <h1 style="font-size: 32px; margin-bottom: 15px; color: #1e40af; font-weight: bold;">Interview Report</h1>
         <h2 style="font-size: 24px; color: #1e3a8a; margin-bottom: 10px;">${
-          interview.first_name
-        } ${interview.last_name}</h2>
+          interview.firstname
+        } ${interview.lastname}</h2>
         <p style="font-size: 16px; color: #4b5563;">Generated on ${new Date().toLocaleDateString()}</p>
       </div>
 
@@ -355,6 +355,7 @@ const InterviewReport = ({ jobTitle }: InterviewReportProps) => {
             <a
               href={interview.report_file_url}
               className="flex gap-1 items-center bg-accent rounded p-2 hover:bg-accent/90 transition-all cursor-pointer"
+              target="_blank"
             >
               <Download className="w-4 h-4 mr-2" />
               Export Report
@@ -378,13 +379,13 @@ const InterviewReport = ({ jobTitle }: InterviewReportProps) => {
                     src={`https://avatar.vercel.sh/${interview?.email}`}
                   />
                   <AvatarFallback>
-                    {interview?.first_name?.[0]}
-                    {interview?.last_name?.[0]}
+                    {interview?.firstname?.[0]}
+                    {interview?.lastname?.[0]}
                   </AvatarFallback>
                 </Avatar>
                 <div>
                   <h3 className="font-semibold">
-                    {interview?.first_name} {interview?.last_name}
+                    {interview?.firstname} {interview?.lastname}
                   </h3>
                   <p className="text-sm text-muted-foreground">
                     {interview?.email}

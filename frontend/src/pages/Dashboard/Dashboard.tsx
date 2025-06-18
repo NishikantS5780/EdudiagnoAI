@@ -39,8 +39,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { InterviewData } from "@/types/interview";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { AuthContext } from "@/context/AuthContext";
-import { recruiterAPI } from "@/services/recruiterApi";
+import { AuthContext } from "@/context/AppContext";
+import { companyApi } from "@/services/companyApi";
 
 const Dashboard = () => {
   const authContext = useContext(AuthContext);
@@ -72,7 +72,7 @@ const Dashboard = () => {
       }
 
       setLoading(true);
-      const res = await recruiterAPI.getAnaltyics(authContext.recruiter.id);
+      const res = await companyApi.getAnaltyics();
       setAnalyticsData(res.data);
     } catch (error) {
       toast.error("Failed to load dashboard data");

@@ -20,13 +20,11 @@ export interface RecruiterData {
   // updateUserProfile?: (data: any) => Promise<void>;
 }
 
-export interface RecruiterRegistrationData {
+export interface CompanyRegistrationData {
   name: string;
   email: string;
   password: string;
   phone: string;
-  designation: string;
-  company_name: string;
   industry: string;
   country: string;
   state: string;
