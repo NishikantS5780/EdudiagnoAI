@@ -20,7 +20,7 @@ import {
 import { InterviewData } from "@/types/interview";
 import { MatchResultsStage } from "./MatchResultsStage";
 import { EmailVerificationStage } from "./EmailVerificationStage";
-import { interviewAPI } from "@/services/interviewApi";
+import { interviewApi } from "@/services/interviewApi";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
@@ -68,9 +68,14 @@ export function ResumeUploadStage({
 
   const handleResumeChange = (file: File) => {
     if (isCompleted) return;
+    if (file.type !== "application/pdf") {
+      alert("Please upload a PDF file.");
+      return;
+    }
+
     const extractResumeData = async () => {
       setIsLoading(true);
-      const res = await interviewAPI.extractResumeData(file);
+      const res = await interviewApi.extractResumeData(file);
       const data = res.data;
 
       // Log the raw AI response
@@ -94,8 +99,8 @@ export function ResumeUploadStage({
       // Log the parsed data that will be used
       const parsedData = {
         id: 0,
-        first_name: data.first_name,
-        last_name: data.last_name,
+        firstname: data.firstname,
+        lastname: data.lastname,
         email: data.email,
         phone: data.phone,
         location: data.location,
@@ -137,10 +142,10 @@ export function ResumeUploadStage({
     const errors: { [key: string]: string } = {};
     // Full Name
     if (
-      !candidateData?.first_name ||
-      candidateData.first_name.trim() === "" ||
-      !candidateData?.last_name ||
-      candidateData.last_name.trim() === ""
+      !candidateData?.firstname ||
+      candidateData.firstname.trim() === "" ||
+      !candidateData?.lastname ||
+      candidateData.lastname.trim() === ""
     ) {
       errors.fullName = "Full name is required";
     }
@@ -211,8 +216,8 @@ export function ResumeUploadStage({
 
         // Convert to snake_case for backend
         const backendData = {
-          first_name: candidateData.first_name,
-          last_name: candidateData.last_name,
+          firstname: candidateData.firstname,
+          lastname: candidateData.lastname,
           email: candidateData.email,
           phone: candidateData.phone,
           location: candidateData.location,
@@ -222,20 +227,20 @@ export function ResumeUploadStage({
           skills: candidateData.skills,
           linkedin_url: candidateData.linkedin_url,
           portfolio_url: candidateData.portfolio_url,
-          job_id: jobId,
+          ai_interviewed_job_id: jobId,
         };
 
         // Log the data being sent
         console.log("Creating interview with data:", backendData);
 
-        const res = await interviewAPI.createInterview(backendData, jobId);
+        const res = await interviewApi.createInterview(backendData, jobId);
         const data = res.data;
         console.log("Interview created successfully:", data);
 
         setCandidateData({
           id: data.id,
-          first_name: data.first_name,
-          last_name: data.last_name,
+          firstname: data.firstname,
+          lastname: data.lastname,
           email: data.email,
           phone: data.phone,
           location: data.location,
@@ -262,11 +267,11 @@ export function ResumeUploadStage({
         localStorage.setItem("i_token", token);
 
         console.log("Uploading resume file:", resumeFile);
-        await interviewAPI.uploadResume(resumeFile);
+        await interviewApi.uploadResume(resumeFile);
         console.log("Resume uploaded successfully");
 
         console.log("Analyzing candidate...");
-        const analysisResponse = await interviewAPI.analyzeCandidate();
+        const analysisResponse = await interviewApi.analyzeCandidate();
         const analysisData = analysisResponse.data;
         console.log("Analysis completed:", analysisData);
 
@@ -409,7 +414,7 @@ export function ResumeUploadStage({
                 </label>
                 <Input
                   value={
-                    candidateData.first_name + " " + candidateData.last_name
+                    candidateData.firstname + " " + candidateData.lastname
                   }
                   onChange={(e) => {
                     const [firstName, ...lastNameParts] =
@@ -417,8 +422,8 @@ export function ResumeUploadStage({
                     if (candidateData) {
                       setCandidateData({
                         ...candidateData,
-                        first_name: firstName || "",
-                        last_name: lastNameParts.join(" ") || "",
+                        firstname: firstName || "",
+                        lastname: lastNameParts.join(" ") || "",
                       });
                     }
                   }}

@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { Eye, EyeOff, ArrowRight } from "lucide-react";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import RegularLayout from "@/components/layout/RegularLayout";
-import { AuthContext } from "@/context/AuthContext";
+import { AuthContext } from "@/context/AppContext";
 
 const Login = () => {
   const [email, setEmail] = useState("");

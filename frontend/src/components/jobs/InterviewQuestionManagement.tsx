@@ -21,7 +21,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { InterviewQuestion, MCQuestion } from "@/types/job";
-import { interviewQuestionAPI } from "@/services/interviewQuestionApi";
+import { companyApi } from "@/services/companyApi";
 
 const InterviewQuestionManagement = ({ jobId }: { jobId: number }) => {
   const [loading, setLoading] = useState(true);
@@ -39,7 +39,7 @@ const InterviewQuestionManagement = ({ jobId }: { jobId: number }) => {
   const fetchInterviewQuestions = async () => {
     try {
       setLoading(true);
-      const response = await interviewQuestionAPI.getByJob(jobId);
+      const response = await companyApi.getCustomInterviewQuestionByJobId(jobId);
       setQuestions(response.data || []);
     } catch (error) {
       toast.error("Failed to load Interview questions");
@@ -57,7 +57,7 @@ const InterviewQuestionManagement = ({ jobId }: { jobId: number }) => {
   const handleSaveQuestion = async () => {
     try {
       setLoading(true);
-      const response = await interviewQuestionAPI.create(newQuestion, jobId);
+      const response = await companyApi.createCustomInterviewQuestion(newQuestion, jobId);
       if (!response || response.status != 200) {
         throw new Error("Failed to save Interview question");
       }

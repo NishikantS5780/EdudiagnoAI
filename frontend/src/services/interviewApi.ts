@@ -2,7 +2,7 @@ import axios from "axios";
 import { GetInterviewsParams, InterviewData } from "@/types/interview";
 import { config } from "@/config";
 
-export const interviewAPI = {
+export const interviewApi = {
   createInterview: async (data: InterviewData, jobId: number) => {
     const token = localStorage.getItem("token");
     const res = await axios.post(
@@ -19,23 +19,12 @@ export const interviewAPI = {
   },
   getInterviews: async (params: GetInterviewsParams) => {
     const response = await axios.get(
-      `${config.API_BASE_URL}/interview/recruiter-view/all`,
+      `${config.API_BASE_URL}/company/interview/all`,
       {
         params,
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-      }
-    );
-    return response;
-  },
-
-  getInterview: async (id: string) => {
-    const response = await axios.get(
-      `${config.API_BASE_URL}/interview/recruiter-view`,
-      {
-        params: { id },
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       }
     );
     return response;
@@ -49,19 +38,11 @@ export const interviewAPI = {
     return res;
   },
 
-  deleteInterview: async (id: string) => {
-    const response = await axios.delete(`${config.API_BASE_URL}/interview`, {
-      params: { id },
-      headers: {Authorization: `Bearer ${localStorage.getItem("token")}`}
-    });
-    return response;
-  },
-
   extractResumeData: async (resume: File) => {
     const formdata = new FormData();
     formdata.append("file", resume);
     const res = await axios.post(
-      `${config.API_BASE_URL}/resume/parse`,
+      `${config.API_BASE_URL}/parse-resume`,
       formdata,
       {
         headers: { "Content-Type": "multipart/form-data" },
@@ -129,7 +110,7 @@ export const interviewAPI = {
   },
 
   textToSpeech: async (text: string) => {
-    const res = axios.post(`${config.API_BASE_URL}/text/to-speech`, { text });
+    const res = axios.post(`${config.API_BASE_URL}/text-to-speech`, { text });
     return res;
   },
 
@@ -138,7 +119,7 @@ export const interviewAPI = {
     formData.append("audio_file", file);
 
     const res = await axios.post(
-      `${config.API_BASE_URL}/audio/to-text`,
+      `${config.API_BASE_URL}/speech-to-text`,
       formData,
       {
         headers: {
@@ -154,7 +135,7 @@ export const interviewAPI = {
   submitTextResponse: async (question_order: number, answer: string) => {
     const iToken = localStorage.getItem("i_token");
     const res = await axios.put(
-      `${config.API_BASE_URL}/interview-question-and-response/submit-text-response`,
+      `${config.API_BASE_URL}/interview/interview-question/submit-text-response`,
       {
         question_order,
         answer,
@@ -188,7 +169,7 @@ export const interviewAPI = {
   generateQuestions: async () => {
     const iToken = localStorage.getItem("i_token");
     const res = await axios.post(
-      `${config.API_BASE_URL}/interview-question-and-response/generate-questions`,
+      `${config.API_BASE_URL}/interview/generate-interview-questions`,
       undefined,
       {
         headers: { Authorization: `Bearer ${iToken}` },
@@ -197,12 +178,47 @@ export const interviewAPI = {
     return res;
   },
 
-  getInterviewQuestionsAndResponses: async (interviewId: string) => {
-    const token = localStorage.getItem("token");
+  // getInterviewQuestionsAndResponses: async (interviewId: string) => {
+  //   const token = localStorage.getItem("token");
+  //   const res = await axios.get(
+  //     `${config.API_BASE_URL}/interview-question-and-response?interview_id=${interviewId}`,
+  //     {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     }
+  //   );
+  //   return res;
+  // },
+  getAiInterviewedJob: async (jobId: string) => {
     const res = await axios.get(
-      `${config.API_BASE_URL}/interview-question-and-response?interview_id=${interviewId}`,
+      `${config.API_BASE_URL}/interview/ai-interviewed-job?id=${jobId}`
+    );
+    return res;
+  },
+  submitQuizResponses: async (
+    responses: { quiz_question_id: number; quiz_option_id: number }[]
+  ) => {
+    const res = await axios.post(
+      `${config.API_BASE_URL}/interview/quiz-response`,
+      responses,
       {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${localStorage.getItem("i_token")}` },
+      }
+    );
+    return res;
+  },
+
+  getDSAQuestion: async (ai_interviewed_job_id: string) => {
+    const response = await axios.get(`${config.API_BASE_URL}/company/dsa-question`, {
+      params: { ai_interviewed_job_id: ai_interviewed_job_id },
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+    });
+    return response;
+  },
+  getQuizQuestionByInterviewId: async (interview_id: string) => {
+    const res = await axios.get(
+      `${config.API_BASE_URL}/interview/quiz-question?interview_id=${interview_id}`,
+      {
+        headers: { Authorization: `Bearer ${localStorage.getItem("i_token")}` },
       }
     );
     return res;

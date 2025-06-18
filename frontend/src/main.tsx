@@ -2,7 +2,7 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
 import { BrowserRouter } from "react-router-dom";
-import { AuthProvider } from "./context/AuthContext";
+import { AuthProvider } from "./context/AppContext";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 import { ThemeProvider } from "./context/ThemeContext";
 

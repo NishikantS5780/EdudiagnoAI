@@ -5,8 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { CheckCircle, Code, Video, BookOpen, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { JobData } from "@/types/job";
-import { interviewAPI } from "@/services/interviewApi";
-import { jobAPI } from "@/services/jobApi";
+import { interviewApi } from "@/services/interviewApi";
 
 const InterviewOverview = () => {
   const navigate = useNavigate();
@@ -19,13 +18,13 @@ const InterviewOverview = () => {
 
   useEffect(() => {
     setIsLoading(true);
-    interviewAPI
+    interviewApi
       .candidateGetInterview()
       .then((interviewResponse) => {
-        const jobId = interviewResponse.data.job_id;
+        const jobId = interviewResponse.data.ai_interviewed_job_id;
 
-        jobAPI
-          .candidateGetJob(jobId)
+        interviewApi
+          .getAiInterviewedJob(jobId)
           .then((response) => {
             setJobData(response.data);
           })

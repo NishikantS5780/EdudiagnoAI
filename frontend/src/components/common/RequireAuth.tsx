@@ -1,6 +1,6 @@
 import { FC, useContext, useEffect } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { AuthContext } from "@/context/AuthContext";
+import { AuthContext } from "@/context/AppContext";
 import { toast } from "sonner";
 
 interface RequireAuthProps {

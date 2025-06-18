@@ -46,7 +46,7 @@ import {
 import { ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
-import { jobAPI } from "@/services/jobApi";
+import { companyApi } from "@/services/companyApi";
 import {
   DSAQuestion,
   InterviewQuestion,
@@ -55,9 +55,6 @@ import {
   TestCase,
 } from "@/types/job";
 import { autoCompletionApi } from "@/services/autoCompletionApi";
-import { dsaAPI } from "@/services/dsaApi";
-import { quizAPI } from "@/services/quizApi";
-import { interviewQuestionAPI } from "@/services/interviewQuestionApi";
 
 const NewJob = () => {
   const navigate = useNavigate();
@@ -261,7 +258,7 @@ const NewJob = () => {
       return;
     }
 
-    dsaAPI
+    companyApi
       .createDSAQuestion(jobData.id.toString(), newDSAQuestion)
       .then((res) => {
         let dsaQuestions: DSAQuestion[] = [];
@@ -327,8 +324,8 @@ const NewJob = () => {
     if (!jobData || !jobData.id) {
       return;
     }
-    jobAPI
-      .updateJob(jobData.id.toString(), {
+    companyApi
+      .updateAiInterviewedJob(jobData.id.toString(), {
         quiz_time_minutes: jobData.quiz_time_minutes,
       })
       .then((res) => {
@@ -391,7 +388,7 @@ const NewJob = () => {
       }
 
       let response;
-      response = await jobAPI.createJob({
+      response = await companyApi.createAiInterviewedJob({
         ...jobData,
         salary_min: jobData.salary_min ? Number(jobData.salary_min) : null,
         salary_max: jobData.salary_max ? Number(jobData.salary_max) : null,
@@ -518,7 +515,7 @@ const NewJob = () => {
         throw new Error(`${firstError[0]} ${firstError[1]}`);
       }
 
-      const response = await quizAPI.createQuizQuestions(
+      const response = await companyApi.createQuizQuestion(
         quizData,
         jobData.id,
         quizImageFile || undefined
@@ -529,7 +526,7 @@ const NewJob = () => {
       quizData = { ...quizData, ...response.data };
       const options = [];
       for (const option of newQuizOptions || []) {
-        const res = await quizAPI.createQuizOption(option, quizData.id);
+        const res = await companyApi.createQuizOption(option, quizData.id);
         if (!res) {
           throw new Error("Failed to save MCQ option");
         }
@@ -553,6 +550,11 @@ const NewJob = () => {
         { label: "", correct: false },
       ]);
       setQuizImageFile(null);
+      // Reset the file input
+      const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+      if (fileInput) {
+        fileInput.value = '';
+      }
 
       toast.success("MCQ question saved successfully");
     } catch (error: any) {
@@ -593,7 +595,7 @@ const NewJob = () => {
         );
       }
 
-      const res = await interviewQuestionAPI.create(
+      const res = await companyApi.createCustomInterviewQuestion(
         newCustomInterviewQuestion,
         jobData.id
       );
@@ -607,6 +609,12 @@ const NewJob = () => {
           ...(jobData.custom_interview_questions || []),
           res.data,
         ],
+      });
+      setNewCustomInterviewQuestion((prev) => {
+        return {
+          order_number: prev.order_number ? prev.order_number + 1 : 0,
+          question: "",
+        };
       });
 
       toast.success("Custom question saved successfully");
@@ -1470,9 +1478,10 @@ const NewJob = () => {
                           </div>
                         </div>
                         <Button
-                          variant="outline"
+                          variant="secondary"
                           size="sm"
                           onClick={handleSaveTestCase}
+                          className="w-full"
                         >
                           Save Test Case
                         </Button>
@@ -1676,18 +1685,18 @@ const NewJob = () => {
                               ))}
                             </div>
 
-                            <div className="flex justify-end">
+                            {/* <div className="flex justify-end">
                               <Button
                                 variant="destructive"
                                 size="sm"
-                                // onClick={() =>
-                                //   handleMcqQuestionDelete(index)
-                                // }
+                                onClick={() =>
+                                  handleMcqQuestionDelete(index)
+                                }
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
                                 Delete Question
                               </Button>
-                            </div>
+                            </div> */}
                           </div>
                         </CardContent>
                       </Card>
@@ -1929,7 +1938,7 @@ const NewJob = () => {
                                         newQuizOptions[3],
                                       ]);
                                     }}
-                                    placeholder={`Option 2`}
+                                    placeholder={`Option 3`}
                                   />
                                 </div>
                                 <div className="flex items-center gap-2">
@@ -1949,7 +1958,7 @@ const NewJob = () => {
                                         },
                                       ]);
                                     }}
-                                    placeholder={`Option 3`}
+                                    placeholder={`Option 4`}
                                   />
                                 </div>
                               </RadioGroup>
@@ -2165,16 +2174,16 @@ const NewJob = () => {
                                   </SelectContent>
                                 </Select>
                               </div>
-                              <div className="flex justify-end">
+                              {/* <div className="flex justify-end">
                                 <Button
                                   variant="destructive"
                                   size="sm"
-                                  // onClick={() => handleCustomQuestionDelete(index)}
+                                  onClick={() => handleCustomQuestionDelete(index)}
                                 >
                                   <Trash2 className="h-4 w-4 mr-2" />
                                   Delete Question
                                 </Button>
-                              </div>
+                              </div> */}
                             </div>
                           </CardContent>
                         </Card>

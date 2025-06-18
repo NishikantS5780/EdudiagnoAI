@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useLocation, useSearchParams, useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,13 +8,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useUser } from "@/context/UserContext";
-import { Pencil, Shield, UserCircle, AlertCircle, Save, X } from "lucide-react";
+import { AuthContext } from "@/context/AuthContext";
+import { Pencil, Shield, UserCircle, Save, X } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { recruiterAPI } from "@/lib/api";
+import { authAPI } from "@/services/authApi";
 import { RecruiterData } from "@/types/recruiter";
+import axios from "axios";
+import { config } from "@/config";
 
 interface ProfileData {
   name: string;
@@ -32,15 +34,19 @@ interface ProfileData {
 }
 
 const Profile = () => {
-  const { toast } = useToast();
-  const { recruiter, setRecruiter } = useUser();
+  const authContext = useContext(AuthContext);
+  if (!authContext) {
+    toast.error("Something went wrong");
+    return null;
+  }
+  const { recruiter, verifyLogin } = authContext;
   const [isLoading, setIsLoading] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(recruiter?.companyLogo || null);
   const location = useLocation();
   const navigate = useNavigate();
   const [emailVerified, setEmailVerified] = useState(false);
   const isNewUser = location.state?.isNewUser || recruiter?.is_profile_complete === false;
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState("profile");
   const [isEditMode, setIsEditMode] = useState(false);
 
@@ -64,7 +70,7 @@ const Profile = () => {
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
-        const recruiterData = await recruiterAPI.verifyLogin();
+        const recruiterData = await authAPI.verifyLogin();
         const userData = recruiterData.data;
 
         setProfileData({
@@ -85,11 +91,7 @@ const Profile = () => {
         setProfileImage(userData.companyLogo || null);
       } catch (error) {
         console.error("Failed to fetch recruiter details:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load profile data. Please try again.",
-          variant: "destructive",
-        });
+        toast.error("Failed to load profile data. Please try again.");
       }
     };
 
@@ -107,25 +109,19 @@ const Profile = () => {
   const handleSave = async () => {
     try {
       setIsLoading(true);
-      const response = await recruiterAPI.updateRecruiter(profileData);
-      if (setRecruiter && recruiter) {
-        setRecruiter({
-          ...recruiter,
-          ...response.data
-        });
-      }
+      await axios.put(
+        `${config.API_BASE_URL}/recruiter`,
+        profileData,
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      );
+      await verifyLogin(); 
       setIsEditMode(false);
-      toast({
-        title: "Success",
-        description: "Profile updated successfully",
-      });
+      toast.success("Profile updated successfully");
     } catch (error) {
       console.error("Failed to update profile:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update profile. Please try again.",
-        variant: "destructive",
-      });
+      toast.error("Failed to update profile. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -136,7 +132,7 @@ const Profile = () => {
     // Reset form data to current user data
     const fetchUserDetails = async () => {
       try {
-        const recruiterData = await recruiterAPI.verifyLogin();
+        const recruiterData = await authAPI.verifyLogin();
         const userData = recruiterData.data;
         setProfileData({
           name: userData.name || '',
@@ -151,11 +147,12 @@ const Profile = () => {
           state: userData.state || '',
           zip: userData.zip || '',
           country: userData.country || '',
-      });
-    } catch (error) {
+        });
+      } catch (error) {
         console.error("Failed to fetch recruiter details:", error);
-    }
-  };
+        toast.error("Failed to load profile data. Please try again.");
+      }
+    };
     fetchUserDetails();
   };
 

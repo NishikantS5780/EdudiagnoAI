@@ -17,10 +17,8 @@ import { Timer, Brain, Award, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import html2canvas from "html2canvas";
-import CameraFeed from "@/components/CameraFeed";
-import { quizAPI } from "@/services/quizApi";
-import { interviewAPI } from "@/services/interviewApi";
-import { jobAPI } from "@/services/jobApi";
+import DraggableCameraFeed from "@/components/DraggableCameraFeed";
+import { interviewApi } from "@/services/interviewApi";
 import { config } from "@/config";
 
 interface QuizQuestion {
@@ -120,17 +118,17 @@ const MCQTest = () => {
     const fetchQuestions = async () => {
       try {
         console.log("Fetching quiz questions...");
-        const response = await quizAPI.getQuizQuestions(interviewId || "");
+        const response = await interviewApi.getQuizQuestionByInterviewId(interviewId || "");
         console.log("Raw quiz questions response:", response);
         console.log("Quiz questions data:", response.data);
 
         // First get the job ID from the interview
-        const interviewResponse = await interviewAPI.candidateGetInterview();
-        const jobId = interviewResponse.data.job_id;
+        const interviewResponse = await interviewApi.candidateGetInterview();
+        const jobId = interviewResponse.data.ai_interviewed_job_id;
         console.log("Job ID from interview:", jobId);
 
         // Then fetch job details using the job ID
-        const jobResponse = await jobAPI.candidateGetJob(jobId.toString());
+        const jobResponse = await interviewApi.getAiInterviewedJob(jobId.toString());
         console.log("Job details response:", jobResponse.data);
 
         // Check both mcq_timing_mode and quiz_time_minutes
@@ -426,14 +424,14 @@ const MCQTest = () => {
 
           if (Array.isArray(answer)) {
             return answer.map((optionId) => ({
-              question_id: question.id,
-              option_id: optionId,
+              quiz_question_id: question.id,
+              quiz_option_id: optionId,
             }));
           }
           return [
             {
-              question_id: question.id,
-              option_id: answer,
+              quiz_question_id: question.id,
+              quiz_option_id: answer,
             },
           ];
         }),
@@ -445,14 +443,14 @@ const MCQTest = () => {
 
           if (Array.isArray(answer)) {
             return answer.map((optionId) => ({
-              question_id: question.id,
-              option_id: optionId,
+              quiz_question_id: question.id,
+              quiz_option_id: optionId,
             }));
           }
           return [
             {
-              question_id: question.id,
-              option_id: answer,
+              quiz_question_id: question.id,
+              quiz_option_id: answer,
             },
           ];
         }),
@@ -460,7 +458,7 @@ const MCQTest = () => {
         .flat()
         .filter((response) => response !== null); // Remove null entries
 
-      await quizAPI.submitQuizResponses(allResponses);
+      await interviewApi.submitQuizResponses(allResponses);
       handleTestComplete();
     } catch (error) {
       toast.error("Failed to submit answers");
@@ -489,11 +487,11 @@ const MCQTest = () => {
     const company = urlParams.get("company");
 
     if (i_id && company) {
-      interviewAPI
+      interviewApi
         .candidateGetInterview()
         .then((interviewResponse) => {
-          const jobId = interviewResponse.data.job_id;
-          return jobAPI.candidateGetJob(jobId);
+          const jobId = interviewResponse.data.ai_interviewed_job_id;
+          return interviewApi.getAiInterviewedJob(jobId);
         })
         .then((response) => {
           const jobData = response.data;
@@ -1253,7 +1251,7 @@ const MCQTest = () => {
       )}
 
       {showCamera && (
-        <CameraFeed
+        <DraggableCameraFeed
           onCameraError={(error) => {
             toast.error(error);
             setShowCamera(false);

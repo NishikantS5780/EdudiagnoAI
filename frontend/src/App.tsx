@@ -65,9 +65,9 @@ import BillingManagement from "@/pages/Admin/Billing";
 import IntegrationManagement from "@/pages/Admin/Integrations";
 import SupportManagement from "@/pages/Admin/Support";
 import { InterviewData } from "./types/interview";
-import { interviewAPI } from "./services/interviewApi";
+import { interviewApi } from "./services/interviewApi";
 import { JobData } from "./types/job";
-import { jobAPI } from "./services/jobApi";
+import { companyApi } from "./services/companyApi";
 
 // import { interviewAPI, jobAPI } from "@/lib/api";
 
@@ -181,14 +181,14 @@ const App = () => {
             </RequireAuth>
           }
         />
-        {/* <Route
-              path="/dashboard/profile"
-              element={
-                <RequireAuth>
-                  <Profile />
-                </RequireAuth>
-              }
-            /> */}
+        <Route
+          path="/dashboard/profile"
+          element={
+            <RequireAuth>
+              <Profile />
+            </RequireAuth>
+          }
+        />
         {/* <Route
               path="/dashboard/settings"
               element={
@@ -249,9 +249,9 @@ const InterviewReportWrapper = () => {
     if (!id) {
       return;
     }
-    interviewAPI.getInterview(id).then((res) => {
+    companyApi.getInterview(id).then((res) => {
       setInterview(res.data);
-      jobAPI.getCurrentRecruiterJob(res.data.job_id.toString()).then((res) => {
+      companyApi.getAiInterviewedJobById(res.data.job_id.toString()).then((res) => {
         setJob(res.data);
       });
     });

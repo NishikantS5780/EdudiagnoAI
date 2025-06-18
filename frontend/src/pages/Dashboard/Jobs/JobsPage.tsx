@@ -63,7 +63,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { jobAPI } from "@/services/jobApi";
+import { companyApi } from "@/services/companyApi";
 
 const JobsPage = () => {
   const [jobs, setJobs] = useState<JobData[]>([]);
@@ -107,7 +107,7 @@ const JobsPage = () => {
   const fetchJobs = async () => {
     try {
       setLoading(true);
-      const response = await jobAPI.getCurrentRecruiterAllJobs({
+      const response = await companyApi.getAllAiInterviewedJobs({
         sort: sortOrder,
         sort_field: sortField,
         start: (currentPage - 1) * itemsPerPage,
@@ -188,8 +188,8 @@ const JobsPage = () => {
 
   const handleDeleteJob = async (jobId: number) => {
     try {
-      const response = await jobAPI.deleteJob(jobId.toString());
-      if (response.status === 204) {
+      const response = await companyApi.deleteAiInterviewedJob(jobId.toString());
+      if (response.status === 200) {
         toast.success("Job deleted successfully");
         await fetchJobs();
       } else {

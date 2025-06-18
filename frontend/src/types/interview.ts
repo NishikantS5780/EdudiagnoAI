@@ -1,8 +1,8 @@
 export interface InterviewData {
   id?: number;
   status?: string;
-  first_name?: string;
-  last_name?: string;
+  firstname?: string;
+  lastname?: string;
   email?: string;
   phone?: string;
   work_experience?: number;
@@ -22,7 +22,7 @@ export interface InterviewData {
   cultural_fit_score?: number;
   feedback?: string;
   created_at?: string;
-  job_id?: number;
+  ai_interviewed_job_id?: number;
   video_url?: string;
   screenshot_urls?: string[];
   report_file_url?: string;

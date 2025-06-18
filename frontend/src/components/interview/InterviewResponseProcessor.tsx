@@ -1,5 +1,5 @@
 import { config } from "@/config";
-import { interviewAPI } from "@/services/interviewApi";
+import { interviewApi } from "@/services/interviewApi";
 import axios from "axios";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -31,7 +31,7 @@ export function useInterviewResponseProcessor() {
   > => {
     try {
       setIsProcessing(true);
-      const response = await interviewAPI.generateQuestions();
+      const response = await interviewApi.generateQuestions();
       return response.data;
     } catch (error) {
       console.error("Error generating question:", error);

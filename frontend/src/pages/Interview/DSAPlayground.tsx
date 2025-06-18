@@ -25,8 +25,7 @@ import { toast } from "sonner";
 import DraggableCameraFeed from "@/components/DraggableCameraFeed";
 import html2canvas from "html2canvas";
 import { InterviewData } from "@/types/interview";
-import { interviewAPI } from "@/services/interviewApi";
-import { dsaAPI } from "@/services/dsaApi";
+import { interviewApi } from "@/services/interviewApi";
 import { DSAQuestion, TestCase } from "@/types/job";
 
 const DSAPlayground = () => {
@@ -112,7 +111,9 @@ const DSAPlayground = () => {
           setCompilationStatus(errorMessage);
           setRunStatus("failed");
         } else if (data.status === "error") {
-          setCompilationStatus(`Error: ${data.error || "Unknown error occurred"}`);
+          setCompilationStatus(
+            `Error: ${data.error || "Unknown error occurred"}`
+          );
           setRunStatus("error");
         }
       }
@@ -122,9 +123,10 @@ const DSAPlayground = () => {
 
   useEffect(() => {
     setIsLoading(true);
-    interviewAPI
+    interviewApi
       .candidateGetInterview()
       .then((res) => {
+        console.log(res)
         setInterviewData(res.data);
       })
       .finally(() => {
@@ -133,11 +135,11 @@ const DSAPlayground = () => {
   }, []);
 
   useEffect(() => {
-    if (!interviewData || !interviewData.job_id) {
+    if (!interviewData || !interviewData.ai_interviewed_job_id) {
       return;
     }
-    dsaAPI
-      .getDSAQuestion(interviewData.job_id?.toString())
+    interviewApi
+      .getDSAQuestion(interviewData.ai_interviewed_job_id?.toString())
       .then((res) => {
         setDsaQuestions(res.data);
       })
@@ -154,7 +156,8 @@ const DSAPlayground = () => {
   const handleNext = () => {
     if (currentQuestionIndex < dsaQuestions.length - 1) {
       setCurrentQuestionIndex((prev) => prev + 1);
-      console.log("Go to next question: index", currentQuestionIndex + 1);
+      setCompilationStatus("");
+      setRunStatus("");
     }
   };
 

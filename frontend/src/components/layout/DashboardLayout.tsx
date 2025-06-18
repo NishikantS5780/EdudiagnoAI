@@ -21,7 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { formatDistanceToNow } from "date-fns";
-import { AuthContext } from "@/context/AuthContext";
+import { AuthContext } from "@/context/AppContext";
 
 interface SidebarLink {
   name: string;

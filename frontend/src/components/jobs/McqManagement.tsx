@@ -20,8 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import { quizAPI } from "@/services/quizApi";
-import { jobAPI } from "@/services/jobApi";
+import { companyApi } from "@/services/companyApi";
 import { MCQuestion } from "@/types/job";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Checkbox } from "../ui/checkbox";
@@ -55,9 +54,9 @@ const McqManagement = ({ jobId }: McqManagementProps) => {
   const fetchMcqQuestions = async () => {
     try {
       setLoading(true);
-      const response = await quizAPI.getByJobId(jobId.toString());
+      const response = await companyApi.getQuizQuestionByAiInterviewedJobId(jobId.toString());
       setQuestions(response.data || []);
-      const jobResponse = await jobAPI.getCurrentRecruiterJob(jobId.toString());
+      const jobResponse = await companyApi.getAiInterviewedJobById(jobId.toString());
       if (jobResponse.data.quiz_time_minutes) {
         setTimingMode("whole_test");
         setWholeTestMinutes(jobResponse.data.quiz_time_minutes);
@@ -108,7 +107,7 @@ const McqManagement = ({ jobId }: McqManagementProps) => {
       if (timingMode == "per_question" && !newQuestion.time_seconds) {
         throw new Error("Please select proper time for mcq question");
       }
-      const response = await quizAPI.createQuizQuestions(
+      const response = await companyApi.createQuizQuestion(
         newQuestion,
         jobId,
         imageFile || undefined
@@ -119,7 +118,7 @@ const McqManagement = ({ jobId }: McqManagementProps) => {
 
       const questionId = response.data.id;
       for (const option of newQuestion.options || []) {
-        const res = await quizAPI.createQuizOption(option, questionId);
+        const res = await companyApi.createQuizOption(option, questionId);
         if (!res) {
           throw new Error("Failed to save MCQ option");
         }
@@ -156,7 +155,7 @@ const McqManagement = ({ jobId }: McqManagementProps) => {
     try {
       setLoading(true);
 
-      await quizAPI.deleteQuizQuestion(id);
+      await companyApi.deleteQuizQuestion(id);
       toast.success("MCQ question deleted successfully");
 
       await fetchMcqQuestions();
