@@ -10,10 +10,10 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { AuthContext } from "@/context/AuthContext";
+import { AppContext } from "@/context/AppContext";
 import { Pencil, Shield, UserCircle, Save, X } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { authAPI } from "@/services/authApi";
+import { companyApi } from "@/services/companyApi";
 import { RecruiterData } from "@/types/recruiter";
 import axios from "axios";
 import { config } from "@/config";
@@ -34,12 +34,12 @@ interface ProfileData {
 }
 
 const Profile = () => {
-  const authContext = useContext(AuthContext);
-  if (!authContext) {
+  const App = useContext(AppContext);
+  if (!App) {
     toast.error("Something went wrong");
     return null;
   }
-  const { recruiter, verifyLogin } = authContext;
+  const { recruiter, verifyLogin } = App;
   const [isLoading, setIsLoading] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(recruiter?.companyLogo || null);
   const location = useLocation();
@@ -70,7 +70,7 @@ const Profile = () => {
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
-        const recruiterData = await authAPI.verifyLogin();
+        const recruiterData = await companyApi.verifyLogin();
         const userData = recruiterData.data;
 
         setProfileData({
@@ -132,7 +132,7 @@ const Profile = () => {
     // Reset form data to current user data
     const fetchUserDetails = async () => {
       try {
-        const recruiterData = await authAPI.verifyLogin();
+        const recruiterData = await companyApi.verifyLogin();
         const userData = recruiterData.data;
         setProfileData({
           name: userData.name || '',
