@@ -17,7 +17,7 @@ import { Timer, Brain, Award, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import html2canvas from "html2canvas";
-import CameraFeed from "@/components/CameraFeed";
+import DraggableCameraFeed from "@/components/DraggableCameraFeed";
 import { interviewApi } from "@/services/interviewApi";
 import { config } from "@/config";
 
@@ -1251,7 +1251,7 @@ const MCQTest = () => {
       )}
 
       {showCamera && (
-        <CameraFeed
+        <DraggableCameraFeed
           onCameraError={(error) => {
             toast.error(error);
             setShowCamera(false);

@@ -550,6 +550,11 @@ const NewJob = () => {
         { label: "", correct: false },
       ]);
       setQuizImageFile(null);
+      // Reset the file input
+      const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+      if (fileInput) {
+        fileInput.value = '';
+      }
 
       toast.success("MCQ question saved successfully");
     } catch (error: any) {

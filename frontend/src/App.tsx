@@ -181,14 +181,14 @@ const App = () => {
             </RequireAuth>
           }
         />
-        {/* <Route
-              path="/dashboard/profile"
-              element={
-                <RequireAuth>
-                  <Profile />
-                </RequireAuth>
-              }
-            /> */}
+        <Route
+          path="/dashboard/profile"
+          element={
+            <RequireAuth>
+              <Profile />
+            </RequireAuth>
+          }
+        />
         {/* <Route
               path="/dashboard/settings"
               element={
