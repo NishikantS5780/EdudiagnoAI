@@ -9,9 +9,9 @@ interface AppContextType {
   recruiter?: RecruiterData | null;
 }
 
-export const AuthContext = createContext<AppContextType | null>(null);
+export const AppContext = createContext<AppContextType | null>(null);
 
-export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
+export const AppContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [recruiter, setRecruiter] = useState<RecruiterData | null>();
 
   const login = async (data: RecruiterLoginData) => {
@@ -34,8 +34,8 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ login, logout, recruiter, verifyLogin }}>
+    <AppContext.Provider value={{ login, logout, recruiter, verifyLogin }}>
       {children}
-    </AuthContext.Provider>
+    </AppContext.Provider>
   );
 };

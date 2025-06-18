@@ -1,6 +1,6 @@
 import { FC, useContext, useEffect } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { AuthContext } from "@/context/AppContext";
+import { AppContext } from "@/context/AppContext";
 import { toast } from "sonner";
 
 interface RequireAuthProps {
@@ -9,20 +9,20 @@ interface RequireAuthProps {
 
 const RequireAuth: FC<RequireAuthProps> = ({ children }) => {
   const location = useLocation();
-  const authContext = useContext(AuthContext);
-  if (!authContext) {
+  const appContext = useContext(AppContext);
+  if (!appContext) {
     return toast.error("Something went wrong");
   }
 
   useEffect(() => {
-    if (!authContext.recruiter) {
-      authContext.verifyLogin().catch((_) => {
+    if (!appContext.recruiter) {
+      appContext.verifyLogin().catch((_) => {
         return <Navigate to="/login" state={{ from: location }} replace />;
       });
     }
   }, []);
 
-  return <>{authContext && authContext.recruiter && children}</>;
+  return <>{appContext && appContext.recruiter && children}</>;
 };
 
 export default RequireAuth;

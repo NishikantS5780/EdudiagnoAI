@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { AuthContext } from "@/context/AppContext";
+import { AppContext } from "@/context/AppContext";
 import { toast } from "sonner";
 
 interface RequireProfileCompletionProps {
@@ -13,8 +13,8 @@ interface RequireProfileCompletionProps {
 const RequireProfileVerified: React.FC<RequireProfileCompletionProps> = ({
   children,
 }) => {
-  const authContext = useContext(AuthContext);
-  if (!authContext) {
+  const appContext = useContext(AppContext);
+  if (!appContext) {
     toast("Something went wrong");
     return;
   }
@@ -24,7 +24,7 @@ const RequireProfileVerified: React.FC<RequireProfileCompletionProps> = ({
     return <>{children}</>;
   }
 
-  if (authContext.recruiter && authContext.recruiter.verified) {
+  if (appContext.recruiter && appContext.recruiter.verified) {
     return (
       <div className="container max-w-7xl py-6">
         <Alert className="border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20 mb-6">

@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { Eye, EyeOff, ArrowRight } from "lucide-react";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import RegularLayout from "@/components/layout/RegularLayout";
-import { AuthContext } from "@/context/AppContext";
+import { AppContext } from "@/context/AppContext";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -18,8 +18,8 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const authContext = useContext(AuthContext);
-  if (!authContext) {
+  const appContext = useContext(AppContext);
+  if (!appContext) {
     return toast.error("Something went wrong");
   }
 
@@ -28,7 +28,7 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      await authContext.login({ email, password });
+      await appContext.login({ email, password });
       toast.success("Login successful");
       navigate("/dashboard");
     } catch (error: any) {

@@ -39,11 +39,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { InterviewData } from "@/types/interview";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { AuthContext } from "@/context/AppContext";
+import { AppContext } from "@/context/AppContext";
 import { companyApi } from "@/services/companyApi";
 
 const Dashboard = () => {
-  const authContext = useContext(AuthContext);
+  const appContext = useContext(AppContext);
   const [dateRange, setDateRange] = useState("30days");
   const [loading, setLoading] = useState(true);
   const [analyticsData, setAnalyticsData] = useState<{
@@ -67,7 +67,7 @@ const Dashboard = () => {
 
   const fetchData = async () => {
     try {
-      if (!authContext || !authContext.recruiter || !authContext.recruiter.id) {
+      if (!appContext || !appContext.recruiter || !appContext.recruiter.id) {
         throw new Error("Recruiter data not available");
       }
 
@@ -103,7 +103,7 @@ const Dashboard = () => {
     return null;
   };
 
-  if (!authContext || !authContext.recruiter) {
+  if (!appContext || !appContext.recruiter) {
     return toast.error("Something went wrong");
   }
 
@@ -121,7 +121,7 @@ const Dashboard = () => {
     <DashboardLayout>
       <PageHeader
         title={`Welcome back, ${
-          authContext.recruiter && authContext.recruiter.name
+          appContext.recruiter && appContext.recruiter.name
         }`}
         description="Here's what's happening with your hiring activities"
       >

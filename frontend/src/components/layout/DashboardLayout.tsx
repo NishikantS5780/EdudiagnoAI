@@ -21,7 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { formatDistanceToNow } from "date-fns";
-import { AuthContext } from "@/context/AppContext";
+import { AppContext } from "@/context/AppContext";
 
 interface SidebarLink {
   name: string;
@@ -38,8 +38,8 @@ const navigation: SidebarLink[] = [
 const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const authContext = useContext(AuthContext);
-  if (!authContext || !authContext.recruiter) {
+  const appContext = useContext(AppContext);
+  if (!appContext || !appContext.recruiter) {
     throw new Error("Something went wrong");
   }
   const location = useLocation();
@@ -49,12 +49,12 @@ const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
   //   useNotifications();
 
   const handleLogout = () => {
-    authContext.logout();
+    appContext.logout();
     navigate("/");
   };
 
-  const initials = authContext.recruiter.name
-    ? authContext.recruiter.name
+  const initials = appContext.recruiter.name
+    ? appContext.recruiter.name
         .split(" ")
         .map((n) => n[0])
         .join("")
@@ -200,8 +200,8 @@ const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
                 >
                   <Avatar>
                     <AvatarImage
-                      src={authContext.recruiter.companyLogo}
-                      alt={authContext.recruiter.name || ""}
+                      src={appContext.recruiter.companyLogo}
+                      alt={appContext.recruiter.name || ""}
                     />
                     <AvatarFallback>{initials}</AvatarFallback>
                   </Avatar>
