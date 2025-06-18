@@ -379,7 +379,7 @@ async def get_all_job(
 
 
 
-@router.post("/generate-description")
+@router.post("/generate-ai-interviewed-job-description")
 async def generate_description(
     generate_jd_data: schemas.GenerateAiInterviewDescription,
 ):
@@ -413,7 +413,7 @@ async def generate_description(
     return {"description": description}
 
 
-@router.post("/generate-requirements")
+@router.post("/generate-ai-interviewed-job-requirements")
 async def generate_requirements(
     generate_jr_data: schemas.GenerateAiInterviewRequirement,
 ):
