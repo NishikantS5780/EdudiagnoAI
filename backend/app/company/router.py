@@ -25,7 +25,7 @@ from sqlalchemy import (
     and_,
 )
 from sqlalchemy.orm import Session
-import openai
+from app.services import openai
 import os
 from os import path
 
