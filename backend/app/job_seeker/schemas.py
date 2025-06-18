@@ -1,11 +1,11 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel
 from typing import Optional
 
 # --- JobSeeker Schemas ---
 class JobSeekerBase(BaseModel):
     firstname: str
     lastname: str
-    email: EmailStr
+    email: str
     phone: str
     # Add more fields as needed
 
@@ -15,7 +15,7 @@ class JobSeekerCreate(JobSeekerBase):
 class JobSeekerUpdate(BaseModel):
     firstname: Optional[str]
     lastname: Optional[str]
-    email: Optional[EmailStr]
+    email: Optional[str]
     phone: Optional[str]
     # Add more fields as needed
 
