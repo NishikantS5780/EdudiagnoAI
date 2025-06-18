@@ -186,7 +186,7 @@ export const companyApi = {
     maxExperience: string
   ) => {
     const res = await axios.post(
-      `${config.API_BASE_URL}/job/generate-description`,
+      `${config.API_BASE_URL}/company/generate-ai-interviewed-job-description`,
       {
         title: jobTitle,
         department: department,
@@ -211,7 +211,7 @@ export const companyApi = {
     keywords: string
   ) => {
     const res = await axios.post(
-      `${config.API_BASE_URL}/job/generate-requirements`,
+      `${config.API_BASE_URL}/company/generate-ai-interviewed-job-requirements`,
       {
         title: jobTitle,
         department: department,
