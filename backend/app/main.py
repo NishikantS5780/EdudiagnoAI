@@ -41,7 +41,7 @@ app.add_middleware(
 
 
 os.makedirs("uploads", exist_ok=True)
-app.mount("/api/uploads", StaticFiles(directory="uploads"), name="uploads")
+app.mount("/api/v1/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 
 from app.exception_handlers import (
