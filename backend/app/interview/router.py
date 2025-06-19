@@ -78,10 +78,10 @@ async def create_dsa_response(
     stmt = insert(DSAResponse).values(
         code=response_data.code,
         interview_id=interview_id,
-        question_id=response_data.question_id,
+        dsa_question_id=response_data.question_id,
     )
     upsert_stmt = stmt.on_conflict_do_update(
-        index_elements=["interview_id", "question_id"],
+        index_elements=["interview_id", "dsa_question_id"],
         set_={
             "code": stmt.excluded.code,
         },
