@@ -380,12 +380,12 @@ async def generate_interview_questions(
     question_types = [
         "technical",
         "technical",
-        # "technical",
-        # "technical",
-        # "technical",
-        # "technical",
-        # "behavioral",
-        # "problem_solving"
+        "technical",
+        "technical",
+        "technical",
+        "technical",
+        "behavioral",
+        "problem_solving"
     ]
 
     system_prompt = f"""You are an expert technical interviewer for the position of {job.title}.
