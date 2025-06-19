@@ -279,7 +279,7 @@ async def execution_callback(request: Request, db: Session = Depends(database.ge
     passed_count = data["passed_count"]
     stmt = (
         select(func.count(DSATestCase.id).label("total_count"))
-        .join(DSAResponse, DSAResponse.question_id == DSATestCase.dsa_question_id)
+        .join(DSAResponse, DSAResponse.dsa_question_id == DSATestCase.dsa_question_id)
         .where(DSAResponse.id == dsa_response_id)
     )
     total_count = db.execute(stmt).all()[0]._mapping["total_count"]
