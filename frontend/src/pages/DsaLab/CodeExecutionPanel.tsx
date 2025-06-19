@@ -98,7 +98,7 @@ function CodeExecutionPanel({
               setCode(currentCode);
 
               try {
-                const response = await fetch(import.meta.env.VITE_API_BASE_URL + "/dsa-response", {
+                const response = await fetch(import.meta.env.VITE_API_BASE_URL + "/interview/dsa-response", {
                   method: "POST",
                   headers: {
                     "Content-Type": "application/json",
