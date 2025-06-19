@@ -114,7 +114,7 @@ async def create_dsa_response(
                     .decode()
                     .rstrip("="),
                     "callbackUrlOnExecutionCompletion": config.settings.URL
-                    + "/dsa-response/callback",
+                    + "/interview/dsa-response/callback",
                     "shouldEnablePerProcessAndThreadCpuTimeLimit": False,
                     "shouldEnablePerProcessAndThreadMemoryLimit": False,
                     "shouldAllowInternetAccess": False,
@@ -164,7 +164,7 @@ async def create_dsa_response(
     return {"message": "executing"}
 
 
-@router.post("/callback")
+@router.post("/dsa-response/callback")
 async def execution_callback(request: Request, db: Session = Depends(database.get_db)):
     data = await request.json()
 
