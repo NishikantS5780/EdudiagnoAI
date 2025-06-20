@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -34,6 +34,7 @@ import InterviewQuestionManagement from "@/components/jobs/InterviewQuestionMana
 import { interviewApi } from "@/services/interviewApi";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 const JobDetail = () => {
   const { id } = useParams();
@@ -43,6 +44,10 @@ const JobDetail = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
   const [isEditMode, setIsEditMode] = useState(false);
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [inviteList, setInviteList] = useState([{ email: "", firstname: "", lastname: "" }]);
+  const [inviteLoading, setInviteLoading] = useState(false);
+  const [inviteResults, setInviteResults] = useState<any[]>([]);
 
   useEffect(() => {
     fetchJobDetails();
@@ -180,6 +185,40 @@ const JobDetail = () => {
       toast.error("Failed to update job details");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleInviteChange = (idx: number, field: string, value: string) => {
+    setInviteList((prev) => prev.map((c, i) => (i === idx ? { ...c, [field]: value } : c)));
+  };
+
+  const addInviteRow = () => setInviteList((prev) => [...prev, { email: "", firstname: "", lastname: "" }]);
+
+  const removeInviteRow = (idx: number) => setInviteList((prev) => prev.filter((_, i) => i !== idx));
+
+  const handleInviteSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setInviteLoading(true);
+    setInviteResults([]);
+    try {
+      const filtered = inviteList.filter((c) => c.email.trim());
+      if (!filtered.length) {
+        toast.error("Please enter at least one candidate email.");
+        setInviteLoading(false);
+        return;
+      }
+      if (!job?.id) {
+        toast.error("Job ID is missing.");
+        setInviteLoading(false);
+        return;
+      }
+      const res = await companyApi.inviteCandidates(job.id, filtered);
+      setInviteResults(res.data.results);
+      toast.success("Invitations sent!");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail || "Failed to send invitations");
+    } finally {
+      setInviteLoading(false);
     }
   };
 
@@ -434,8 +473,8 @@ const JobDetail = () => {
                               <div className="flex items-start">
                                 <div>
                                   <h3 className="text-lg font-semibold">
-                                    {interview.first_name}{" "}
-                                    {interview.first_name}
+                                    {interview.firstname}{" "}
+                                    {interview.firstname}
                                   </h3>
                                   <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
                                     <Mail className="h-4 w-4" />
@@ -579,6 +618,76 @@ const JobDetail = () => {
             </CardContent>
           </Card>
         </div>
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>Invite Candidates for Private Interview Link</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline">Invite Candidates</Button>
+              </DialogTrigger>
+              <DialogContent className="bg-background rounded-lg p-0 max-w-xl w-full">
+                <Card className="shadow-none border-none bg-background">
+                  <CardHeader>
+                    <CardTitle className="text-xl">Invite Candidates</CardTitle>
+                    <p className="text-muted-foreground text-sm mt-1">Enter candidate emails and (optionally) names. Each will receive a private interview link.</p>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <form onSubmit={handleInviteSubmit} className="space-y-4">
+                      {inviteList.map((c, idx) => (
+                        <div key={idx} className="flex gap-2 items-center">
+                          <Input
+                            type="email"
+                            placeholder="Email"
+                            value={c.email}
+                            onChange={(e) => handleInviteChange(idx, "email", e.target.value)}
+                            required
+                          />
+                          <Input
+                            type="text"
+                            placeholder="First Name (optional)"
+                            value={c.firstname}
+                            onChange={(e) => handleInviteChange(idx, "firstname", e.target.value)}
+                          />
+                          <Input
+                            type="text"
+                            placeholder="Last Name (optional)"
+                            value={c.lastname}
+                            onChange={(e) => handleInviteChange(idx, "lastname", e.target.value)}
+                          />
+                          {inviteList.length > 1 && (
+                            <Button type="button" variant="ghost" onClick={() => removeInviteRow(idx)}><Trash className="w-4 h-4" /></Button>
+                          )}
+                        </div>
+                      ))}
+                      <Button type="button" variant="secondary" onClick={addInviteRow}>
+                        + Add Another
+                      </Button>
+                      <CardFooter className="p-0 pt-2 flex-col items-stretch gap-2">
+                        <Button type="submit" className="w-full" disabled={inviteLoading}>
+                          {inviteLoading ? <LoadingSpinner /> : "Send Invitations"}
+                        </Button>
+                        {inviteResults.length > 0 && (
+                          <div className="mt-2 w-full">
+                            <h4 className="font-semibold mb-2">Results:</h4>
+                            <ul className="space-y-1">
+                              {inviteResults.map((r, i) => (
+                                <li key={i} className="text-sm">
+                                  <span className="font-medium">{r.email}:</span> {r.status} {r.link && (<a href={r.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline ml-2">Link</a>)}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </CardFooter>
+                    </form>
+                  </CardContent>
+                </Card>
+              </DialogContent>
+            </Dialog>
+          </CardContent>
+        </Card>
       </div>
     </DashboardLayout>
   );

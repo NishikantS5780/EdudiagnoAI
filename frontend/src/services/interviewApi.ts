@@ -223,4 +223,19 @@ export const interviewApi = {
     );
     return res;
   },
+  getInterviewByPrivateLink: async (token: string, email: string) => {
+    const res = await axios.get(
+      `${config.API_BASE_URL}/interview/private/${token}`,
+      { params: { email } }
+    );
+    return res;
+  },
+  deleteInterview: async (id: string) => {
+    const token = localStorage.getItem("token");
+    const res = await axios.delete(
+      `${config.API_BASE_URL}/company/interview?id=${id}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    return res;
+  },
 };

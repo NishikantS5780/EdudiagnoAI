@@ -240,3 +240,17 @@ class UpdateQuizOption(BaseModel):
 class CreateQuizResponse(BaseModel):
     question_id: int
     option_id: int
+
+
+class CandidateInviteRequest(BaseModel):
+    candidates: list[dict]
+    # Each dict should have at least 'email', and optionally 'firstname' and 'lastname'
+
+    @validator('candidates', pre=True)
+    def validate_candidates(cls, v):
+        if not isinstance(v, list):
+            raise ValueError('candidates must be a list')
+        for c in v:
+            if 'email' not in c:
+                raise ValueError('Each candidate must have an email')
+        return v

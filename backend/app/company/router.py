@@ -28,6 +28,7 @@ from sqlalchemy.orm import Session
 from app.configs import openai
 import os
 from os import path
+import uuid
 
 from app import database, config
 from app.company import services
@@ -48,6 +49,7 @@ from app.models import (
 )
 from app.services import brevo
 from app.services import gcs as gcs_service
+from app.company.schemas import CandidateInviteRequest
 
 
 router = APIRouter()
@@ -1364,3 +1366,70 @@ async def get_quiz_response_recruiter_view(
         }
         for response in responses
     ]
+
+@router.post("/invite-candidates/{ai_interviewed_job_id}")
+async def invite_candidates(
+    ai_interviewed_job_id: int,
+    invite_data: CandidateInviteRequest,
+    db: Session = Depends(database.get_db),
+    recruiter_id=Depends(authorize_company),
+):
+    job = db.execute(select(AiInterviewedJob).where(AiInterviewedJob.id == ai_interviewed_job_id, AiInterviewedJob.company_id == recruiter_id)).scalar_one_or_none()
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found or unauthorized")
+
+    sent_links = []
+    for candidate in invite_data.candidates:
+        email = candidate["email"].strip().lower()
+        firstname = candidate.get("firstname", "Candidate")
+        lastname = candidate.get("lastname", "")
+        # Check if interview already exists for this job and email
+        interview = db.execute(
+            select(Interview).where(
+                Interview.email == email,
+                Interview.ai_interviewed_job_id == ai_interviewed_job_id
+            )
+        ).scalar_one_or_none()
+        if not interview:
+            token = str(uuid.uuid4())
+            interview = Interview(
+                firstname=firstname,
+                lastname=lastname,
+                email=email,
+                ai_interviewed_job_id=ai_interviewed_job_id,
+                private_link_token=token
+            )
+            db.add(interview)
+            db.commit()
+            db.refresh(interview)
+        else:
+            # If already exists, update the token
+            interview.private_link_token = str(uuid.uuid4())
+            db.commit()
+            db.refresh(interview)
+        # Always use the value from the DB
+        private_link = f"{config.settings.FRONTEND_URL}/interview/private/{interview.private_link_token}"
+        html_content = f"""
+            <h1>Edudiagno Interview Invitation</h1>
+            <p>Dear {firstname},</p>
+            <p>You have been invited to participate in an interview for the position: <b>{job.title}</b>.</p>
+            <p>Please use the following private link to access your interview:</p>
+            <a href='{private_link}'>{private_link}</a>
+            <p>This link is unique to you and should not be shared.</p>
+            <p>Best regards,<br/>Edudiagno Team</p>
+        """
+        try:
+            send_smtp_email = brevo.brevo_python.SendSmtpEmail(
+                sender={
+                    "name": config.settings.MAIL_SENDER_NAME,
+                    "email": config.settings.MAIL_SENDER_EMAIL,
+                },
+                to=[{"email": email}],
+                html_content=html_content,
+                subject=f"Interview Invitation for {job.title}",
+            )
+            brevo.api_instance.send_transac_email(send_smtp_email)
+            sent_links.append({"email": email, "link": private_link, "status": "sent"})
+        except Exception as e:
+            sent_links.append({"email": email, "link": private_link, "status": f"failed: {str(e)}"})
+    return {"results": sent_links}
