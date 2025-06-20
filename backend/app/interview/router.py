@@ -1,6 +1,6 @@
 import base64
 from typing import Dict
-from fastapi import APIRouter, Depends, Request, WebSocket, WebSocketDisconnect, Response, File, UploadFile, BackgroundTasks
+from fastapi import APIRouter, Depends, Request, WebSocket, WebSocketDisconnect, Response, File, UploadFile, BackgroundTasks, Query, HTTPException
 from sqlalchemy import and_, func, select, update, case
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
@@ -15,7 +15,6 @@ from app.dependencies.authorization import authorize_candidate
 from app.models import DSAResponse, DSATestCase, DSATestCaseResponse, Interview, DSAQuestion, QuizQuestion, AiInterviewedJob, Company, QuizOption, QuizResponse, InterviewQuestionAndResponse, InterviewQuestion, InterviewQuestionResponse
 from app.interview import schemas
 from app.lib import jwt
-import aiohttp
 from fpdf import FPDF
 import unicodedata
 import io
@@ -1339,20 +1338,22 @@ async def create_interview_question_response(
 
 @router.get("/private/{token}")
 async def get_interview_by_private_link(
-    token: str, db: Session = Depends(database.get_db)
+    token: str,
+    email: str = Query(..., description="Candidate's email for verification"),
+    db: Session = Depends(database.get_db)
 ):
-    stmt = select(Interview).where(Interview.private_link_token == token)
+    stmt = select(Interview).where(Interview.private_link_token == token, Interview.email == email)
     result = db.execute(stmt)
     interview = result.scalar_one_or_none()
     if not interview:
-        raise HTTPException(status_code=404, detail="Invalid or expired private link")
+        raise HTTPException(status_code=404, detail="Invalid or expired private link or email mismatch")
     return {
         "id": interview.id,
-        "first_name": interview.first_name,
-        "last_name": interview.last_name,
+        "first_name": interview.firstname,
+        "last_name": interview.lastname,
         "email": interview.email,
         "status": interview.status,
-        "job_id": interview.job_id,
+        "job_id": interview.ai_interviewed_job_id,
     }
 
 

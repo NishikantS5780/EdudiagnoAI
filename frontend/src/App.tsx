@@ -68,6 +68,7 @@ import { InterviewData } from "./types/interview";
 import { interviewApi } from "./services/interviewApi";
 import { JobData } from "./types/job";
 import { companyApi } from "./services/companyApi";
+import PrivateInterviewPage from "@/pages/Interview/PrivateInterviewPage";
 
 // import { interviewAPI, jobAPI } from "@/lib/api";
 
@@ -110,6 +111,7 @@ const App = () => {
         <Route path="/interview/video" element={<VideoInterview />} />
         <Route path="/interview/overview" element={<InterviewOverview />} />
         <Route path="/mcq" element={<MCQTest />} />
+        <Route path="/interview/private/:token" element={<PrivateInterviewPage />} />
         {/* Protected Dashboard Routes */}
         <Route
           path="/dashboard"
