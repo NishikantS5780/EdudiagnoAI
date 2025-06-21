@@ -43,7 +43,7 @@ interface QuestionTimer {
   isExpired: boolean;
 }
 
-const MCQTest = () => {
+const MCQTest = ({ onComplete }: { onComplete?: () => void }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
@@ -482,6 +482,10 @@ const MCQTest = () => {
   };
 
   const handleTestComplete = () => {
+    if (onComplete) {
+      onComplete();
+      return;
+    }
     const urlParams = new URLSearchParams(window.location.search);
     const i_id = urlParams.get("i_id");
     const company = urlParams.get("company");

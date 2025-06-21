@@ -203,24 +203,6 @@ const JobsPage = () => {
     }
   };
 
-  const copyInterviewLink = async (jobId: number) => {
-    try {
-      if (!jobId || isNaN(jobId)) {
-        toast.error("Invalid job ID");
-        return;
-      }
-
-      const interviewLink = `${window.location.origin}/interview?job_id=${jobId}`;
-      await navigator.clipboard.writeText(interviewLink);
-      toast.success("Interview link copied to clipboard", {
-        description: interviewLink,
-      });
-    } catch (error) {
-      console.error("Error creating interview link:", error);
-      toast.error("Failed to create interview link");
-    }
-  };
-
   const handleSort = (field: typeof sortField) => {
     if (field === sortField) {
       setSortOrder(sortOrder === "ascending" ? "descending" : "ascending");
@@ -420,15 +402,6 @@ const JobsPage = () => {
                                 View Details
                               </Link>
                             </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() =>
-                                job.id && copyInterviewLink(job.id)
-                              }
-                            >
-                              <Share className="mr-2 h-4 w-4" />
-                              Copy Interview Link
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
                             <DropdownMenuItem
                               className="text-destructive"
                               onClick={() => setJobToDelete(job.id)}

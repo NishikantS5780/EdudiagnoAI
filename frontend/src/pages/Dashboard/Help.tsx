@@ -21,7 +21,7 @@ const Help = () => {
     },
     {
       question: "How can I share an interview link with candidates?",
-      answer: "After creating a job with AI interviews enabled, go to the job details page and click on 'Interview Links'. You can copy the shareable link and send it directly to candidates via email, or use our built-in invitation system to send branded email invitations."
+      answer: "After creating a job with AI interviews enabled, go to the job details page and use the 'Invite Candidates' feature. This will generate private interview links for each candidate and send them branded email invitations. Private links ensure only invited candidates can access the interview."
     },
     {
       question: "Can I customize the AI interview questions?",

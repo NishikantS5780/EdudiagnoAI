@@ -21,6 +21,11 @@ const PrivateInterviewPage: React.FC = () => {
     try {
       const res = await interviewApi.getInterviewByPrivateLink(token!, email);
       if (res.data && res.data.id) {
+        // Store the JWT token for authentication
+        if (res.data.token) {
+          localStorage.setItem("i_token", res.data.token);
+        }
+        // Navigate directly to the interview flow
         navigate(`/interview?job_id=${res.data.job_id}`);
       } else {
         setError("Invalid or expired link.");

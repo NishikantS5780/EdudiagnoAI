@@ -42,6 +42,7 @@ interface MatchResultsStageProps {
   companyName: string;
   interviewId: string;
   onScheduleLater: () => void;
+  onStartInterview?: () => void;
 }
 
 export function MatchResultsStage({
@@ -51,6 +52,7 @@ export function MatchResultsStage({
   companyName,
   interviewId,
   onScheduleLater,
+  onStartInterview,
 }: MatchResultsStageProps) {
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [rating, setRating] = useState(0);
@@ -61,9 +63,13 @@ export function MatchResultsStage({
 
   const handleStartInterview = async () => {
     try {
-      // Open interview in new tab
-      const interviewUrl = `/interview/overview?i_id=${interviewId}&company=${companyName}`;
-      window.open(interviewUrl, "fullscreen=yes");
+      if (onStartInterview) {
+        onStartInterview();
+      } else {
+        // fallback: open in new tab (legacy)
+        const interviewUrl = `/interview/overview?i_id=${interviewId}&company=${companyName}`;
+        window.open(interviewUrl, "fullscreen=yes");
+      }
     } catch (error) {
       console.error("Error starting interview:", error);
       toast.error("Failed to start interview. Please try again.");
