@@ -38,18 +38,6 @@ export const interviewApi = {
     return res;
   },
 
-  updateInterview: async (data: Partial<InterviewData>) => {
-    const iToken = localStorage.getItem("i_token");
-    const res = await axios.put(
-      `${config.API_BASE_URL}/interview`,
-      data,
-      {
-        headers: { Authorization: `Bearer ${iToken}` },
-      }
-    );
-    return res;
-  },
-
   extractResumeData: async (resume: File) => {
     const formdata = new FormData();
     formdata.append("file", resume);
@@ -95,6 +83,30 @@ export const interviewApi = {
       }
     );
     return res;
+  },
+
+  sendOtp: async (email: string) => {
+    const iToken = localStorage.getItem("i_token");
+    const res = await axios.post(
+      `${config.API_BASE_URL}/interview/send-otp`,
+      { email },
+      {
+        headers: { Authorization: `Bearer ${iToken}` },
+      }
+    );
+    return res.data;
+  },
+
+  verifyOtp: async (email: string, otp: string) => {
+    const iToken = localStorage.getItem("i_token");
+    const res = await axios.post(
+      `${config.API_BASE_URL}/interview/verify-otp`,
+      { email, otp },
+      {
+        headers: { Authorization: `Bearer ${iToken}` },
+      }
+    );
+    return res.data;
   },
 
   textToSpeech: async (text: string) => {

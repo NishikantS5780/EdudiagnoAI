@@ -6,11 +6,9 @@ export interface InterviewData {
   email?: string;
   phone?: string;
   work_experience?: number;
-  work_experience_yrs?: number;
   education?: string;
   skills?: string;
   location?: string;
-  city?: string;
   linkedin_url?: string;
   portfolio_url?: string;
   resume_url?: string;

@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { InterviewData } from "@/types/interview";
 import { MatchResultsStage } from "./MatchResultsStage";
+import { EmailVerificationStage } from "./EmailVerificationStage";
 import { interviewApi } from "@/services/interviewApi";
 
 const formSchema = z.object({
@@ -43,14 +44,12 @@ interface ResumeUploadStageProps {
   jobTitle: string;
   companyName: string;
   jobId: number;
-  onComplete?: (matchScore: number, matchFeedback: string) => void;
 }
 
 export function ResumeUploadStage({
   jobTitle,
   companyName,
   jobId,
-  onComplete,
 }: ResumeUploadStageProps) {
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -65,6 +64,7 @@ export function ResumeUploadStage({
   const navigate = useNavigate();
   const { accessCode } = useParams<{ accessCode: string }>();
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
 
   const handleResumeChange = (file: File) => {
     if (isCompleted) return;
@@ -103,9 +103,9 @@ export function ResumeUploadStage({
         lastname: data.lastname,
         email: data.email,
         phone: data.phone,
-        city: data.location,
+        location: data.location,
         resume_text: data.resume_text,
-        work_experience_yrs: Number(data.work_experience),
+        work_experience: Number(data.work_experience),
         education: data.education,
         skills: data.skills.join(","),
         linkedin_url: data.linkedin_url,
@@ -166,14 +166,14 @@ export function ResumeUploadStage({
       errors.phone = "Valid phone number is required";
     }
     // Location
-    if (!candidateData?.city || candidateData.city.trim() === "") {
+    if (!candidateData?.location || candidateData.location.trim() === "") {
       errors.location = "Location is required";
     }
     // Work Experience
     if (
-      candidateData?.work_experience_yrs === undefined ||
-      candidateData?.work_experience_yrs === null ||
-      isNaN(Number(candidateData?.work_experience_yrs))
+      candidateData?.work_experience === undefined ||
+      candidateData?.work_experience === null ||
+      isNaN(Number(candidateData?.work_experience))
     ) {
       errors.workExperience = "Work experience is required";
     }
@@ -207,32 +207,64 @@ export function ResumeUploadStage({
     }
 
     setIsSubmitting(true);
-    const processResume = async () => {
+    const createInterview = async () => {
       try {
         if (!candidateData) {
           toast.error("Please complete the form first");
           return;
         }
 
-        // Update interview with candidate data
-        const updateData = {
+        // Convert to snake_case for backend
+        const backendData = {
           firstname: candidateData.firstname,
           lastname: candidateData.lastname,
           email: candidateData.email,
           phone: candidateData.phone,
-          city: candidateData.city,
+          location: candidateData.location,
           resume_text: candidateData.resume_text,
-          work_experience_yrs: candidateData.work_experience_yrs,
+          work_experience: candidateData.work_experience,
           education: candidateData.education,
           skills: candidateData.skills,
           linkedin_url: candidateData.linkedin_url,
           portfolio_url: candidateData.portfolio_url,
+          ai_interviewed_job_id: jobId,
         };
 
-        console.log("Updating interview with data:", updateData);
+        // Log the data being sent
+        console.log("Creating interview with data:", backendData);
 
-        // Update the interview with candidate data
-        await interviewApi.updateInterview(updateData);
+        const res = await interviewApi.createInterview(backendData, jobId);
+        const data = res.data;
+        console.log("Interview created successfully:", data);
+
+        setCandidateData({
+          id: data.id,
+          firstname: data.firstname,
+          lastname: data.lastname,
+          email: data.email,
+          phone: data.phone,
+          location: data.location,
+          resume_text: data.resume_text,
+          work_experience: data.work_experience,
+          education: data.education,
+          skills: data.skills,
+          linkedin_url: data.linkedin_url,
+          portfolio_url: data.portfolio_url,
+          resume_match_score: 0,
+          resume_match_feedback: "",
+          status: "pending",
+          overall_score: 0,
+          feedback: "",
+          created_at: new Date().toISOString(),
+          job_id: jobId,
+          technical_skills_score: 0,
+          communication_skills_score: 0,
+          problem_solving_skills_score: 0,
+          cultural_fit_score: 0,
+          resume_url: "",
+        });
+        const token = res.headers["authorization"].split("Bearer ")[1];
+        localStorage.setItem("i_token", token);
 
         console.log("Uploading resume file:", resumeFile);
         await interviewApi.uploadResume(resumeFile);
@@ -271,7 +303,7 @@ export function ResumeUploadStage({
         setIsSubmitting(false);
       }
     };
-    processResume();
+    createInterview();
   };
 
   const handleStartInterview = () => {
@@ -290,16 +322,15 @@ export function ResumeUploadStage({
     }));
   };
 
-  useEffect(() => {
-    if (isCompleted && matchAnalysis) {
-      if (onComplete) {
-        onComplete(matchAnalysis.matchScore, matchAnalysis.matchFeedback);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isCompleted]);
-
   if (isCompleted && matchAnalysis) {
+    if (!isEmailVerified) {
+      return (
+        <EmailVerificationStage
+          resumeEmail={candidateData?.email || ""}
+          onVerified={() => setIsEmailVerified(true)}
+        />
+      );
+    }
     return (
       <MatchResultsStage
         matchScore={matchAnalysis.matchScore}
@@ -470,12 +501,12 @@ export function ResumeUploadStage({
                   <span className="text-destructive">*</span>
                 </label>
                 <Input
-                  value={candidateData.city || ""}
+                  value={candidateData.location || ""}
                   onChange={(e) => {
                     if (candidateData) {
                       setCandidateData({
                         ...candidateData,
-                        city: e.target.value,
+                        location: e.target.value,
                       });
                     }
                   }}
@@ -497,12 +528,12 @@ export function ResumeUploadStage({
                 </label>
                 <Input
                   type="number"
-                  value={candidateData.work_experience_yrs || ""}
+                  value={candidateData.work_experience || ""}
                   onChange={(e) => {
                     if (candidateData) {
                       setCandidateData({
                         ...candidateData,
-                        work_experience_yrs: Number(e.target.value),
+                        work_experience: Number(e.target.value),
                       });
                     }
                   }}

@@ -353,6 +353,17 @@ const InterviewDetail = () => {
     calculateScores();
   }, [quizResponses, quizQuestions]);
 
+  const copyInterviewLink = () => {
+    const link = `${window.location.origin}/interviews?job_id=${id}`;
+    navigator.clipboard.writeText(link);
+    setIsLinkCopied(true);
+    toast.success("Interview link copied to clipboard");
+
+    setTimeout(() => {
+      setIsLinkCopied(false);
+    }, 3000);
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "completed":
