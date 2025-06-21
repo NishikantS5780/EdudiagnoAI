@@ -211,9 +211,10 @@ const Landing4 = () => {
                 <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-violet-100 text-violet-600 mb-4">
                   <Users className="h-6 w-6" />
                 </div>
-                <h3 className="font-bold text-xl mb-2 text-violet-900">Private Interview Links</h3>
+                <h3 className="font-bold text-xl mb-2 text-violet-900">Shareable Links</h3>
                 <p className="text-violet-700">
-                  Generate secure private interview links for each candidate, ensuring only invited candidates can access their interviews.
+                  Invite candidates with a simple shareable link that can be
+                  distributed via email or social media platforms.
                 </p>
               </CardContent>
             </Card>

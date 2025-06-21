@@ -1,3 +1,4 @@
+
 from typing import List, Optional
 from pydantic import BaseModel
 from pydantic import validator
@@ -139,14 +140,10 @@ class CreateInterview(BaseModel):
 
 
 class UpdateInterview(BaseModel):
-    firstname: Optional[str] = None
-    lastname: Optional[str] = None
-    email: Optional[str] = None
-    phone: Optional[str] = None
-    work_experience_yrs: Optional[int] = None
+    work_experience: Optional[int] = None
     education: Optional[str] = None
     skills: Optional[str] = None
-    city: Optional[str] = None
+    location: Optional[str] = None
     linkedin_url: Optional[str] = None
     portfolio_url: Optional[str] = None
     resume_url: Optional[str] = None
@@ -155,6 +152,10 @@ class UpdateInterview(BaseModel):
     resume_match_feedback: Optional[str] = None
     overall_score: Optional[int] = None
     feedback: Optional[str] = None
+
+
+class VerifyOtpCandidate(BaseModel):
+    otp: str = None
 
 
 class TextToSpeech(BaseModel):
