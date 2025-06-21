@@ -28,7 +28,7 @@ import { InterviewData } from "@/types/interview";
 import { interviewApi } from "@/services/interviewApi";
 import { DSAQuestion, TestCase } from "@/types/job";
 
-const DSAPlayground = () => {
+const DSAPlayground = ({ onComplete }: { onComplete?: () => void }) => {
   const [searchParams] = useSearchParams();
   const interviewId = searchParams.get("i_id");
   const [activeTab, setActiveTab] = React.useState("welcome");
@@ -167,6 +167,10 @@ const DSAPlayground = () => {
   };
 
   const handleComplete = () => {
+    if (onComplete) {
+      onComplete();
+      return;
+    }
     const urlParams = new URLSearchParams(window.location.search);
     const i_id = urlParams.get("i_id");
     const company = urlParams.get("company");

@@ -120,7 +120,7 @@ interface ThankYouStageProps {
   jobId?: string;
 }
 
-export default function VideoInterview() {
+export default function VideoInterview({ onComplete }: { onComplete?: () => void } = {}) {
   const [interviewData, setInterviewData] = useState<InterviewData>({
     job_requirements: "",
     questions: [],
@@ -1125,6 +1125,10 @@ export default function VideoInterview() {
   };
 
   const handleInterviewComplete = () => {
+    if (onComplete) {
+      onComplete();
+      return;
+    }
     const urlParams = new URLSearchParams(window.location.search);
     const i_id = urlParams.get("i_id");
     const company = urlParams.get("company");
