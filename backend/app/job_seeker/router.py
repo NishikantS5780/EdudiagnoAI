@@ -54,7 +54,7 @@ def update_jobseeker(jobseeker_id: int = Query(...), jobseeker: schemas.JobSeeke
     simple_fields = [
         'firstname', 'lastname', 'email', 'phone', 'country_code', 'work_experience_yrs', 'email_verified', 'phone_verified',
         'profile_picture_url', 'gender', 'date_of_birth', 'current_location', 'home_town', 'country', 'key_skills', 'languages',
-        'profile_summary', 'resume_url', 'last_updated_time', 'incomplete_fields', 'total_fields', 'preferred_work_location',
+        'profile_summary', 'resume_url', 'preferred_work_location',
         'career_preference_jobs', 'career_preference_internships', 'min_duration_months', 'awards_and_accomplishments', 'updates_subscription'
     ]
     for k in simple_fields:
