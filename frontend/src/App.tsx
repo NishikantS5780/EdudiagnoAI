@@ -58,6 +58,7 @@ import JobDetailPage from "@/pages/JobSeeker/JobDetailPage";
 import CompanySearchPage from "@/pages/Company/CompanySearchPage";
 import CompanyDetailPage from "@/pages/JobSeeker/CompanyDetailPage";
 import CompanyProfilePage from "@/pages/Company/CompanyProfilePage";
+import InterviewOverview from "./pages/Interview/InterviewOverview";
 
 // import { interviewAPI, jobAPI } from "@/lib/api";
 
@@ -109,6 +110,7 @@ const App = () => {
         <Route path="/interview/compatibility" element={<InterviewFlow />} />
         <Route path="/interview/dsa-playground" element={<DSAPlayground />} />
         <Route path="/interview/video" element={<VideoInterview />} />
+        <Route path="/interview/overview" element={<InterviewOverview />} />
         <Route path="/mcq" element={<MCQTest />} />
 {/* 
         <Route path="/interview/private/:token" element={<PrivateInterviewPage />} /> */}
