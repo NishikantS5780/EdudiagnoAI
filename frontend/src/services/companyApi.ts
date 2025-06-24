@@ -444,4 +444,14 @@ export const companyApi = {
     );
     return res.data;
   },
+
+  inviteCandidates: async (jobId: number, candidates: { email: string; firstname?: string; lastname?: string }[]) => {
+    const token = localStorage.getItem("token");
+    const res = await axios.post(
+      `${config.API_BASE_URL}/company/invite-candidates/${jobId}`,
+      { candidates },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    return res;
+  },
 };

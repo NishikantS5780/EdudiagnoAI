@@ -235,4 +235,11 @@ export const interviewApi = {
     );
     return res;
   },
+  getInterviewByPrivateLink: async (token: string, email: string) => {
+    const res = await axios.get(
+      `${config.API_BASE_URL}/interview/private/${token}`,
+      { params: { email } }
+    );
+    return res;
+  },
 };

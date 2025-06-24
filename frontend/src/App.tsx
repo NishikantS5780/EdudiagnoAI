@@ -59,6 +59,8 @@ import CompanySearchPage from "@/pages/Company/CompanySearchPage";
 import CompanyDetailPage from "@/pages/JobSeeker/CompanyDetailPage";
 import CompanyProfilePage from "@/pages/Company/CompanyProfilePage";
 
+// import { interviewAPI, jobAPI } from "@/lib/api";
+
 const App = () => {
   return (
     <>
@@ -108,7 +110,9 @@ const App = () => {
         <Route path="/interview/dsa-playground" element={<DSAPlayground />} />
         <Route path="/interview/video" element={<VideoInterview />} />
         <Route path="/mcq" element={<MCQTest />} />
-
+{/* 
+        <Route path="/interview/private/:token" element={<PrivateInterviewPage />} /> */}
+        {/* Protected Dashboard Routes */}
         <Route
           path="/company/dashboard"
           element={

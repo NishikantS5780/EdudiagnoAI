@@ -292,3 +292,15 @@ class JobUpdate(BaseModel):
     languages: Optional[str] = None
     education_degree: Optional[str] = None
     job_description: Optional[str] = None
+class CandidateInviteRequest(BaseModel):
+    candidates: list[dict]
+    # Each dict should have at least 'email', and optionally 'firstname' and 'lastname'
+
+    @validator('candidates', pre=True)
+    def validate_candidates(cls, v):
+        if not isinstance(v, list):
+            raise ValueError('candidates must be a list')
+        for c in v:
+            if 'email' not in c:
+                raise ValueError('Each candidate must have an email')
+        return v
