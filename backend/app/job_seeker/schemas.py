@@ -120,9 +120,6 @@ class JobSeekerCreate(BaseModel):
     languages: Optional[str] = None
     profile_summary: Optional[str] = None
     resume_url: Optional[str] = None
-    last_updated_time: Optional[str] = None
-    incomplete_fields: Optional[List[str]] = None
-    total_fields: Optional[int] = None
     employment_details: Optional[List[EmploymentDetail]] = None
     internships: Optional[List[Internship]] = None
     preferred_work_location: Optional[str] = None
@@ -159,9 +156,6 @@ class JobSeekerUpdate(BaseModel):
     languages: Optional[str] = None
     profile_summary: Optional[str] = None
     resume_url: Optional[str] = None
-    last_updated_time: Optional[str] = None
-    incomplete_fields: Optional[List[str]] = None
-    total_fields: Optional[int] = None
     employment_details: Optional[List[EmploymentDetail]] = None
     internships: Optional[List[Internship]] = None
     preferred_work_location: Optional[str] = None
