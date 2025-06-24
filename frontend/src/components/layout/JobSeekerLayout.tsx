@@ -47,10 +47,10 @@ const JobSeekerLayout: React.FC<{ children: React.ReactNode }> = ({ children }) 
             aria-expanded={isDropdownOpen}
           >
             <img
-              src={appContext?.jobSeeker?.profile_picture_url || "/avatar-placeholder.png"}
+              src={appContext?.jobSeeker?.profile_picture_url || "/placeholder.svg"}
               alt="Avatar"
               className="w-8 h-8 rounded-full border"
-              onError={(e) => { (e.target as HTMLImageElement).src = "/avatar-placeholder.png"; }}
+              onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.svg"; }}
             />
           </button>
           {isDropdownOpen && (
