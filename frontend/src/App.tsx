@@ -1,13 +1,5 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { Routes, Route, useParams } from "react-router-dom";
-import { ThemeProvider } from "@/context/ThemeContext";
-import RequireAuth from "@/components/common/RequireAuth";
-import { useEffect, useContext, useState } from "react";
-import VideoInterview from "@/pages/Interview/VideoInterview";
-import ScrollToTop from "@/components/common/ScrollToTop";
-
+import { Toaster } from "sonner";
+import { Routes, Route } from "react-router-dom";
 import Landing from "@/pages/Landing";
 import Landing1 from "@/pages/Landing1";
 import Landing2 from "@/pages/Landing2";
@@ -19,39 +11,24 @@ import Careers from "@/pages/Careers";
 import Integrations from "@/pages/Integrations";
 import Changelog from "@/pages/Changelog";
 import HowItWorks from "@/pages/HowItWorks";
-
-import Login from "@/pages/Login";
-import Signup from "@/pages/Signup";
-import ForgotPassword from "@/pages/ForgotPassword";
-
-import Dashboard from "@/pages/Dashboard/Dashboard";
-import JobsPage from "@/pages/Dashboard/Jobs/JobsPage";
-import NewJob from "@/pages/Dashboard/Jobs/NewJob";
-import JobDetail from "@/pages/Dashboard/Jobs/JobDetail";
-import InterviewsPage from "@/pages/Dashboard/Interviews/InterviewsPage";
-import InterviewDetail from "@/pages/Dashboard/Interviews/InterviewDetail";
-import Profile from "@/pages/Dashboard/Profile";
-import RecruiterEmailVerification from "@/pages/Dashboard/RecruiterEmailVerification";
-import Settings from "@/pages/Dashboard/Settings";
-import Help from "@/pages/Dashboard/Help";
-
-import InterviewFlow from "@/pages/Interview/InterviewFlow";
-import CandidatePreCheck from "@/components/interview/CandidatePreCheck";
-import DSAPlayground from "@/pages/Interview/DSAPlayground";
-
-import NotFound from "@/pages/NotFound";
-import LoadingSpinner from "./components/common/LoadingSpinner";
-import RequireProfileVerified from "@/components/common/RequireProfileVerified";
+import Signup from "@/pages/Company/CompanySignup";
+import JobSeekerSignup from "@/pages/JobSeeker/JobSeekerSignup";
+import JobSeekerLogin from "@/pages/JobSeeker/JobSeekerLogin";
+import JobSeekerHomePage from "@/pages/JobSeeker/JobSeekerHomePage";
+import JobSeekerProfile from "@/pages/JobSeeker/JobSeekerProfile";
+import CompanyDashboard from "@/pages/Company/CompanyDashboard";
+import AiInterviewedJobsPage from "@/pages/Company/aiInterviewedJobs/AiInterviewedJobsPage";
+import NewJob from "@/pages/Company/aiInterviewedJobs/NewAiInterviewedJob";
+import JobDetail from "@/pages/Company/aiInterviewedJobs/AiInterviewedJobDetail";
+import InterviewsPage from "@/pages/Company/Interviews/InterviewsPage";
+import InterviewDetail from "@/pages/Company/Interviews/InterviewDetail";
 import InterviewPage from "@/pages/Interview/InterviewPage";
 import MCQTest from "@/pages/Interview/MCQTest";
-import InterviewReport from "@/pages/Dashboard/Interviews/InterviewReport";
-import InterviewOverview from "@/pages/Interview/InterviewOverview";
-import Dashboard4 from "@/pages/Dashboard4";
-import Candidates4 from "@/pages/Candidates4";
-import Jobs4 from "@/pages/Jobs4";
-import Analytics4 from "@/pages/Analytics4";
-import Settings4 from "@/pages/Settings4";
-
+import { InterviewFlow } from "@/pages/Interview/InterviewFlow";
+import DSAPlayground from "@/pages/Interview/DSAPlayground";
+import NotFound from "@/pages/NotFound";
+import JobSeekerAuthRequired from "@/components/auth/JobSeekerAuthRequired";
+import CompanyLogin from "@/pages/Company/CompanyLogin";
 import AdminLayout from "@/pages/Admin/AdminLayout";
 import AdminDashboard from "@/pages/Admin/Dashboard";
 import UserManagement from "@/pages/Admin/Users";
@@ -64,11 +41,23 @@ import PlatformAnalytics from "@/pages/Admin/Analytics";
 import BillingManagement from "@/pages/Admin/Billing";
 import IntegrationManagement from "@/pages/Admin/Integrations";
 import SupportManagement from "@/pages/Admin/Support";
-import { InterviewData } from "./types/interview";
-import { interviewApi } from "./services/interviewApi";
-import { JobData } from "./types/job";
-import { companyApi } from "./services/companyApi";
-import PrivateInterviewPage from "@/pages/Interview/PrivateInterviewPage";
+import Dashboard4 from "@/pages/Dashboard4";
+import Candidates4 from "@/pages/Candidates4";
+import Jobs4 from "@/pages/Jobs4";
+import Analytics4 from "@/pages/Analytics4";
+import Settings4 from "@/pages/Settings4";
+import RequireAuth from "@/components/auth/RequireAuth";
+import RequireCompanyAuth from "@/components/auth/RequireAuth";
+import RequireProfileVerified from "@/components/auth/RequireProfileVerified";
+import VideoInterview from "@/pages/Interview/VideoInterview";
+import InterviewReportWrapper from "@/components/interview/InterviewReportWrapper";
+import JobsPage from "./pages/Company/jobs/JobsPage";
+import JobPage from "./pages/Company/jobs/JobPage";
+import JobSearchPage from "@/pages/JobSeeker/JobSearchPage";
+import JobDetailPage from "@/pages/JobSeeker/JobDetailPage";
+import CompanySearchPage from "@/pages/Company/CompanySearchPage";
+import CompanyDetailPage from "@/pages/JobSeeker/CompanyDetailPage";
+import CompanyProfilePage from "@/pages/Company/CompanyProfilePage";
 
 // import { interviewAPI, jobAPI } from "@/lib/api";
 
@@ -76,10 +65,7 @@ const App = () => {
   return (
     <>
       <Toaster />
-      <Sonner />
-      <ScrollToTop />
       <Routes>
-        {/* Public Routes */}
         <Route path="/" element={<Landing />} />
         <Route path="/landing1" element={<Landing1 />} />
         <Route path="/landing2" element={<Landing2 />} />
@@ -91,82 +77,88 @@ const App = () => {
         <Route path="/integrations" element={<Integrations />} />
         <Route path="/changelog" element={<Changelog />} />
         <Route path="/how-it-works" element={<HowItWorks />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        {/* <Route path="/forgot-password" element={<ForgotPassword />} /> */}
-        {/* <Route
-              path="/recruiter-email-verification"
-              element={<RecruiterEmailVerification />}
-            /> */}
+        <Route path="/employer/login" element={<CompanyLogin />} />
+        <Route path="/employer/signup" element={<Signup />} />
+        <Route path="/jobseeker/signup" element={<JobSeekerSignup />} />
+        <Route path="/jobseeker/login" element={<JobSeekerLogin />} />
+
+        <Route path="/jobseeker/home" element={
+          <JobSeekerAuthRequired>
+            <JobSeekerHomePage />
+          </JobSeekerAuthRequired>
+        } />
+        <Route path="/jobseeker/profile" element={
+          <JobSeekerAuthRequired>
+            <JobSeekerProfile />
+          </JobSeekerAuthRequired>
+        } />
+        <Route path="/jobseeker/job-search" element={
+          <JobSeekerAuthRequired>
+            <JobSearchPage />
+          </JobSeekerAuthRequired>
+        } />
+        <Route path="/jobseeker/job/:jobId" element={
+          <JobSeekerAuthRequired>
+            <JobDetailPage />
+          </JobSeekerAuthRequired>
+        } />
+        <Route path="/jobseeker/companies" element={<JobSeekerAuthRequired><CompanySearchPage /></JobSeekerAuthRequired>} />
+        <Route path="/jobseeker/company/:companyId" element={<JobSeekerAuthRequired><CompanyDetailPage /></JobSeekerAuthRequired>} />
+
         <Route path="/interview" element={<InterviewPage />} />
         <Route path="/interview/compatibility" element={<InterviewFlow />} />
-        {/* <Route path="/interview/setup" element={<CandidatePreCheck />} /> */}
-        {/* <Route
-              path="/interview/video-interview"
-              element={<VideoInterview />}
-            /> */}
-        {/* <Route path="/interview/flow" element={<InterviewFlow />} /> */}
-        {/* <Route path="/interview/precheck" element={<CandidatePreCheck />} /> */}
         <Route path="/interview/dsa-playground" element={<DSAPlayground />} />
         <Route path="/interview/video" element={<VideoInterview />} />
-        <Route path="/interview/overview" element={<InterviewOverview />} />
         <Route path="/mcq" element={<MCQTest />} />
-        <Route path="/interview/private/:token" element={<PrivateInterviewPage />} />
+{/* 
+        <Route path="/interview/private/:token" element={<PrivateInterviewPage />} /> */}
         {/* Protected Dashboard Routes */}
         <Route
-          path="/dashboard"
+          path="/company/dashboard"
           element={
-            <RequireAuth>
-              <Dashboard />
-            </RequireAuth>
+            <RequireCompanyAuth>
+              <CompanyDashboard />
+            </RequireCompanyAuth>
           }
         />
         <Route
-          path="/dashboard/jobs"
+          path="/company/ai-interviewed-jobs/new"
           element={
-            <RequireAuth>
-              <JobsPage />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="/dashboard/jobs/new"
-          element={
-            <RequireAuth>
+            <RequireCompanyAuth>
               <RequireProfileVerified>
                 <NewJob />
               </RequireProfileVerified>
-            </RequireAuth>
+            </RequireCompanyAuth>
           }
         />
         <Route
-          path="/dashboard/jobs/:id"
+          path="/company/ai-interviewed-jobs/:id"
           element={
-            <RequireAuth>
+            <RequireCompanyAuth>
               <RequireProfileVerified>
                 <JobDetail />
               </RequireProfileVerified>
-            </RequireAuth>
+            </RequireCompanyAuth>
           }
         />
         <Route
-          path="/dashboard/interviews"
+          path="/company/interviews"
           element={
-            <RequireAuth>
+            <RequireCompanyAuth>
               <InterviewsPage />
-            </RequireAuth>
+            </RequireCompanyAuth>
           }
         />
         <Route
-          path="/dashboard/interviews/:id"
+          path="/company/interviews/:id"
           element={
-            <RequireAuth>
+            <RequireCompanyAuth>
               <InterviewDetail />
-            </RequireAuth>
+            </RequireCompanyAuth>
           }
         />
         {/* <Route
-              path="/dashboard/interviews/new"
+              path="/company/interviews/new"
               element={
                 <RequireAuth>
                   <RequireProfileVerified>
@@ -176,37 +168,29 @@ const App = () => {
               }
             /> */}
         <Route
-          path="/dashboard/interviews/:id/report"
+          path="/company/interviews/:id/report"
           element={
-            <RequireAuth>
+            <RequireCompanyAuth>
               <InterviewReportWrapper />
-            </RequireAuth>
+            </RequireCompanyAuth>
           }
         />
         <Route
-          path="/dashboard/profile"
-          element={
-            <RequireAuth>
-              <Profile />
-            </RequireAuth>
-          }
+          path="/company/ai-interviewed-jobs"
+          element={<RequireCompanyAuth><AiInterviewedJobsPage /></RequireCompanyAuth>}
         />
-        {/* <Route
-              path="/dashboard/settings"
-              element={
-                <RequireAuth>
-                  <Settings />
-                </RequireAuth>
-              }
-            /> */}
-        {/* <Route
-              path="/dashboard/help"
-              element={
-                <RequireAuth>
-                  <Help />
-                </RequireAuth>
-              }
-            /> */}
+        <Route
+          path="/company/jobs"
+          element={<RequireCompanyAuth><JobsPage /></RequireCompanyAuth>}
+        />
+        <Route
+          path="/company/job/:jobId"
+          element={<RequireCompanyAuth><JobPage /></RequireCompanyAuth>}
+        />
+        <Route
+          path="/company/profile"
+          element={<RequireCompanyAuth><CompanyProfilePage /></RequireCompanyAuth>}
+        />
 
         {/* Admin Routes */}
         <Route
@@ -236,31 +220,10 @@ const App = () => {
         <Route path="/analytics4" element={<Analytics4 />} />
         <Route path="/settings4" element={<Settings4 />} />
 
-        {/* 404 Route */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>
   );
-};
-
-const InterviewReportWrapper = () => {
-  const { id } = useParams();
-  const [interview, setInterview] = useState<InterviewData>({});
-  const [job, setJob] = useState<JobData>({});
-  useEffect(() => {
-    if (!id) {
-      return;
-    }
-    companyApi.getInterview(id).then((res) => {
-      setInterview(res.data);
-      companyApi.getAiInterviewedJobById(res.data.job_id.toString()).then((res) => {
-        setJob(res.data);
-      });
-    });
-  }, []);
-
-  if (!interview || !job) return null;
-  return <InterviewReport jobTitle={job.title || ""} />;
 };
 
 export default App;

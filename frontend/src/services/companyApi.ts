@@ -1,18 +1,18 @@
 import { config } from "@/config";
 import axios from "axios";
 
-import { JobData } from "@/types/job";
-import { DSAQuestion, TestCase } from "@/types/job";
-import { MCQuestion } from "@/types/job";
-import { RecruiterLoginData, CompanyRegistrationData } from "@/types/recruiter";
-import { InterviewQuestion } from "@/types/job";
+import { AiInterviewedJobData } from "@/types/aiInterviewedJob";
+import { DSAQuestion, TestCase } from "@/types/aiInterviewedJob";
+import { MCQuestion } from "@/types/aiInterviewedJob";
+import { CompanyLoginData, CompanyRegistrationData } from "@/types/company";
+import { InterviewQuestion } from "@/types/aiInterviewedJob";
 
 
 export const companyApi = {
   register: async (data: CompanyRegistrationData) => {
     await axios.post(`${config.API_BASE_URL}/company`, data);
   },
-  login: async (data: RecruiterLoginData) => {
+  login: async (data: CompanyLoginData) => {
     const res = await axios.post(
       `${config.API_BASE_URL}/company/login`,
       data
@@ -103,7 +103,7 @@ export const companyApi = {
     );
     return res;
   },
-  createAiInterviewedJob: async (data: JobData) => {
+  createAiInterviewedJob: async (data: AiInterviewedJobData) => {
     const jobData = {
       title: data.title,
       description: data.description,
@@ -135,23 +135,20 @@ export const companyApi = {
     return jobResponse;
   },
   getAllAiInterviewedJobs: async (params: {
-    limit?: number;
     start?: number;
+    limit?: number;
+    sort_field?: "title" | "department" | "city" | "type" | "show_salary" | "status";
     sort?: "ascending" | "descending";
-    sort_field?:
-    | "title"
-    | "department"
-    | "city"
-    | "type"
-    | "show_salary"
-    | "status";
+    search?: string;
+    status?: string;
   }) => {
     const queryParams = new URLSearchParams();
-    if (params?.limit) queryParams.append("limit", params.limit.toString());
-    if (params?.start) queryParams.append("start", params.start.toString());
-    if (params?.sort) queryParams.append("sort", params.sort);
+    if (params?.start !== undefined) queryParams.append("start", String(params.start));
+    if (params?.limit !== undefined) queryParams.append("limit", String(params.limit));
     if (params?.sort_field) queryParams.append("sort_field", params.sort_field);
-
+    if (params?.sort) queryParams.append("sort", params.sort);
+    if (params?.search) queryParams.append("search", params.search);
+    if (params?.status && params.status !== "all") queryParams.append("status", params.status);
     const res = await axios.get(
       `${config.API_BASE_URL}/company/ai-interviewed-job/all?${queryParams.toString()}`,
       {
@@ -160,11 +157,18 @@ export const companyApi = {
     );
     return res;
   },
+  getAiInterviewedJobsPaginated: async ({ page, limit, search, status, order }: { page: number; limit: number; search?: string; status?: string; order?: string }) => {
+    const response = await axios.get(`${config.API_BASE_URL}/company/ai-interviewed-job/all`, {
+      params: { page, limit, search, status, order },
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+    });
+    return response;
+  },
   getAiInterviewedJobById: (ai_interviewed_job_id: string) =>
     axios.get(`${config.API_BASE_URL}/company/ai-interviewed-job?id=${ai_interviewed_job_id}`, {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
     }),
-  updateAiInterviewedJob: async (jobId: string, data: JobData) => {
+  updateAiInterviewedJob: async (jobId: string, data: AiInterviewedJobData) => {
     const res = await axios.put(
       `${config.API_BASE_URL}/company/ai-interviewed-job`,
       {
@@ -339,6 +343,106 @@ export const companyApi = {
       }
     );
     return res;
+  },
+  createJob: async (data: any) => {
+    const res = await axios.post(
+      `${config.API_BASE_URL}/company/job`,
+      data,
+      { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+    );
+    return res;
+  },
+  getJobById: async (jobId: string)=>{
+    const res = await axios.get(`${config.API_BASE_URL}/company/job`, {
+      params: { job_id: jobId },
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+    });
+    return res;
+  },
+  updateJob: async (id: string, data: any) => {
+    const res = await axios.put(
+      `${config.API_BASE_URL}/company/job?job_id=${id}`,
+      data,
+      { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+    );
+    return res;
+  },
+  deleteCustomInterviewQuestion: async (id: number) => {
+    await axios.delete(
+      `${config.API_BASE_URL}/company/interview-question`,
+      {
+        params: { id },
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      }
+    );
+  },
+  listJobs: async (search?: string) => {
+    const params = search ? { search } : {};
+    const res = await axios.get(
+      `${config.API_BASE_URL}/company/jobs`,
+      {
+        params,
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      }
+    );
+    return res;
+  },
+  getJobApplications: async (jobId: string) => {
+    const res = await axios.get(
+      `${config.API_BASE_URL}/company/job/applications`,
+      {
+        params: { job_id: jobId },
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      }
+    );
+    return res.data;
+  },
+  getCandidateDetailsForApplication: async (applicationId: number) => {
+    const res = await axios.get(
+      `${config.API_BASE_URL}/company/job/application/candidate`,
+      {
+        params: { application_id: applicationId },
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      }
+    );
+    return res.data;
+  },
+  getCompanyById: async (companyId: string | number) => {
+    const token = localStorage.getItem("token");
+    const res = await axios.get(
+      `${config.API_BASE_URL}/company/profile`,
+      {
+        params: { company_id: companyId },
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    return res.data;
+  },
+  updateProfile: async (data: Partial<import("@/types/company").CompanyPublicData>, bannerFile?: File, logoFile?: File) => {
+    const formData = new FormData();
+    Object.entries(data).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && key !== "password_hash") {
+        formData.append(key, value as string);
+      }
+    });
+    if (bannerFile) {
+      formData.append("banner", bannerFile);
+    }
+    if (logoFile) {
+      formData.append("logo", logoFile);
+    }
+    const token = localStorage.getItem("token");
+    const res = await axios.put(
+      `${config.API_BASE_URL}/company/profile`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    return res.data;
   },
 
   inviteCandidates: async (jobId: number, candidates: { email: string; firstname?: string; lastname?: string }[]) => {

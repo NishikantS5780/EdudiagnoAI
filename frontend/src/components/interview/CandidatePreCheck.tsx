@@ -31,7 +31,7 @@ import {
   Settings,
   RefreshCw,
 } from "lucide-react";
-import ResumeUpload from "@/components/common/ResumeUpload";
+import ResumeUpload from "@/components/interview/ResumeUpload";
 import { toast } from "sonner";
 import api from "@/lib/api";
 

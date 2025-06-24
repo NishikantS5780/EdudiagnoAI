@@ -108,7 +108,7 @@ const RejectionStage: React.FC<RejectionStageProps> = ({ score, skillsMatch, job
       
       <div className="pt-4 flex flex-col sm:flex-row gap-3 justify-center">
         <Button variant="outline" asChild>
-          <Link to="/jobs">
+          <Link to="/jobseeker/job-search">
             View Other Opportunities
           </Link>
         </Button>

@@ -3,7 +3,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ResumeUpload } from "@/components/common/ResumeUpload";
+import { ResumeUpload } from "@/components/interview/ResumeUpload";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   Loader2,

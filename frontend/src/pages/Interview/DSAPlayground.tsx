@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import DsaQuestion from "../DsaLab/DsaQuestion";
-import CodeExecutionPanel from "../DsaLab/CodeExecutionPanel";
+import DsaQuestion from "../../components/common/DsaQuestion";
+import CodeExecutionPanel from "./CodeExecutionPanel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,11 +22,11 @@ import {
 import { Loader2 } from "lucide-react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { toast } from "sonner";
-import DraggableCameraFeed from "@/components/DraggableCameraFeed";
+import DraggableCameraFeed from "@/components/interview/DraggableCameraFeed";
 import html2canvas from "html2canvas";
 import { InterviewData } from "@/types/interview";
 import { interviewApi } from "@/services/interviewApi";
-import { DSAQuestion, TestCase } from "@/types/job";
+import { DSAQuestion, TestCase } from "@/types/aiInterviewedJob";
 
 const DSAPlayground = () => {
   const [searchParams] = useSearchParams();

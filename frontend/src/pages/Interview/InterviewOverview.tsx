@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { CheckCircle, Code, Video, BookOpen, Clock } from "lucide-react";
 import { toast } from "sonner";
-import { JobData } from "@/types/job";
+import { AiInterviewedJobData } from "@/types/aiInterviewedJob";
 import { interviewApi } from "@/services/interviewApi";
 
 const InterviewOverview = () => {
@@ -13,7 +13,7 @@ const InterviewOverview = () => {
   const searchParams = new URLSearchParams(location.search);
   const interviewId = searchParams.get("i_id");
   const companyName = searchParams.get("company");
-  const [jobData, setJobData] = useState<JobData>({});
+  const [jobData, setJobData] = useState<AiInterviewedJobData>({});
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
