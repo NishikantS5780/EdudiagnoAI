@@ -22,7 +22,16 @@ def create_jobseeker(jobseeker: schemas.JobSeekerCreate, db: Session = Depends(d
     jobseeker_data = jobseeker.dict()
     password_hash = hash_password(jobseeker_data.pop("password"))
     jobseeker_data["password_hash"] = password_hash
-    stmt = insert(JobSeeker).values(**jobseeker_data).returning(JobSeeker)
+    # Only keep fields that are actual columns in the JobSeeker model
+    valid_columns = [
+        'firstname', 'lastname', 'gender', 'date_of_birth', 'password_hash', 'email', 'email_otp', 'email_otp_expiry',
+        'email_verified', 'country_code', 'phone', 'phone_otp', 'phone_otp_expiry', 'phone_verified', 'dob',
+        'current_location', 'home_town', 'country', 'career_preference_internships', 'career_preference_jobs',
+        'min_duration_months', 'preferred_work_location', 'work_experience_yrs', 'updates_subscription',
+        'key_skills', 'languages', 'profile_summary', 'awards_and_accomplishments', 'resume_url', 'profile_picture_url'
+    ]
+    filtered_data = {k: v for k, v in jobseeker_data.items() if k in valid_columns}
+    stmt = insert(JobSeeker).values(**filtered_data).returning(JobSeeker)
     result = db.execute(stmt)
     db.commit()
     db_jobseeker = result.mappings().first()
