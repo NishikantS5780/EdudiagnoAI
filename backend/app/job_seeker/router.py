@@ -1,8 +1,6 @@
 from fastapi import APIRouter, Depends, Request, Query, UploadFile, File, HTTPException
 from sqlalchemy.orm import Session, selectinload
 from sqlalchemy import select, insert, update, delete, or_, func
-from jose import jwt, JWTError
-from datetime import datetime, timedelta
 
 from app import database
 from app.models import (
@@ -15,6 +13,7 @@ from app.config import settings
 from app.job_seeker.dependencies import authorize_jobseeker
 from app.job_seeker.services import upload_resume_to_gcs
 from app.dependencies.authorization import authorize_company
+from app.lib import jwt as app_jwt
 
 router = APIRouter()
 
@@ -196,7 +195,7 @@ def login_jobseeker(login_data: schemas.JobSeekerLogin, db: Session = Depends(da
         raise CustomException('Invalid credentials', code=401)
     # Generate JWT token
     to_encode = {"sub": str(jobseeker.id), "exp": datetime.utcnow() + timedelta(days=1)}
-    token = jwt.encode(to_encode, settings.SECRET_KEY, algorithm="HS256")
+    token = app_jwt.encode(to_encode)
     from fastapi.responses import JSONResponse
     res = JSONResponse(content=serialize_jobseeker(jobseeker))
     res.headers["Authorization"] = f"Bearer {token}"
