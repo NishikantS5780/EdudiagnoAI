@@ -3,14 +3,14 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { CandidateJobData } from "@/types/job";
+import { AiInterviewedCandidateJobData } from "@/types/aiInterviewedJob";
 import { interviewApi } from "@/services/interviewApi";
 
 const InterviewPage = () => {
   const [urlSearchParams, setUrlSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [jobDetails, setJobDetails] = useState<CandidateJobData | null>(null);
+  const [jobDetails, setJobDetails] = useState<AiInterviewedCandidateJobData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [expandedSections, setExpandedSections] = useState({
     description: false,

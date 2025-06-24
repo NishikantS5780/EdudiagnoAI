@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Menu } from "lucide-react";
+import { Menu, ChevronDown } from "lucide-react";
 
 interface NavLink {
   label: string;
@@ -64,12 +64,28 @@ const RegularLayout: React.FC<{ children: React.ReactNode }> = ({
             <ThemeToggle />
 
             <div className="hidden md:flex items-center gap-4">
-              <Link to="/login">
+              <Link to="/jobseeker/login">
                 <Button variant="ghost">Log in</Button>
               </Link>
-              <Link to="/signup">
+              <Link to="/jobseeker/signup">
                 <Button>Sign up</Button>
               </Link>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="flex items-center gap-1">
+                    Employer
+                    <ChevronDown className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem asChild>
+                    <Link to="/employer/login">Employer Login</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/employer/signup">Employer Signup</Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             <DropdownMenu>
@@ -97,15 +113,29 @@ const RegularLayout: React.FC<{ children: React.ReactNode }> = ({
                   ))}
                 </nav>
                 <div className="flex flex-col gap-2">
-                  <Link to="/login" className="w-full">
+                  <Link to="/jobseeker/login" className="w-full">
                     <Button variant="outline" className="w-full">
                       Log in
                     </Button>
                   </Link>
-                  <Link to="/signup" className="w-full">
+                  <Link to="/jobseeker/signup" className="w-full">
                     <Button className="w-full">Sign up</Button>
                   </Link>
                 </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild className="md:hidden">
+                <Button variant="outline">Employer <ChevronDown/></Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                  <Link to="/employer/login">Employer Login</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/employer/signup">Employer Signup</Link>
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

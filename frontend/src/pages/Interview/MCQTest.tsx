@@ -17,7 +17,7 @@ import { Timer, Brain, Award, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import html2canvas from "html2canvas";
-import DraggableCameraFeed from "@/components/DraggableCameraFeed";
+import DraggableCameraFeed from "@/components/interview/DraggableCameraFeed";
 import { interviewApi } from "@/services/interviewApi";
 import { config } from "@/config";
 
@@ -494,7 +494,7 @@ const MCQTest = () => {
           return interviewApi.getAiInterviewedJob(jobId);
         })
         .then((response) => {
-          const jobData = response.data;
+          const jobData: AiInterviewedJobData = response.data;
           if (jobData.hasDSATest) {
             navigate(
               `/interview/dsa-playground?i_id=${i_id}&company=${company}`

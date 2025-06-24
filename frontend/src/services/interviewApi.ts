@@ -223,4 +223,16 @@ export const interviewApi = {
     );
     return res;
   },
+
+  deleteInterview: async (interviewId: string) => {
+    const token = localStorage.getItem("token");
+    const res = await axios.delete(
+      `${config.API_BASE_URL}/company/interview`,
+      {
+        params: { id: interviewId },
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    return res;
+  },
 };

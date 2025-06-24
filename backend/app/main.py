@@ -58,7 +58,7 @@ app.add_exception_handler(Exception, global_exception_handler)
 app.include_router(public.router.router, prefix="/api/v1", tags=["Public"])
 app.include_router(company.router.router, prefix="/api/v1/company", tags=["Company"])
 app.include_router(interview.router.router, prefix="/api/v1/interview", tags=["Interview"])
-app.include_router(job_seeker.router.router, prefix="/api/v1/job-seeker", tags=["Job Seeker"])
+app.include_router(job_seeker.router.router, prefix="/api/v1/jobseeker", tags=["Job Seeker"])
 
 
 @app.get("/api/v1", tags=["Health"])

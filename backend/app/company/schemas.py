@@ -28,6 +28,16 @@ class UpdateRecruiter(BaseModel):
     city: Optional[str] = None
     zip: Optional[str] = None
     address: Optional[str] = None
+    logo_url: Optional[str] = None
+    tagline: Optional[str] = None
+    tags: Optional[str] = None
+    about_us: Optional[str] = None
+    about_us_poster_url: Optional[str] = None
+    foundation_year: Optional[int] = None
+    website_url: Optional[str] = None
+    min_company_size: Optional[int] = None
+    max_company_size: Optional[int] = None
+    banner_url: Optional[str] = None
 
 
 class RecruiterLogin(BaseModel):
@@ -240,3 +250,45 @@ class UpdateQuizOption(BaseModel):
 class CreateQuizResponse(BaseModel):
     question_id: int
     option_id: int
+
+
+# --- Job Schemas ---
+class JobCreate(BaseModel):
+    company_id: int
+    job_title: Optional[str] = None
+    job_role: Optional[str] = None
+    job_location: Optional[str] = None
+    job_locality: Optional[str] = None
+    work_mode: Optional[str] = None
+    min_work_experience: Optional[int] = None
+    max_work_experience: Optional[int] = None
+    min_salary_per_month: Optional[int] = None
+    max_salary_per_month: Optional[int] = None
+    additional_benefits: Optional[str] = None
+    skills: Optional[str] = None
+    qualification: Optional[str] = None
+    gender_preference: Optional[str] = None
+    candidate_prev_industry: Optional[str] = None
+    languages: Optional[str] = None
+    education_degree: Optional[str] = None
+    job_description: Optional[str] = None
+
+
+class JobUpdate(BaseModel):
+    job_title: Optional[str] = None
+    job_role: Optional[str] = None
+    job_location: Optional[str] = None
+    job_locality: Optional[str] = None
+    work_mode: Optional[str] = None
+    min_work_experience: Optional[int] = None
+    max_work_experience: Optional[int] = None
+    min_salary_per_month: Optional[int] = None
+    max_salary_per_month: Optional[int] = None
+    additional_benefits: Optional[str] = None
+    skills: Optional[str] = None
+    qualification: Optional[str] = None
+    gender_preference: Optional[str] = None
+    candidate_prev_industry: Optional[str] = None
+    languages: Optional[str] = None
+    education_degree: Optional[str] = None
+    job_description: Optional[str] = None

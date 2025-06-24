@@ -11,6 +11,7 @@ from fastapi import (
     File,
     UploadFile,
     Response,
+    Query
 )
 from sqlalchemy import (
     Float,
@@ -24,7 +25,7 @@ from sqlalchemy import (
     case,
     and_,
 )
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from app.configs import openai
 import os
 from os import path
@@ -35,6 +36,7 @@ from app.company import schemas
 from app.dependencies.authorization import authorize_company
 from app.lib import jwt, security
 from app.lib.errors import CustomException
+from app.company import services
 from app.models import (
     AiInterviewedJob,
     DSAQuestion,
@@ -44,7 +46,10 @@ from app.models import (
     Company,
     QuizOption,
     QuizResponse,
-    InterviewQuestionAndResponse
+    InterviewQuestionAndResponse,
+    Job,
+    JobApplication,
+    JobSeeker
 )
 from app.services import brevo
 from app.services import gcs as gcs_service
@@ -295,7 +300,9 @@ async def get_job(
         AiInterviewedJob.benefits,
         AiInterviewedJob.status,
         AiInterviewedJob.quiz_time_minutes,
+        AiInterviewedJob.company_id,
         AiInterviewedJob.created_at,
+        AiInterviewedJob.updated_at,
     ).where(AiInterviewedJob.id == int(id))
     result = db.execute(stmt)
     job = result.mappings().one()
@@ -311,6 +318,8 @@ async def get_all_job(
         "title", "department", "location", "type", "show_salary", "status"
     ] = None,
     sort: str = "ascending",
+    search: str = None,
+    status: str = None,
     db: Session = Depends(database.get_db),
     recruiter_id=Depends(authorize_company),
 ):
@@ -340,6 +349,13 @@ async def get_all_job(
     elif sort_field == "status":
         order_column = AiInterviewedJob.status
 
+    # Build base filter
+    filters = [AiInterviewedJob.company_id == recruiter_id]
+    if search:
+        filters.append(AiInterviewedJob.title.ilike(f"%{search}%"))
+    if status and status.lower() != "all":
+        filters.append(AiInterviewedJob.status == status)
+
     stmt = (
         select(
             AiInterviewedJob.id,
@@ -349,17 +365,23 @@ async def get_all_job(
             AiInterviewedJob.city,
             AiInterviewedJob.location,
             AiInterviewedJob.type,
+            AiInterviewedJob.duration_months,
             AiInterviewedJob.min_experience,
             AiInterviewedJob.max_experience,
+            AiInterviewedJob.currency,
             AiInterviewedJob.salary_min,
             AiInterviewedJob.salary_max,
             AiInterviewedJob.show_salary,
+            AiInterviewedJob.key_qualification,
             AiInterviewedJob.requirements,
             AiInterviewedJob.benefits,
             AiInterviewedJob.status,
+            AiInterviewedJob.quiz_time_minutes,
+            AiInterviewedJob.company_id,
             AiInterviewedJob.created_at,
+            AiInterviewedJob.updated_at,
         )
-        .where(AiInterviewedJob.company_id == recruiter_id)
+        .where(*filters)
         .order_by(desc(order_column) if sort == "descending" else asc(order_column))
         .limit(limit_int)
         .offset(start_int)
@@ -368,7 +390,7 @@ async def get_all_job(
     count_stmt = (
         select(func.count())
         .select_from(AiInterviewedJob)
-        .where(AiInterviewedJob.company_id == recruiter_id)
+        .where(*filters)
     )
     total_count = db.execute(count_stmt).scalar()
 
@@ -473,16 +495,21 @@ async def update_job(
             AiInterviewedJob.title,
             AiInterviewedJob.description,
             AiInterviewedJob.department,
+            AiInterviewedJob.city,
             AiInterviewedJob.location,
             AiInterviewedJob.type,
+            AiInterviewedJob.duration_months,
             AiInterviewedJob.min_experience,
             AiInterviewedJob.max_experience,
+            AiInterviewedJob.currency,
             AiInterviewedJob.salary_min,
             AiInterviewedJob.salary_max,
             AiInterviewedJob.show_salary,
+            AiInterviewedJob.key_qualification,
             AiInterviewedJob.requirements,
             AiInterviewedJob.benefits,
             AiInterviewedJob.status,
+            AiInterviewedJob.quiz_time_minutes,
             AiInterviewedJob.company_id,
         )
     )
@@ -748,6 +775,8 @@ async def upate_recruiter(
         password_hash = security.hash_password(recruiter_data.password)
 
     data = recruiter_data.model_dump(exclude_none=True)
+    # Always remove password_hash if present in incoming data
+    data.pop("password_hash", None)
     if "password" in data:
         data.pop("password")
     if password_hash:
@@ -757,32 +786,45 @@ async def upate_recruiter(
         update(Company)
         .values(data)
         .where(Company.id == company_id)
-        .returning(
-            Company.id,
-            Company.name,
-            Company.email,
-            Company.email_verified,
-            Company.phone,
-            Company.designation,
-            Company.company_name,
-            Company.company_logo,
-            Company.website,
-            Company.industry,
-            Company.min_company_size,
-            Company.max_company_size,
-            Company.country,
-            Company.state,
-            Company.city,
-            Company.zip,
-            Company.address,
-            Company.verified,
-        )
+        .returning(Company)
     )
 
     result = db.execute(stmt)
     db.commit()
-    recruiter = result.all()[0]._mapping
-    return recruiter
+    company = result.scalars().first()
+    if not company:
+        raise HTTPException(status_code=404, detail="Company not found")
+    # Return updated company profile (public fields)
+    return {
+        "id": company.id,
+        "name": company.name,
+        "email": company.email,
+        "email_verified": company.email_verified,
+        "phone": company.phone,
+        "country_code": company.country_code,
+        "website": company.website,
+        "industry": company.industry,
+        "min_company_size": company.min_company_size,
+        "max_company_size": company.max_company_size,
+        "country": company.country,
+        "state": company.state,
+        "city": company.city,
+        "zip": company.zip,
+        "address": company.address,
+        "banner_url": company.banner_url,
+        "logo_url": company.logo_url,
+        "rating": company.rating,
+        "ratings_count": company.ratings_count,
+        "tagline": company.tagline,
+        "tags": company.tags,
+        "about_us": company.about_us,
+        "about_us_poster_url": company.about_us_poster_url,
+        "foundation_year": company.foundation_year,
+        "website_url": company.website_url,
+        "verified": company.verified,
+        "created_at": company.created_at,
+        "updated_at": company.updated_at,
+    }
 
 
 @router.get("/verify-token")
@@ -893,7 +935,7 @@ async def delete_interview_question(
     recruiter_id: int = Depends(authorize_company),
     db: Session = Depends(database.get_db),
 ):
-    return services.interview_question.delete_interview_question(id, db)
+    return services.delete_interview_question(id, db)
 
 
 @router.get("/interview-question")
@@ -1314,24 +1356,6 @@ async def get_interview_recruiter_view(
     interview["screenshot_urls"] = screenshot_urls
     return interview
 
-@router.delete("/interview", status_code=204)
-async def delete_interview(
-    id: str,
-    db: Session = Depends(database.get_db),
-    recruiter_id=Depends(authorize_company),
-):
-    job_subq = (
-        select(AiInterviewedJob.id).where(AiInterviewedJob.company_id == recruiter_id).subquery()
-    )
-    stmt = (
-        delete(Interview)
-        .where(Interview.ai_interviewed_job_id.in_(select(job_subq)))
-        .where(Interview.id == int(id))
-    )
-    db.execute(stmt)
-    db.commit()
-    return
-
 @router.post("/generate-private-link/{interview_id}")
 async def generate_private_link(
     interview_id: int,
@@ -1364,3 +1388,283 @@ async def get_quiz_response_recruiter_view(
         }
         for response in responses
     ]
+
+
+@router.post('/job')
+def create_job(job: schemas.JobCreate, db: Session = Depends(database.get_db)):
+    db_job = Job(**job.dict())
+    db.add(db_job)
+    db.commit()
+    db.refresh(db_job)
+    return db_job
+
+@router.get('/job')
+def get_job(job_id: int = Query(...), db: Session = Depends(database.get_db)):
+    stmt = select(Job).where(Job.id == job_id)
+    job = db.scalars(stmt).first()
+    if not job:
+        raise HTTPException(status_code=404, detail='Job not found')
+    return job
+
+@router.get('/jobs')
+def list_jobs(db: Session = Depends(database.get_db)):
+    stmt = select(Job)
+    return db.scalars(stmt).all()
+
+@router.put('/job')
+def update_job(job_id: int = Query(...), job: schemas.JobUpdate = None, db: Session = Depends(database.get_db)):
+    stmt = select(Job).where(Job.id == job_id)
+    db_job = db.scalars(stmt).first()
+    if not db_job:
+        raise HTTPException(status_code=404, detail='Job not found')
+    for k, v in job.dict(exclude_unset=True).items():
+        setattr(db_job, k, v)
+    db.commit()
+    db.refresh(db_job)
+    return db_job
+
+@router.delete('/job')
+def delete_job(job_id: int = Query(...), db: Session = Depends(database.get_db)):
+    stmt = select(Job).where(Job.id == job_id)
+    db_job = db.scalars(stmt).first()
+    if not db_job:
+        raise HTTPException(status_code=404, detail='Job not found')
+    db.delete(db_job)
+    db.commit()
+    return {"ok": True}
+
+@router.delete("/interview")
+async def delete_interview(
+    id: int,
+    recruiter_id: int = Depends(authorize_company),
+    db: Session = Depends(database.get_db),
+):
+    rowcount = services.delete_interview(id, recruiter_id, db)
+    if rowcount == 0:
+        raise HTTPException(status_code=404, detail="Interview not found or you don't have permission to delete it")
+    return {"detail": "Interview deleted successfully"}
+
+@router.get("/job/applications")
+def get_applications_for_job(
+    job_id: int,
+    db: Session = Depends(database.get_db),
+    company_id: int = Depends(authorize_company)
+):
+    # Ensure the job belongs to the company
+    job_stmt = select(Job).where(Job.id == job_id, Job.company_id == company_id)
+    job_obj = db.scalars(job_stmt).first()
+    if not job_obj:
+        raise HTTPException(status_code=404, detail="Job not found or not authorized")
+
+    # Fetch applications with jobseeker info
+    stmt = (
+        select(JobApplication)
+        .where(JobApplication.job_id == job_id)
+        .options(joinedload(JobApplication.job_seeker))
+    )
+    applications = db.scalars(stmt).all()
+    return [
+        {
+            "id": app.id,
+            "status": app.status,
+            "applied_at": app.applied_at,
+            "resume_url": app.resume_url,
+            "job_seeker": {
+                "id": app.job_seeker.id,
+                "firstname": app.job_seeker.firstname,
+                "lastname": app.job_seeker.lastname,
+                "email": app.job_seeker.email,
+                "phone": app.job_seeker.phone,
+                "profile_picture_url": app.job_seeker.profile_picture_url,
+            }
+        }
+        for app in applications
+    ]
+
+@router.get("/job/application/candidate")
+def get_candidate_details_for_application(
+    application_id: int,
+    db: Session = Depends(database.get_db),
+    company_id: int = Depends(authorize_company)
+):
+    # Fetch the application and join the jobseeker
+    stmt = (
+        select(JobApplication)
+        .where(JobApplication.id == application_id)
+        .options(joinedload(JobApplication.job_seeker))
+    )
+    app_obj = db.scalars(stmt).first()
+    if not app_obj:
+        raise HTTPException(status_code=404, detail="Application not found")
+    # Optionally: check that the job belongs to the company
+
+    js = app_obj.job_seeker
+    return {
+        "id": js.id,
+        "firstname": js.firstname,
+        "lastname": js.lastname,
+        "email": js.email,
+        "phone": js.phone,
+        "profile_picture_url": js.profile_picture_url,
+        "gender": js.gender,
+        "date_of_birth": js.date_of_birth,
+        "current_location": js.current_location,
+        "home_town": js.home_town,
+        "country": js.country,
+        "work_experience_yrs": js.work_experience_yrs,
+        "key_skills": js.key_skills,
+        "languages": js.languages,
+        "profile_summary": js.profile_summary,
+        "awards_and_accomplishments": js.awards_and_accomplishments,
+        "resume_url": js.resume_url,
+        # Add more fields as needed
+    }
+
+@router.get("/profile")
+async def get_company_profile(
+    company_id: int = Depends(authorize_company),
+    db: Session = Depends(database.get_db),
+):
+    stmt = select(Company).where(Company.id == company_id)
+    result = db.execute(stmt)
+    company = result.scalars().first()
+    if not company:
+        raise HTTPException(status_code=404, detail="Company not found")
+    # Return all model fields except sensitive ones
+    return {
+        "id": company.id,
+        "name": company.name,
+        "email": company.email,
+        "email_verified": company.email_verified,
+        "phone": company.phone,
+        "country_code": company.country_code,
+        "website": company.website,
+        "industry": company.industry,
+        "min_company_size": company.min_company_size,
+        "max_company_size": company.max_company_size,
+        "country": company.country,
+        "state": company.state,
+        "city": company.city,
+        "zip": company.zip,
+        "address": company.address,
+        "banner_url": company.banner_url,
+        "logo_url": company.logo_url,
+        "rating": company.rating,
+        "ratings_count": company.ratings_count,
+        "tagline": company.tagline,
+        "tags": company.tags,
+        "about_us": company.about_us,
+        "about_us_poster_url": company.about_us_poster_url,
+        "foundation_year": company.foundation_year,
+        "website_url": company.website_url,
+        "verified": company.verified,
+        "created_at": company.created_at,
+        "updated_at": company.updated_at,
+    }
+
+@router.put("/profile")
+async def update_company_profile(
+    logo: UploadFile = File(None),
+    banner: UploadFile = File(None),
+    name: Optional[str] = Form(None),
+    phone: Optional[str] = Form(None),
+    designation: Optional[str] = Form(None),
+    company_name: Optional[str] = Form(None),
+    industry: Optional[str] = Form(None),
+    country: Optional[str] = Form(None),
+    state: Optional[str] = Form(None),
+    city: Optional[str] = Form(None),
+    zip: Optional[str] = Form(None),
+    address: Optional[str] = Form(None),
+    tagline: Optional[str] = Form(None),
+    tags: Optional[str] = Form(None),
+    about_us: Optional[str] = Form(None),
+    about_us_poster_url: Optional[str] = Form(None),
+    foundation_year: Optional[int] = Form(None),
+    website: Optional[str] = Form(None),
+    website_url: Optional[str] = Form(None),
+    min_company_size: Optional[int] = Form(None),
+    max_company_size: Optional[int] = Form(None),
+    company_id=Depends(authorize_company),
+    db: Session = Depends(database.get_db),
+):
+    update_data = {
+        "name": name,
+        "phone": phone,
+        "designation": designation,
+        "company_name": company_name,
+        "industry": industry,
+        "country": country,
+        "state": state,
+        "city": city,
+        "zip": zip,
+        "address": address,
+        "tagline": tagline,
+        "tags": tags,
+        "about_us": about_us,
+        "about_us_poster_url": about_us_poster_url,
+        "foundation_year": foundation_year,
+        "website": website,
+        "website_url": website_url,
+        "min_company_size": min_company_size,
+        "max_company_size": max_company_size,
+    }
+    update_data = {k: v for k, v in update_data.items() if v is not None}
+
+    # Handle logo upload
+    if logo is not None:
+        bucket = config.settings.GCS_BUCKET_NAME
+        ext = logo.filename.split(".")[-1]
+        dest = f"company/logo_{company_id}.{ext}"
+        url = gcs_service.upload_file_to_gcs(bucket, dest, logo.file, logo.content_type)
+        update_data["logo_url"] = url
+
+    # Handle banner upload
+    if banner is not None:
+        bucket = config.settings.GCS_BUCKET_NAME
+        ext = banner.filename.split(".")[-1]
+        dest = f"company/banner_{company_id}.{ext}"
+        url = gcs_service.upload_file_to_gcs(bucket, dest, banner.file, banner.content_type)
+        update_data["banner_url"] = url
+
+    stmt = (
+        update(Company)
+        .values(update_data)
+        .where(Company.id == company_id)
+        .returning(Company)
+    )
+    result = db.execute(stmt)
+    db.commit()
+    company = result.scalars().first()
+    if not company:
+        raise HTTPException(status_code=404, detail="Company not found")
+    return {
+        "id": company.id,
+        "name": company.name,
+        "email": company.email,
+        "email_verified": company.email_verified,
+        "phone": company.phone,
+        "country_code": company.country_code,
+        "website": company.website,
+        "industry": company.industry,
+        "min_company_size": company.min_company_size,
+        "max_company_size": company.max_company_size,
+        "country": company.country,
+        "state": company.state,
+        "city": company.city,
+        "zip": company.zip,
+        "address": company.address,
+        "banner_url": company.banner_url,
+        "logo_url": company.logo_url,
+        "rating": company.rating,
+        "ratings_count": company.ratings_count,
+        "tagline": company.tagline,
+        "tags": company.tags,
+        "about_us": company.about_us,
+        "about_us_poster_url": company.about_us_poster_url,
+        "foundation_year": company.foundation_year,
+        "website_url": company.website_url,
+        "verified": company.verified,
+        "created_at": company.created_at,
+        "updated_at": company.updated_at,
+    }

@@ -23,7 +23,7 @@ import { toast } from "sonner";
 import AIAvatar from "../../components/interview/AIAvatar";
 import RecordingButton from "../../components/interview/RecordingButton";
 import { useInterviewResponseProcessor } from "../../components/interview/InterviewResponseProcessor";
-import { JobData } from "@/types/job";
+import { AiInterviewedJobData } from "@/types/aiInterviewedJob";
 import { ThankYouStage } from "./ThankYouStage";
 import VoiceAnimation from "@/components/interview/VoiceAnimation";
 import {
@@ -36,7 +36,7 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import html2canvas from "html2canvas";
-import { RecruiterData } from "@/types/recruiter";
+import { RecruiterData, CompanyData } from "@/types/company";
 import { interviewApi } from "@/services/interviewApi";
 import { config } from "@/config";
 import axios from "axios";
@@ -129,10 +129,10 @@ export default function VideoInterview() {
     company_name: "",
     job_title: "",
   });
-  const [companyData, setCompanyData] = useState<RecruiterData | undefined>(
+  const [companyData, setCompanyData] = useState<CompanyData | undefined>(
     undefined
   );
-  const [jobData, setJobData] = useState<JobData | undefined>(undefined);
+  const [jobData, setJobData] = useState<AiInterviewedJobData | undefined>(undefined);
   const navigate = useNavigate();
   const [isInterviewActive, setIsInterviewActive] = useState(false);
   const [isVideoEnabled, setIsVideoEnabled] = useState(true);
@@ -367,7 +367,7 @@ export default function VideoInterview() {
         company_id: data.company_id || "",
         created_at: data.created_at || "",
         updated_at: data.updated_at || "",
-      } as unknown as JobData);
+      } as unknown as AiInterviewedJobData);
     };
     getCandidateData();
   }, []);
@@ -1165,13 +1165,13 @@ export default function VideoInterview() {
   };
 
   // Update job data with proper type
-  const updateJobData = (data: Partial<JobData>) => {
+  const updateJobData = (data: Partial<AiInterviewedJobData>) => {
     setJobData(
       (prev) =>
         ({
           ...prev,
           ...data,
-        } as JobData)
+        } as AiInterviewedJobData)
     );
   };
 

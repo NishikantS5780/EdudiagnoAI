@@ -2,7 +2,8 @@ from sqlalchemy import delete, insert, select, update
 from sqlalchemy.orm import Session
 
 from app import schemas
-from app.models import InterviewQuestion
+from app.models import InterviewQuestion, Interview
+from app.models import AiInterviewedJob
 
 
 def create_interview_question(
@@ -58,3 +59,19 @@ def delete_interview_question(id: int, db: Session):
     db.execute(stmt)
     db.commit()
     return
+
+
+def delete_interview(id: int, company_id: int, db: Session):
+    stmt = (
+        delete(Interview)
+        .where(
+            Interview.id == id,
+            Interview.ai_interviewed_job_id == select(AiInterviewedJob.id).where(
+                AiInterviewedJob.company_id == company_id,
+                AiInterviewedJob.id == Interview.ai_interviewed_job_id
+            ).scalar_subquery()
+        )
+    )
+    result = db.execute(stmt)
+    db.commit()
+    return result.rowcount

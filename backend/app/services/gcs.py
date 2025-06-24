@@ -39,3 +39,9 @@ def list_blobs_with_prefix(bucket_name, prefix):
     bucket = storage_client.bucket(bucket_name)
     blobs = bucket.list_blobs(prefix=prefix)
     return [blob.name for blob in blobs]
+
+def delete_blob_from_gcs(bucket_name, blob_name):
+    bucket = storage_client.bucket(bucket_name)
+    blob = bucket.blob(blob_name)
+    blob.delete()
+    return True

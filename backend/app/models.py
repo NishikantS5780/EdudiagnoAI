@@ -99,8 +99,8 @@ class JobSeeker(Base):
     ssc_education = relationship(
         "SSCEducation", back_populates="job_seeker", uselist=False
     )
-    higher_education = relationship(
-        "HigherEducation", back_populates="job_seeker", uselist=False
+    higher_educations = relationship(
+        "HigherEducation", back_populates="job_seeker"
     )
     internships = relationship("Internship", back_populates="job_seeker")
     projects = relationship("Project", back_populates="job_seeker")
@@ -159,7 +159,7 @@ class HigherEducation(Base):
     passing_year = Column(Integer)
     course_type = Column(String)  # e.g., Full-time, Part-time
 
-    job_seeker = relationship("JobSeeker", back_populates="higher_education")
+    job_seeker = relationship("JobSeeker", back_populates="higher_educations")
     clubs_and_committees = relationship("ClubAndCommittee", back_populates="education")
 
 
@@ -249,7 +249,7 @@ class CompetitiveExam(Base):
     __tablename__ = "competitive_exams"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(
+    job_seeker_id = Column(
         Integer, ForeignKey("job_seekers.id", ondelete="CASCADE"), nullable=False
     )
     exam_label = Column(String)  # e.g., GRE, GMAT, SAT
@@ -315,7 +315,6 @@ class Job(Base):
     languages = Column(String)
     education_degree = Column(String)
     job_description = Column(String)
-    about_company = Column(String)
     posted_at = Column(DateTime, default=func.now())
 
     company = relationship("Company", back_populates="jobs")
