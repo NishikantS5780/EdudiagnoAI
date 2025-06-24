@@ -1,11 +1,11 @@
 from fastapi import Request, Depends
 from sqlalchemy.orm import Session
-from jose import jwt, JWTError
 from app.config import settings
 from app.models import JobSeeker
 from app.lib.errors import CustomException
 from sqlalchemy import select
 from app import database
+from app.lib import jwt as app_jwt
 
 def authorize_jobseeker(request: Request, db: Session = Depends(database.get_db)):
     auth_header = request.headers.get("authorization")
@@ -13,9 +13,9 @@ def authorize_jobseeker(request: Request, db: Session = Depends(database.get_db)
         raise CustomException('Missing or invalid Authorization header', code=401)
     token = auth_header.split("Bearer ", 1)[1]
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+        payload = app_jwt.decode(token)
         jobseeker_id = int(payload.get("sub"))
-    except (JWTError, ValueError, TypeError):
+    except Exception:
         raise CustomException('Invalid token', code=401)
     if not jobseeker_id:
         raise CustomException('Invalid token payload', code=401)
