@@ -70,17 +70,6 @@ export function ThankYouStage({
     setFeedbackText("");
   };
 
-  const handleShare = () => {
-    if (!jobId) {
-      toast.error("Unable to share interview: Job ID not found");
-      return;
-    }
-    const interviewLink = `${window.location.origin}/interview?job_id=${jobId}`;
-    navigator.clipboard.writeText(interviewLink);
-    toast.success("Interview link copied to clipboard", {
-      description: interviewLink,
-    });
-  };
 
   const handleFeedbackReaction = (reaction: "positive" | "negative") => {
     setFeedbackReaction(reaction);
@@ -395,7 +384,7 @@ export function ThankYouStage({
                     </div>
                   </Button>
                   
-                  <Button onClick={handleShare} variant="outline" className="w-full h-auto py-4">
+                  <Button onClick={() => setShowShareOptions(true)} variant="outline" className="w-full h-auto py-4">
                     <Share2 className="mr-2 h-5 w-5" />
                     <div className="flex flex-col items-start">
                       <span className="font-medium">Share Interview</span>

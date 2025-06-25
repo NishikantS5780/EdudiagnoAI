@@ -8,6 +8,7 @@ import datetime
 import os
 import time
 import subprocess
+import logging
 
 from app.lib.errors import CustomException
 from app import config, database
@@ -667,73 +668,6 @@ async def upload_resume(
     return interview
 
 
-@router.post("/send-otp")
-async def send_otp(
-    interview_id=Depends(authorize_candidate), db: Session = Depends(database.get_db)
-):
-    stmt = select(Interview.email).where(Interview.id == interview_id)
-    interview = db.execute(stmt).mappings().one()
-
-    otp = str(int(random.random() * 1000000))
-    otp = otp + "0" * (6 - len(otp))
-
-    brevo.send_otp_email(
-        interview["email"],
-        otp,
-        str(config.settings.OTP_EXPIRY_DURATION_SECONDS) + " seconds",
-    )
-    stmt = (
-        update(Interview)
-        .values(
-            email_otp=str(otp),
-            email_otp_expiry=datetime.datetime.now()
-            .astimezone()
-            .astimezone(tz=datetime.timezone.utc)
-            .replace(tzinfo=None)
-            + datetime.timedelta(seconds=config.settings.OTP_EXPIRY_DURATION_SECONDS),
-        )
-        .where(Interview.id == interview_id)
-    )
-    db.execute(stmt)
-    db.commit()
-    return {"message": "successfully sent otp"}
-
-
-@router.post("/verify-otp")
-async def verify_email(
-    response: Response,
-    verify_otp_data: schemas.VerifyOtpCandidate,
-    interview_id=Depends(authorize_candidate),
-    db: Session = Depends(database.get_db),
-):
-    stmt = select(Interview.email_otp, Interview.email_otp_expiry).where(
-        Interview.id == interview_id
-    )
-    interview = db.execute(stmt).mappings().one()
-
-    if interview["email_otp_expiry"] < datetime.datetime.now().astimezone().astimezone(
-        tz=datetime.timezone.utc
-    ).replace(tzinfo=None):
-        response.status_code = 400
-        return {"message": "otp expired"}
-
-    if interview["email_otp"] != verify_otp_data.otp:
-        response.status_code = 400
-        return {"message": "invalid otp"}
-
-    stmt = (
-        update(Interview)
-        .values(email_verified=True)
-        .where(Interview.id == interview_id)
-        .returning(Interview)
-    )
-    result = db.execute(stmt)
-    db.commit()
-    interview = result.scalars().all()[0]
-
-    return interview
-
-
 @router.put("")
 async def update_interview(
     interview_data: schemas.UpdateInterview,
@@ -749,14 +683,14 @@ async def update_interview(
         .returning(
             Interview.id,
             Interview.status,
-            Interview.first_name,
-            Interview.last_name,
+            Interview.firstname,
+            Interview.lastname,
             Interview.email,
             Interview.phone,
-            Interview.work_experience,
+            Interview.work_experience_yrs,
             Interview.education,
             Interview.skills,
-            Interview.location,
+            Interview.city,
             Interview.linkedin_url,
             Interview.portfolio_url,
             Interview.resume_url,
@@ -765,7 +699,7 @@ async def update_interview(
             Interview.resume_match_feedback,
             Interview.overall_score,
             Interview.feedback,
-            Interview.job_id,
+            Interview.ai_interviewed_job_id,
         )
     )
     result = db.execute(stmt)
@@ -1339,14 +1273,36 @@ async def create_interview_question_response(
 @router.get("/private/{token}")
 async def get_interview_by_private_link(
     token: str,
-    email: str = Query(..., description="Candidate's email for verification"),
+    email: str = Query(None, description="Candidate's email for verification"),
     db: Session = Depends(database.get_db)
 ):
-    stmt = select(Interview).where(Interview.private_link_token == token, Interview.email == email)
+    logging.warning(f"/private/{{token}} called with token={token} and email={email}")
+    stmt = select(Interview).where(Interview.private_link_token == token)
     result = db.execute(stmt)
     interview = result.scalar_one_or_none()
+    logging.warning(f"DB result for token: {interview}")
     if not interview:
-        raise HTTPException(status_code=404, detail="Invalid or expired private link or email mismatch")
+        logging.error(f"Token not found: {token}")
+        raise HTTPException(status_code=404, detail="Invalid or expired private link")
+    if email is None:
+        logging.info(f"Token valid, email not provided. Interview ID: {interview.id}")
+        return {
+            "token_valid": True,
+            "interview_id": interview.id,
+            "first_name": interview.firstname,
+            "last_name": interview.lastname
+        }
+    if interview.email != email:
+        logging.error(f"Email mismatch: interview.email={interview.email}, provided={email}")
+        raise HTTPException(status_code=404, detail="Email mismatch for this private link")
+    logging.info(f"Token and email match for interview ID: {interview.id}")
+    encoded_jwt = jwt.encode(
+        {
+            "interview_id": interview.id,
+            "exp": datetime.datetime.now(tz=datetime.timezone.utc)
+            + datetime.timedelta(hours=3),
+        }
+    )
     return {
         "id": interview.id,
         "first_name": interview.firstname,
@@ -1354,6 +1310,7 @@ async def get_interview_by_private_link(
         "email": interview.email,
         "status": interview.status,
         "job_id": interview.ai_interviewed_job_id,
+        "token": encoded_jwt,
     }
 
 
