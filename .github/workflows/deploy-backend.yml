@@ -53,6 +53,7 @@ jobs:
             echo "GOOGLE_APPLICATION_CREDENTIALS=gcs_service_key.json" >> ./.env 
             echo '${{ secrets.GCS_SERVICE_KEY }}' >> ./gcs_service_key.json
             echo "GCS_BUCKET_NAME=${{ secrets.GCS_BUCKET_NAME }}" >> ./.env
+            echo "FRONTEND_URL=${{ secrets.FRONTEND_URL }}" >> ./.env
             ./venv/bin/alembic upgrade head
             sudo systemctl restart gunicorn.service
           EOF
