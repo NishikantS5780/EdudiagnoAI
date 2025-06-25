@@ -148,7 +148,7 @@ const CompanyLogin = () => {
           <div className="mt-6 text-center">
             <p className="text-sm text-muted-foreground">
               Don't have an account?{" "}
-              <Link to="/signup" className="text-brand hover:underline">
+              <Link to="/employer/signup" className="text-brand hover:underline">
                 Sign up for free
               </Link>
             </p>
