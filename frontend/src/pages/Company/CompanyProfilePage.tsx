@@ -18,12 +18,7 @@ const CompanyProfilePage: React.FC = () => {
       try {
         // Assumes company user can only see their own profile
         const res = await companyApi.getCompanyById("me");
-        // Map backend fields to frontend fields
-        setCompany({
-          ...res,
-          companyLogo: res.logo_url,
-          bannerUrl: res.banner_url,
-        });
+        setCompany(res);
       } catch {
         setCompany(null);
       } finally {
@@ -37,11 +32,7 @@ const CompanyProfilePage: React.FC = () => {
     await companyApi.updateProfile({ ...company, ...data }, bannerFile, logoFile);
     // Refresh company data
     const res = await companyApi.getCompanyById("me");
-    setCompany({
-      ...res,
-      companyLogo: res.logo_url,
-      bannerUrl: res.banner_url,
-    });
+    setCompany(res);
     setEditOpen(false);
   };
 
@@ -51,8 +42,8 @@ const CompanyProfilePage: React.FC = () => {
         <div className="max-w-3xl mx-auto">
           {/* Banner with overlayed logo */}
           <div className="relative mb-8 bg-background">
-            {company?.bannerUrl ? (
-              <img src={company.bannerUrl} alt="Company Banner" className="w-full h-48 object-cover rounded-2xl shadow-lg bg-background" />
+            {company?.banner_url ? (
+              <img src={company.banner_url} alt="Company Banner" className="w-full h-48 object-cover rounded-2xl shadow-lg bg-background" />
             ) : (
               <div className="w-full h-48 rounded-2xl bg-background flex items-center justify-center border border-dashed border-blue-200 shadow-lg">
                 <span className="text-blue-400 text-lg font-semibold opacity-60">No Banner Available</span>
@@ -61,8 +52,8 @@ const CompanyProfilePage: React.FC = () => {
             {/* Logo overlay */}
             <div className="absolute left-1/2 -bottom-10 transform -translate-x-1/2 bg-background">
               <div className="rounded-full bg-background shadow-xl p-2 border-4 border-background">
-                {company?.companyLogo ? (
-                  <img src={company.companyLogo} alt={company.name} className="h-24 w-24 rounded-full object-cover bg-background" />
+                {company?.logo_url ? (
+                  <img src={company.logo_url} alt={company.name} className="h-24 w-24 rounded-full object-cover bg-background" />
                 ) : (
                   <div className="h-24 w-24 rounded-full bg-background flex items-center justify-center text-4xl font-bold text-gray-500">
                     <Building className="h-12 w-12" />
@@ -79,10 +70,10 @@ const CompanyProfilePage: React.FC = () => {
           </div>
           <div className="h-12" /> {/* Spacer for logo overlay */}
           <EditCompanyProfileModal
-            key={(company?.id || 0) + (company?.updatedAt || "")}
+            key={(company?.id || 0) + (company?.updated_at || "")}
             open={!!editOpen && !!company}
             onClose={() => setEditOpen(false)}
-            initialData={company || { id: 0, name: "" }}
+            initialData={company || { id: 0, name: "", email: "" }}
             onSave={handleSaveProfile}
           />
           <Card className="shadow-xl border-0 mb-8 p-6 rounded-2xl bg-background">
@@ -99,13 +90,13 @@ const CompanyProfilePage: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <div className="font-semibold flex items-center gap-2 mb-1"><Users className="h-4 w-4 text-blue-400" /> Company Size</div>
-                  <div className="text-muted-foreground mb-3">{(company?.minCompanySize && company?.maxCompanySize) ? `${company.minCompanySize} - ${company.maxCompanySize} employees` : <span className="italic text-red-400">Not specified</span>}</div>
+                  <div className="text-muted-foreground mb-3">{(company?.min_company_size && company?.max_company_size) ? `${company.min_company_size} - ${company.max_company_size} employees` : <span className="italic text-red-400">Not specified</span>}</div>
                   <div className="font-semibold flex items-center gap-2 mb-1"><MapPin className="h-4 w-4 text-blue-400" /> Address</div>
                   <div className="text-muted-foreground mb-3">{company?.address || <span className="italic text-red-400">Not specified</span>}</div>
                   <div className="font-semibold flex items-center gap-2 mb-1"><Globe className="h-4 w-4 text-blue-400" /> Website</div>
                   <div className="text-muted-foreground mb-3">{company?.website ? <a href={company.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">{company.website}</a> : <span className="italic text-red-400">Not specified</span>}</div>
                   <div className="font-semibold flex items-center gap-2 mb-1"><Calendar className="h-4 w-4 text-blue-400" /> Foundation Year</div>
-                  <div className="text-muted-foreground mb-3">{company?.foundationYear || <span className="italic text-red-400">Not specified</span>}</div>
+                  <div className="text-muted-foreground mb-3">{company?.foundation_year || <span className="italic text-red-400">Not specified</span>}</div>
                 </div>
                 <div>
                   <div className="font-semibold flex items-center gap-2 mb-1"><Mail className="h-4 w-4 text-blue-400" /> Email</div>
@@ -120,12 +111,12 @@ const CompanyProfilePage: React.FC = () => {
               </div>
               <div className="mt-8 mb-4">
                 <div className="font-semibold mb-1 text-lg flex items-center gap-2"><span>About Us</span></div>
-                <div className="text-muted-foreground whitespace-pre-line bg-background rounded p-3 min-h-[60px]">{company?.aboutUs || <span className="italic text-red-400">Not specified</span>}</div>
+                <div className="text-muted-foreground whitespace-pre-line bg-background rounded p-3 min-h-[60px]">{company?.about_us || <span className="italic text-red-400">Not specified</span>}</div>
               </div>
-              {company?.aboutUsPosterUrl && (
+              {company?.about_us_poster_url && (
                 <div className="mb-4">
                   <div className="font-semibold mb-1">About Us Poster</div>
-                  <img src={company.aboutUsPosterUrl} alt="About Us Poster" className="w-full h-32 object-cover rounded shadow bg-background" />
+                  <img src={company.about_us_poster_url} alt="About Us Poster" className="w-full h-32 object-cover rounded shadow bg-background" />
                 </div>
               )}
             </CardContent>

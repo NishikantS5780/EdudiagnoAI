@@ -29,6 +29,49 @@ const InterviewReport = ({ jobTitle }: InterviewReportProps) => {
   });
 
   useEffect(() => {
+    const calculateScores = () => {
+      if (quizResponses.length === 0 || quizQuestions.length === 0) return;
+
+      const scores = {
+        total: { correct: 0, total: quizResponses.length },
+        technical: { correct: 0, total: 0 },
+        aptitude: { correct: 0, total: 0 },
+      };
+
+      quizResponses.forEach((response) => {
+        const question = quizQuestions.find(
+          (q) => q.id === response.question_id
+        );
+        if (!question) return;
+
+        const chosenOption = question.options?.find(
+          (opt) => opt.id === response.option_id
+        );
+        if (chosenOption?.correct) {
+          scores.total.correct++;
+          if (question.category === "technical") {
+            scores.technical.correct++;
+            scores.technical.total++;
+          } else if (question.category === "aptitude") {
+            scores.aptitude.correct++;
+            scores.aptitude.total++;
+          }
+        } else {
+          if (question.category === "technical") {
+            scores.technical.total++;
+          } else if (question.category === "aptitude") {
+            scores.aptitude.total++;
+          }
+        }
+      });
+
+      setMcqScores(scores);
+    };
+
+    calculateScores();
+  }, [quizResponses, quizQuestions]);
+
+  useEffect(() => {
     const fetchInterview = async () => {
       try {
         if (!id) {
@@ -42,13 +85,13 @@ const InterviewReport = ({ jobTitle }: InterviewReportProps) => {
           return;
         }
 
-        const quizResponse = await companyApi.getQuizQuestionByAiInterviewedJobId(id as string);
+        const quizResponse = await companyApi.getQuizQuestionByAiInterviewedJobId(response.data.ai_interviewed_job_id.toString());
         const quizQuestionsResponse = await companyApi.getQuizResponsesByInterviewId(
           id as string
         );
 
-        setQuizResponses(quizResponse.data);
-        setQuizQuestions(quizQuestionsResponse.data);
+        setQuizResponses(quizQuestionsResponse.data);
+        setQuizQuestions(quizResponse.data);
 
         setInterview(response.data);
       } catch (error) {
@@ -60,54 +103,7 @@ const InterviewReport = ({ jobTitle }: InterviewReportProps) => {
     };
 
     fetchInterview();
-  }, [id, navigate]);
-
-  useEffect(() => {
-    const calculateMcqScores = () => {
-      const scores = {
-        total: { correct: 0, total: 0 },
-        technical: { correct: 0, total: 0 },
-        aptitude: { correct: 0, total: 0 },
-      };
-
-      quizQuestions.forEach((question) => {
-        const responses = quizResponses.filter(
-          (r) => r.question_id === question.id
-        );
-        const selectedOptionIds = responses.map((r) => r.option_id);
-        const correctOptions = question.options
-          ?.filter((opt) => opt.correct)
-          .map((opt) => opt.id);
-
-        const isFullyCorrect = selectedOptionIds.every((id) =>
-          correctOptions?.includes(id)
-        );
-        const allCorrectOptionsSelected = correctOptions?.every((id) => {
-          if (!id) {
-            return;
-          }
-          selectedOptionIds.includes(id);
-        });
-        const isCorrect = isFullyCorrect && allCorrectOptionsSelected;
-
-        scores.total.total++;
-        if (isCorrect) scores.total.correct++;
-
-        if (question.category === "technical") {
-          scores.technical.total++;
-          if (isCorrect) scores.technical.correct++;
-        } else if (question.category === "aptitude") {
-          scores.aptitude.total++;
-          if (isCorrect) scores.aptitude.correct++;
-        }
-      });
-
-      return scores;
-    };
-
-    const scores = calculateMcqScores();
-    setMcqScores(scores);
-  }, [quizResponses, quizQuestions]);
+  }, []);
 
   const getScoreColor = (score: number | undefined) => {
     if (!score) return "#4b5563"; // Default gray color for undefined scores
