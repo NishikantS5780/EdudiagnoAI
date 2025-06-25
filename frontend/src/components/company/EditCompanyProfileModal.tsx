@@ -72,15 +72,19 @@ const EditCompanyProfileModal: React.FC<EditCompanyProfileModalProps> = ({ open,
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">About Us</label>
-            <Textarea name="aboutUs" value={form.aboutUs || ""} onChange={handleChange} rows={3} />
+            <Textarea name="about_us" value={form.about_us || ""} onChange={handleChange} rows={3} />
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">About Us Poster URL</label>
-            <Input name="aboutUsPosterUrl" value={form.aboutUsPosterUrl || ""} onChange={handleChange} />
+            <Input name="about_us_poster_url" value={form.about_us_poster_url || ""} onChange={handleChange} />
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Website</label>
             <Input name="website" value={form.website || ""} onChange={handleChange} />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Website URL</label>
+            <Input name="website_url" value={form.website_url || ""} onChange={handleChange} />
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Industry</label>
@@ -89,11 +93,11 @@ const EditCompanyProfileModal: React.FC<EditCompanyProfileModalProps> = ({ open,
           <div className="flex gap-2">
             <div className="flex-1">
               <label className="block text-sm font-medium mb-1">Min Company Size</label>
-              <Input name="minCompanySize" type="number" value={form.minCompanySize !== undefined && form.minCompanySize !== null ? String(form.minCompanySize) : ""} onChange={handleChange} />
+              <Input name="min_company_size" type="number" value={form.min_company_size !== undefined && form.min_company_size !== null ? String(form.min_company_size) : ""} onChange={handleChange} />
             </div>
             <div className="flex-1">
               <label className="block text-sm font-medium mb-1">Max Company Size</label>
-              <Input name="maxCompanySize" type="number" value={form.maxCompanySize !== undefined && form.maxCompanySize !== null ? String(form.maxCompanySize) : ""} onChange={handleChange} />
+              <Input name="max_company_size" type="number" value={form.max_company_size !== undefined && form.max_company_size !== null ? String(form.max_company_size) : ""} onChange={handleChange} />
             </div>
           </div>
           <div>
@@ -127,6 +131,10 @@ const EditCompanyProfileModal: React.FC<EditCompanyProfileModalProps> = ({ open,
               <label className="block text-sm font-medium mb-1">Phone</label>
               <Input name="phone" value={form.phone || ""} onChange={handleChange} />
             </div>
+            <div className="flex-1">
+              <label className="block text-sm font-medium mb-1">Country Code</label>
+              <Input name="country_code" value={form.country_code || ""} onChange={handleChange} />
+            </div>
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Tags (comma separated)</label>
@@ -134,7 +142,7 @@ const EditCompanyProfileModal: React.FC<EditCompanyProfileModalProps> = ({ open,
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Foundation Year</label>
-            <Input name="foundationYear" type="number" value={form.foundationYear !== undefined && form.foundationYear !== null ? String(form.foundationYear) : ""} onChange={handleChange} />
+            <Input name="foundation_year" type="number" value={form.foundation_year !== undefined && form.foundation_year !== null ? String(form.foundation_year) : ""} onChange={handleChange} />
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Banner Image</label>
