@@ -17,9 +17,9 @@ function CandidateDetailsModal({ candidate, onClose }: { candidate: any, onClose
   if (!candidate) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 w-full max-w-2xl relative">
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-8 w-full max-w-4xl min-h-[60vh] relative">
         <button onClick={onClose} className="absolute top-2 right-2 text-gray-500 hover:text-gray-900 text-2xl">&times;</button>
-        <div className="flex flex-col md:flex-row gap-6">
+        <div className="flex flex-col md:flex-row gap-8">
           <div className="flex flex-col items-center md:items-start md:w-1/3">
             <img
               src={candidate.profile_picture_url || 'https://static.vecteezy.com/system/resources/thumbnails/009/292/244/small/default-avatar-icon-of-social-media-user-vector.jpg'}
@@ -27,7 +27,7 @@ function CandidateDetailsModal({ candidate, onClose }: { candidate: any, onClose
               className="w-24 h-24 rounded-full object-cover border-2 border-blue-400"
             />
             <div className="mt-4 text-center md:text-left">
-              <div className="text-2xl font-bold">{candidate.firstname} {candidate.lastname}</div>
+              <div className="text-2xl font-bold break-words whitespace-pre-wrap max-w-xs">{candidate.firstname} {candidate.lastname}</div>
               <div className="flex items-center gap-2 text-gray-500 text-sm mt-1"><Mail size={16} />{candidate.email}</div>
               <div className="flex items-center gap-2 text-gray-500 text-sm"><Phone size={16} />{candidate.phone}</div>
             </div>
@@ -130,4 +130,4 @@ export default function JobApplicationsSidebar({ jobId }: { jobId: string }) {
       )}
     </div>
   );
-} 
+}
