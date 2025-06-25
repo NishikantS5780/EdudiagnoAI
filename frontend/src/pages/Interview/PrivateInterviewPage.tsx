@@ -9,6 +9,7 @@ import { Lock } from "lucide-react";
 
 const PrivateInterviewPage: React.FC = () => {
   const { token } = useParams<{ token: string }>();
+  console.log("[PrivateInterviewPage] token from URL:", token);
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -19,7 +20,9 @@ const PrivateInterviewPage: React.FC = () => {
     setLoading(true);
     setError("");
     try {
+      console.log("[PrivateInterviewPage] Calling getInterviewByPrivateLink with token:", token, "email:", email);
       const res = await interviewApi.getInterviewByPrivateLink(token!, email);
+      console.log("[PrivateInterviewPage] API response:", res);
       if (res.data && res.data.id) {
         // Store the JWT token for authentication
         if (res.data.token) {
@@ -29,11 +32,13 @@ const PrivateInterviewPage: React.FC = () => {
         navigate(`/interview?job_id=${res.data.job_id}`);
       } else {
         setError("Invalid or expired link.");
+        console.error("[PrivateInterviewPage] Invalid or expired link. Response:", res);
       }
     } catch (err: any) {
       setError(
         err?.response?.data?.detail || "Invalid or expired link or email mismatch."
       );
+      console.error("[PrivateInterviewPage] API error:", err);
     } finally {
       setLoading(false);
     }

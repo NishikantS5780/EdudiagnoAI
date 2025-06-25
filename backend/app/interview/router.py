@@ -8,6 +8,7 @@ import datetime
 import os
 import time
 import subprocess
+import logging
 
 from app.lib.errors import CustomException
 from app import config, database
@@ -561,9 +562,7 @@ async def create_interview(
             "interview_id": interview.id,
             "exp": datetime.datetime.now(tz=datetime.timezone.utc)
             + datetime.timedelta(hours=3),
-        },
-        config.settings.SECRET_KEY,
-        algorithm="HS256"
+        }
     )
 
     response.headers["Authorization"] = f"Bearer {encoded_jwt}"
@@ -1274,22 +1273,35 @@ async def create_interview_question_response(
 @router.get("/private/{token}")
 async def get_interview_by_private_link(
     token: str,
-    email: str = Query(..., description="Candidate's email for verification"),
+    email: str = Query(None, description="Candidate's email for verification"),
     db: Session = Depends(database.get_db)
 ):
-    stmt = select(Interview).where(Interview.private_link_token == token, Interview.email == email)
+    logging.warning(f"/private/{{token}} called with token={token} and email={email}")
+    stmt = select(Interview).where(Interview.private_link_token == token)
     result = db.execute(stmt)
     interview = result.scalar_one_or_none()
+    logging.warning(f"DB result for token: {interview}")
     if not interview:
-        raise HTTPException(status_code=404, detail="Invalid or expired private link or email mismatch")
+        logging.error(f"Token not found: {token}")
+        raise HTTPException(status_code=404, detail="Invalid or expired private link")
+    if email is None:
+        logging.info(f"Token valid, email not provided. Interview ID: {interview.id}")
+        return {
+            "token_valid": True,
+            "interview_id": interview.id,
+            "first_name": interview.firstname,
+            "last_name": interview.lastname
+        }
+    if interview.email != email:
+        logging.error(f"Email mismatch: interview.email={interview.email}, provided={email}")
+        raise HTTPException(status_code=404, detail="Email mismatch for this private link")
+    logging.info(f"Token and email match for interview ID: {interview.id}")
     encoded_jwt = jwt.encode(
         {
             "interview_id": interview.id,
             "exp": datetime.datetime.now(tz=datetime.timezone.utc)
             + datetime.timedelta(hours=3),
-        },
-        config.settings.SECRET_KEY,
-        algorithm="HS256"
+        }
     )
     return {
         "id": interview.id,

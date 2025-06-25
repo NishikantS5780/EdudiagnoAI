@@ -59,6 +59,7 @@ import CompanySearchPage from "@/pages/Company/CompanySearchPage";
 import CompanyDetailPage from "@/pages/JobSeeker/CompanyDetailPage";
 import CompanyProfilePage from "@/pages/Company/CompanyProfilePage";
 import InterviewOverview from "./pages/Interview/InterviewOverview";
+import PrivateInterviewPage from "@/pages/Interview/PrivateInterviewPage";
 
 // import { interviewAPI, jobAPI } from "@/lib/api";
 
@@ -112,8 +113,7 @@ const App = () => {
         <Route path="/interview/video" element={<VideoInterview />} />
         <Route path="/interview/overview" element={<InterviewOverview />} />
         <Route path="/mcq" element={<MCQTest />} />
-{/* 
-        <Route path="/interview/private/:token" element={<PrivateInterviewPage />} /> */}
+        <Route path="/interview/private/:token" element={<PrivateInterviewPage />} /> 
         {/* Protected Dashboard Routes */}
         <Route
           path="/company/dashboard"
