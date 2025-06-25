@@ -561,7 +561,9 @@ async def create_interview(
             "interview_id": interview.id,
             "exp": datetime.datetime.now(tz=datetime.timezone.utc)
             + datetime.timedelta(hours=3),
-        }
+        },
+        config.settings.SECRET_KEY,
+        algorithm="HS256"
     )
 
     response.headers["Authorization"] = f"Bearer {encoded_jwt}"
@@ -667,73 +669,6 @@ async def upload_resume(
     return interview
 
 
-@router.post("/send-otp")
-async def send_otp(
-    interview_id=Depends(authorize_candidate), db: Session = Depends(database.get_db)
-):
-    stmt = select(Interview.email).where(Interview.id == interview_id)
-    interview = db.execute(stmt).mappings().one()
-
-    otp = str(int(random.random() * 1000000))
-    otp = otp + "0" * (6 - len(otp))
-
-    brevo.send_otp_email(
-        interview["email"],
-        otp,
-        str(config.settings.OTP_EXPIRY_DURATION_SECONDS) + " seconds",
-    )
-    stmt = (
-        update(Interview)
-        .values(
-            email_otp=str(otp),
-            email_otp_expiry=datetime.datetime.now()
-            .astimezone()
-            .astimezone(tz=datetime.timezone.utc)
-            .replace(tzinfo=None)
-            + datetime.timedelta(seconds=config.settings.OTP_EXPIRY_DURATION_SECONDS),
-        )
-        .where(Interview.id == interview_id)
-    )
-    db.execute(stmt)
-    db.commit()
-    return {"message": "successfully sent otp"}
-
-
-@router.post("/verify-otp")
-async def verify_email(
-    response: Response,
-    verify_otp_data: schemas.VerifyOtpCandidate,
-    interview_id=Depends(authorize_candidate),
-    db: Session = Depends(database.get_db),
-):
-    stmt = select(Interview.email_otp, Interview.email_otp_expiry).where(
-        Interview.id == interview_id
-    )
-    interview = db.execute(stmt).mappings().one()
-
-    if interview["email_otp_expiry"] < datetime.datetime.now().astimezone().astimezone(
-        tz=datetime.timezone.utc
-    ).replace(tzinfo=None):
-        response.status_code = 400
-        return {"message": "otp expired"}
-
-    if interview["email_otp"] != verify_otp_data.otp:
-        response.status_code = 400
-        return {"message": "invalid otp"}
-
-    stmt = (
-        update(Interview)
-        .values(email_verified=True)
-        .where(Interview.id == interview_id)
-        .returning(Interview)
-    )
-    result = db.execute(stmt)
-    db.commit()
-    interview = result.scalars().all()[0]
-
-    return interview
-
-
 @router.put("")
 async def update_interview(
     interview_data: schemas.UpdateInterview,
@@ -749,14 +684,14 @@ async def update_interview(
         .returning(
             Interview.id,
             Interview.status,
-            Interview.first_name,
-            Interview.last_name,
+            Interview.firstname,
+            Interview.lastname,
             Interview.email,
             Interview.phone,
-            Interview.work_experience,
+            Interview.work_experience_yrs,
             Interview.education,
             Interview.skills,
-            Interview.location,
+            Interview.city,
             Interview.linkedin_url,
             Interview.portfolio_url,
             Interview.resume_url,
@@ -765,7 +700,7 @@ async def update_interview(
             Interview.resume_match_feedback,
             Interview.overall_score,
             Interview.feedback,
-            Interview.job_id,
+            Interview.ai_interviewed_job_id,
         )
     )
     result = db.execute(stmt)
@@ -1347,6 +1282,15 @@ async def get_interview_by_private_link(
     interview = result.scalar_one_or_none()
     if not interview:
         raise HTTPException(status_code=404, detail="Invalid or expired private link or email mismatch")
+    encoded_jwt = jwt.encode(
+        {
+            "interview_id": interview.id,
+            "exp": datetime.datetime.now(tz=datetime.timezone.utc)
+            + datetime.timedelta(hours=3),
+        },
+        config.settings.SECRET_KEY,
+        algorithm="HS256"
+    )
     return {
         "id": interview.id,
         "first_name": interview.firstname,
@@ -1354,6 +1298,7 @@ async def get_interview_by_private_link(
         "email": interview.email,
         "status": interview.status,
         "job_id": interview.ai_interviewed_job_id,
+        "token": encoded_jwt,
     }
 
 
