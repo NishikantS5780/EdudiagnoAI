@@ -15,7 +15,7 @@ const InterviewReportWrapper = () => {
     }
     companyApi.getInterview(id).then((res) => {
       setInterview(res.data);
-      companyApi.getAiInterviewedJobById(res.data.job_id.toString()).then((res) => {
+      companyApi.getAiInterviewedJobById(res.data.ai_interviewed_job_id.toString()).then((res) => {
         setJob(res.data);
       });
     });

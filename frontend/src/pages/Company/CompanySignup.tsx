@@ -201,7 +201,7 @@ const SignUp = () => {
         address,
       });
       toast.success("Account created successfully");
-      navigate("/login");
+      navigate("/employer/login");
     } catch (error: any) {
       if (error.response?.status === 400) {
         if (
@@ -657,7 +657,7 @@ const SignUp = () => {
         <div className="mt-6 text-center">
           <p className="text-sm text-muted-foreground">
             Already have an account?{" "}
-            <Link to="/login" className="text-brand hover:underline">
+            <Link to="/employer/login" className="text-brand hover:underline">
               Log in
             </Link>
           </p>

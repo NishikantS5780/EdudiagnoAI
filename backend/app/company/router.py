@@ -611,7 +611,7 @@ async def get_quiz_questions(
         ).where(QuizQuestion.ai_interviewed_job_id == int(ai_interviewed_job_id))
     else:
         response.status_code = 400
-        return {"msg": "interview id is required"}
+        return {"msg": "job id is required"}
 
     quiz_questions = [
         dict(quiz_question._mapping) for quiz_question in db.execute(stmt).all()
