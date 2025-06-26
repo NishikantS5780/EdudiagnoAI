@@ -1,9 +1,6 @@
 import { Toaster } from "sonner";
 import { Routes, Route } from "react-router-dom";
 import Landing from "@/pages/Landing";
-import Landing1 from "@/pages/Landing1";
-import Landing2 from "@/pages/Landing2";
-import Landing4 from "@/pages/Landing4";
 import Features from "@/pages/Features";
 import Contact from "@/pages/Contact";
 import Privacy from "@/pages/Privacy";
@@ -29,25 +26,9 @@ import DSAPlayground from "@/pages/Interview/DSAPlayground";
 import NotFound from "@/pages/NotFound";
 import JobSeekerAuthRequired from "@/components/auth/JobSeekerAuthRequired";
 import CompanyLogin from "@/pages/Company/CompanyLogin";
-import AdminLayout from "@/pages/Admin/AdminLayout";
-import AdminDashboard from "@/pages/Admin/Dashboard";
-import UserManagement from "@/pages/Admin/Users";
-import DevelopmentManagement from "@/pages/Admin/Development";
-import ContentManagement from "@/pages/Admin/Content";
-import SecurityCompliance from "@/pages/Admin/Security";
-import SystemHealth from "@/pages/Admin/Health";
-import SystemSettings from "@/pages/Admin/Settings";
-import PlatformAnalytics from "@/pages/Admin/Analytics";
-import BillingManagement from "@/pages/Admin/Billing";
-import IntegrationManagement from "@/pages/Admin/Integrations";
-import SupportManagement from "@/pages/Admin/Support";
-import Dashboard4 from "@/pages/Dashboard4";
-import Candidates4 from "@/pages/Candidates4";
-import Jobs4 from "@/pages/Jobs4";
-import Analytics4 from "@/pages/Analytics4";
-import Settings4 from "@/pages/Settings4";
+import AdminDashboard from "@/pages/AdminDashboard";
 import RequireAuth from "@/components/auth/RequireAuth";
-import RequireCompanyAuth from "@/components/auth/RequireAuth";
+import RequireCompanyAuth from "@/components/auth/RequireCompanyAuth";
 import RequireProfileVerified from "@/components/auth/RequireProfileVerified";
 import VideoInterview from "@/pages/Interview/VideoInterview";
 import InterviewReportWrapper from "@/components/interview/InterviewReportWrapper";
@@ -69,9 +50,6 @@ const App = () => {
       <Toaster />
       <Routes>
         <Route path="/" element={<Landing />} />
-        <Route path="/landing1" element={<Landing1 />} />
-        <Route path="/landing2" element={<Landing2 />} />
-        <Route path="/landing4" element={<Landing4 />} />
         <Route path="/features" element={<Features />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/privacy" element={<Privacy />} />
@@ -196,32 +174,9 @@ const App = () => {
 
         {/* Admin Routes */}
         <Route
-          path="/admin-test/*"
-          element={
-            <RequireAuth>
-              <AdminLayout />
-            </RequireAuth>
-          }
-        >
-          <Route index element={<AdminDashboard />} />
-          <Route path="users" element={<UserManagement />} />
-          <Route path="development" element={<DevelopmentManagement />} />
-          <Route path="content" element={<ContentManagement />} />
-          <Route path="security" element={<SecurityCompliance />} />
-          <Route path="health" element={<SystemHealth />} />
-          <Route path="settings" element={<SystemSettings />} />
-          <Route path="analytics" element={<PlatformAnalytics />} />
-          <Route path="billing" element={<BillingManagement />} />
-          <Route path="integrations" element={<IntegrationManagement />} />
-          <Route path="support" element={<SupportManagement />} />
-          Legacy Routes
-        </Route>
-        <Route path="/dashboard4" element={<Dashboard4 />} />
-        <Route path="/candidates4" element={<Candidates4 />} />
-        <Route path="/jobs4" element={<Jobs4 />} />
-        <Route path="/analytics4" element={<Analytics4 />} />
-        <Route path="/settings4" element={<Settings4 />} />
-
+          path="/admin-dashboard"
+          element={<RequireAuth><AdminDashboard /></RequireAuth>}
+        />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>

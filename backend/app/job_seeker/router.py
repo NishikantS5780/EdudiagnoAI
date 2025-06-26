@@ -46,12 +46,13 @@ def get_jobseeker(jobseeker_id: int = Query(...), db: Session = Depends(database
     jobseeker = db.scalars(stmt).first()
     if not jobseeker:
         raise CustomException('JobSeeker not found', code=404)
-    return jobseeker
+    return serialize_jobseeker(jobseeker)
 
 @router.get('/all')
 def list_jobseekers(db: Session = Depends(database.get_db)):
     stmt = select(JobSeeker)
-    return db.scalars(stmt).all()
+    jobseekers = db.scalars(stmt).all()
+    return [serialize_jobseeker(js) for js in jobseekers]
 
 @router.put('')
 def update_jobseeker(jobseeker_id: int = Query(...), jobseeker: schemas.JobSeekerUpdate = None, db: Session = Depends(database.get_db)):

@@ -49,9 +49,13 @@ class Company(Base):
     verified = Column(Boolean)
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+    # Admin fields
+    is_suspended = Column(Boolean, default=False)  # Admin: suspend/unsuspend company
+    is_deleted = Column(Boolean, default=False)    # Admin: soft delete
+    admin_notes = Column(String)                   # Admin: notes about company
 
     # Relationships
-    ai_interviewed_jobs = relationship("AiInterviewedJob", back_populates="company")
+    ai_interviewed_jobs = relationship("AiInterviewedJob", back_populates="company", cascade="all, delete-orphan")
     jobs = relationship("Job", back_populates="company")
 
 
@@ -89,6 +93,11 @@ class JobSeeker(Base):
     awards_and_accomplishments = Column(String)
     resume_url = Column(String)
     profile_picture_url = Column(String)
+    # Admin fields
+    is_suspended = Column(Boolean, default=False)  # Admin: suspend/unsuspend user
+    is_verified = Column(Boolean, default=False)   # Admin: manual verification
+    is_deleted = Column(Boolean, default=False)    # Admin: soft delete
+    admin_notes = Column(String)                   # Admin: notes about user
 
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
@@ -316,6 +325,12 @@ class Job(Base):
     education_degree = Column(String)
     job_description = Column(String)
     posted_at = Column(DateTime, default=func.now())
+    # Admin fields
+    is_featured = Column(Boolean, default=False)   # Admin: feature job
+    is_approved = Column(Boolean, default=True)   # Admin: approve job (auto-approved)
+    is_closed = Column(Boolean, default=False)     # Admin: close job
+    is_deleted = Column(Boolean, default=False)    # Admin: soft delete
+    admin_notes = Column(String)                   # Admin: notes about job
 
     company = relationship("Company", back_populates="jobs")
     job_applications = relationship("JobApplication", back_populates="job")
@@ -334,6 +349,9 @@ class JobApplication(Base):
     )  # applied, shortlisted, rejected, accepted
     resume_url = Column(String)
     applied_at = Column(DateTime, default=func.now())
+    # Admin fields
+    is_flagged = Column(Boolean, default=False)    # Admin: flag application
+    admin_notes = Column(String)                   # Admin: notes about application
 
     # Relationships
     job_seeker = relationship("JobSeeker", back_populates="job_applications")
@@ -371,12 +389,19 @@ class AiInterviewedJob(Base):
     company_id = Column(
         Integer, ForeignKey("companies.id", ondelete="CASCADE"), nullable=False
     )
+    # Admin fields
+    is_featured = Column(Boolean, default=False)   # Admin: feature job
+    is_approved = Column(Boolean, default=True)   # Admin: approve job (auto-approved)
+    is_closed = Column(Boolean, default=False)     # Admin: close job
+    is_deleted = Column(Boolean, default=False)    # Admin: soft delete
+    admin_notes = Column(String)                   # Admin: notes about job
 
     # Relationships
     company = relationship("Company", back_populates="ai_interviewed_jobs")
     interviews = relationship(
         "Interview",
         back_populates="ai_interviewed_job",
+        cascade="all, delete-orphan"
     )
     quiz_questions = relationship(
         "QuizQuestion",
@@ -403,6 +428,10 @@ class InterviewQuestion(Base):
         ForeignKey("ai_interviewed_jobs.id", ondelete="CASCADE"),
         nullable=False,
     )
+    # Admin fields
+    is_approved = Column(Boolean, default=False)   # Admin: approve question
+    is_deleted = Column(Boolean, default=False)    # Admin: soft delete
+    admin_notes = Column(String)                   # Admin: notes about question
 
     __table_args__ = (
         UniqueConstraint("order_number", "ai_interviewed_job_id", name="uq_order_job"),
@@ -455,6 +484,10 @@ class QuizQuestion(Base):
         Integer, ForeignKey("ai_interviewed_jobs.id", ondelete="CASCADE")
     )
     created_at = Column(DateTime, default=func.now())
+    # Admin fields
+    is_approved = Column(Boolean, default=False)   # Admin: approve question
+    is_deleted = Column(Boolean, default=False)    # Admin: soft delete
+    admin_notes = Column(String)                   # Admin: notes about question
 
     ai_interviewed_job = relationship(
         "AiInterviewedJob", back_populates="quiz_questions"
@@ -498,6 +531,10 @@ class DSAQuestion(Base):
     ai_interviewed_job_id = Column(
         Integer, ForeignKey("ai_interviewed_jobs.id", ondelete="CASCADE")
     )
+    # Admin fields
+    is_approved = Column(Boolean, default=False)   # Admin: approve question
+    is_deleted = Column(Boolean, default=False)    # Admin: soft delete
+    admin_notes = Column(String)                   # Admin: notes about question
 
     ai_interviewed_job = relationship(
         "AiInterviewedJob", back_populates="dsa_questions"
@@ -569,6 +606,9 @@ class Interview(Base):
         nullable=False,
     )
     private_link_token = Column(String, unique=True)
+    # Admin fields
+    is_flagged = Column(Boolean, default=False)    # Admin: flag interview
+    admin_notes = Column(String)                   # Admin: notes about interview
 
     ai_interviewed_job = relationship("AiInterviewedJob", back_populates="interviews")
     interview_question_and_responses = relationship(
@@ -713,3 +753,14 @@ class City(Base):
 
     country = relationship("Country", back_populates="cities")
     state = relationship("State", back_populates="cities")
+
+
+class AdminUser(Base):
+    __tablename__ = "admin_users"
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, unique=True, nullable=False)
+    password_hash = Column(String, nullable=False)
+    is_active = Column(Boolean, default=True)
+    role = Column(String, default="admin")  # e.g., admin, superadmin
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())

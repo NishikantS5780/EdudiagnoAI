@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import RegularLayout from "@/components/layout/RegularLayout";
 import { jobSeekerApi } from "@/services/jobSeekerApi";
+import { adminApi } from "@/services/adminApi";
 import { toast } from "sonner";
 
 const JobSeekerLogin: React.FC = () => {
@@ -17,14 +18,23 @@ const JobSeekerLogin: React.FC = () => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const res = await jobSeekerApi.login({ email, password });
-      const token = res.headers["authorization"]?.split("Bearer ")[1];
-      if (token) {
-        localStorage.setItem("jobseeker_token", token);
-        toast.success("Login successful");
-        navigate("/jobseeker/home");
+      if (email === "admin@edudiagno.com") {
+        // Admin login
+        const res = await adminApi.login(email, password);
+        localStorage.setItem("admin_token", res.access_token);
+        toast.success("Admin login successful");
+        navigate("/admin-dashboard");
       } else {
-        toast.error("No token received");
+        // Regular jobseeker login
+        const res = await jobSeekerApi.login({ email, password });
+        const token = res.headers["authorization"]?.split("Bearer ")[1];
+        if (token) {
+          localStorage.setItem("jobseeker_token", token);
+          toast.success("Login successful");
+          navigate("/jobseeker/home");
+        } else {
+          toast.error("No token received");
+        }
       }
     } catch (error: any) {
       toast.error(error?.response?.data?.detail || "Login failed");

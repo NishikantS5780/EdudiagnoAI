@@ -728,8 +728,13 @@ async def login_recruiter(
         Company.verified,
         Company.created_at,
         Company.updated_at,
+        Company.is_suspended,
     ).where(Company.email == login_data.email)
     company = db.execute(stmt).mappings().one()
+
+    if company.get("is_suspended"):
+        response.status_code = 403
+        return {"message": "Account suspended. Please contact support."}
 
     password_match = security.verify_password(
         login_data.password, company["password_hash"]
