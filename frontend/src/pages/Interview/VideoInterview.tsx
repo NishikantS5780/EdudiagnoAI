@@ -36,7 +36,7 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import html2canvas from "html2canvas";
-import { RecruiterData, CompanyData } from "@/types/company";
+import { CompanyData } from "@/types/company";
 import { interviewApi } from "@/services/interviewApi";
 import { config } from "@/config";
 import axios from "axios";
