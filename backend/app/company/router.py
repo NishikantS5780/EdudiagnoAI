@@ -1077,8 +1077,7 @@ async def get_analytics(
         select(func.count(func.distinct(Interview.email)))
         .join(AiInterviewedJob, AiInterviewedJob.id == Interview.ai_interviewed_job_id)
         .where(
-            AiInterviewedJob.company_id == recruiter_id,
-            Interview.status == "completed",
+            AiInterviewedJob.company_id == recruiter_id
         )
     ).scalar()
 
@@ -1087,7 +1086,6 @@ async def get_analytics(
         .join(AiInterviewedJob, AiInterviewedJob.id == Interview.ai_interviewed_job_id)
         .where(
             AiInterviewedJob.company_id == recruiter_id,
-            Interview.status == "completed",
             Interview.created_at >= first_day_this_month,
             Interview.created_at
             < (first_day_this_month + datetime.timedelta(days=32)).replace(day=1),
@@ -1099,7 +1097,6 @@ async def get_analytics(
         .join(AiInterviewedJob, AiInterviewedJob.id == Interview.ai_interviewed_job_id)
         .where(
             AiInterviewedJob.company_id == recruiter_id,
-            Interview.status == "completed",
             Interview.created_at >= first_day_prev_month,
             Interview.created_at <= last_day_prev_month,
         )
