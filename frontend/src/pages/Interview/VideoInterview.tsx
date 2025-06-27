@@ -35,8 +35,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import html2canvas from "html2canvas";
-import { RecruiterData, CompanyData } from "@/types/company";
+import { CompanyData } from "@/types/company";
 import { interviewApi } from "@/services/interviewApi";
 import { config } from "@/config";
 import axios from "axios";
@@ -964,7 +963,7 @@ export default function VideoInterview({ onComplete }: { onComplete?: () => void
       fullInterviewRecorderRef.current = fullInterviewRecorder;
 
       // Start full interview recording immediately
-      fullInterviewRecorder.start(1000);
+      fullInterviewRecorder.start(3000);
       setIsFullInterviewRecording(true);
 
       // Start screenshot capture after devices are initialized

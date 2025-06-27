@@ -456,7 +456,7 @@ const InterviewDetail = () => {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground mb-1">Location</p>
-                <p className="font-medium">{interview.location}</p>
+                <p className="font-medium">{interview.city}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground mb-1">Education</p>
@@ -465,9 +465,9 @@ const InterviewDetail = () => {
               <div>
                 <p className="text-sm text-muted-foreground mb-1">Experience</p>
                 <p className="font-medium">
-                  {interview.work_experience
-                    ? `${interview.work_experience} ${
-                        interview.work_experience === 1 ? "year" : "years"
+                  {interview.work_experience_yrs
+                    ? `${interview.work_experience_yrs} ${
+                        interview.work_experience_yrs === 1 ? "year" : "years"
                       }`
                     : "Not specified"}
                 </p>

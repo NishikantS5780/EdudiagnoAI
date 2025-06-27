@@ -29,7 +29,7 @@ export interface InterviewData {
 }
 
 export interface GetInterviewsParams {
-  job_id?: string;
+  ai_interviewed_job_id?: string;
   start?: number;
   limit?: number;
 }
