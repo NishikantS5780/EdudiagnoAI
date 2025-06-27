@@ -465,7 +465,7 @@ const JobDetail = () => {
                                 <div>
                                   <h3 className="text-lg font-semibold">
                                     {interview.firstname}{" "}
-                                    {interview.firstname}
+                                    {interview.lastname}
                                   </h3>
                                   <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
                                     <Mail className="h-4 w-4" />
