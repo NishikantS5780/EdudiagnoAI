@@ -454,4 +454,17 @@ export const companyApi = {
     );
     return res;
   },
+  sendOtp: async (email: string)=>{
+      const res = await axios.post(`${config.API_BASE_URL}/company/send-otp`, {
+        email
+      });
+      return res;
+  },
+  verifyOtp: async({email, otp}: {email: string, otp: string})=>{
+      const res = await axios.post(`${config.API_BASE_URL}/company/verify-otp`, {
+        email,
+        otp
+      });
+      return res;
+  }
 };
