@@ -243,8 +243,8 @@ const CompanyDashboard = () => {
             <CardContent>
               <ChartContainer config={{ Score: {} }}>
                 <div className="flex flex-col items-center justify-center">
-                  <div className="relative" style={{ width: 120, height: 120 }}>
-                    <PieChart width={120} height={120}>
+                  <div className="relative" style={{ width: 240, height: 240 }}>
+                    <PieChart width={240} height={240}>
                       <Pie
                         data={[
                           {
@@ -259,8 +259,8 @@ const CompanyDashboard = () => {
                         dataKey="value"
                         startAngle={90}
                         endAngle={-270}
-                        innerRadius={40}
-                        outerRadius={55}
+                        innerRadius={80}
+                        outerRadius={100}
                         stroke="none"
                       >
                         <Cell
