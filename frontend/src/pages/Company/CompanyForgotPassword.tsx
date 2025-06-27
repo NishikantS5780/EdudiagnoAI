@@ -308,13 +308,6 @@ const ForgotPassword = () => {
                 </form>
               </>
             )}
-            
-            <div className="mt-6 text-center">
-              <Link to="/login" className="inline-flex items-center text-sm text-brand hover:underline">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to login
-              </Link>
-            </div>
           </div>
     </RegularLayout>
   );
