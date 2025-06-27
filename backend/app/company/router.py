@@ -1410,9 +1410,47 @@ def get_job(job_id: int = Query(...), db: Session = Depends(database.get_db)):
     return job
 
 @router.get('/jobs')
-def list_jobs(db: Session = Depends(database.get_db)):
+def list_jobs(
+    db: Session = Depends(database.get_db),
+    company_id: int = None,
+    search: str = None,
+    limit: int = 50,
+    offset: int = 0,
+):
     stmt = select(Job)
-    return db.scalars(stmt).all()
+    filters = []
+    if company_id:
+        filters.append(Job.company_id == company_id)
+    if search:
+        filters.append(Job.title.ilike(f"%{search}%"))
+    if filters:
+        stmt = stmt.where(*filters)
+    stmt = stmt.limit(limit).offset(offset)
+    jobs = db.execute(stmt).scalars().all()
+    return [
+        {
+            "id": job.id,
+            "title": job.title,
+            "description": job.description,
+            "department": getattr(job, "department", None),
+            "city": getattr(job, "city", None),
+            "location": getattr(job, "location", None),
+            "type": getattr(job, "type", None),
+            "min_experience": getattr(job, "min_experience", None),
+            "max_experience": getattr(job, "max_experience", None),
+            "salary_min": getattr(job, "salary_min", None),
+            "salary_max": getattr(job, "salary_max", None),
+            "currency": getattr(job, "currency", None),
+            "show_salary": getattr(job, "show_salary", None),
+            "requirements": getattr(job, "requirements", None),
+            "benefits": getattr(job, "benefits", None),
+            "status": getattr(job, "status", None),
+            "created_at": getattr(job, "created_at", None),
+            "updated_at": getattr(job, "updated_at", None),
+            "company_id": getattr(job, "company_id", None),
+        }
+        for job in jobs
+    ]
 
 @router.put('/job')
 def update_job(job_id: int = Query(...), job: schemas.JobUpdate = None, db: Session = Depends(database.get_db)):
