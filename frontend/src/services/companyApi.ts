@@ -376,8 +376,12 @@ export const companyApi = {
       }
     );
   },
-  listJobs: async (search?: string) => {
-    const params = search ? { search } : {};
+  listJobs: async (options?: { search?: string; company_id?: number; limit?: number; offset?: number }) => {
+    const params: any = {};
+    if (options?.search) params.search = options.search;
+    if (options?.company_id) params.company_id = options.company_id;
+    if (options?.limit !== undefined) params.limit = options.limit;
+    if (options?.offset !== undefined) params.offset = options.offset;
     const res = await axios.get(
       `${config.API_BASE_URL}/company/jobs`,
       {
