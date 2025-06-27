@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { LayoutDashboard, Users, Briefcase, Video, FileQuestion, ClipboardList } from "lucide-react";
 import {
   AlertDialog,
@@ -53,6 +53,7 @@ export default function AdminDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [deleteAiJobId, setDeleteAiJobId] = useState<number | null>(null);
   const [deleteCompanyId, setDeleteCompanyId] = useState<number | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (activeSection === "users") {
@@ -208,7 +209,13 @@ export default function AdminDashboard() {
                             </Button>
                           </TableCell>
                           <TableCell>
-                            <Button variant="ghost" size="sm">View</Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => navigate(`/admin-dashboard/users/${js.id}`)}
+                            >
+                              View
+                            </Button>
                           </TableCell>
                         </TableRow>
                       ))}

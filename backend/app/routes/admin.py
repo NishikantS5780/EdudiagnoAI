@@ -78,6 +78,18 @@ def serialize_jobseeker_for_admin(js):
         'updated_at': js.updated_at.isoformat() if js.updated_at else None,
     }
 
+def serialize_job_application_for_admin(app):
+    return {
+        'id': app.id,
+        'job_seeker_id': app.job_seeker_id,
+        'job_id': app.job_id,
+        'status': app.status,
+        'resume_url': app.resume_url,
+        'applied_at': app.applied_at.isoformat() if app.applied_at else '',
+        'is_flagged': app.is_flagged,
+        'admin_notes': app.admin_notes,
+    }
+
 # --- JobSeeker Endpoints ---
 @router.get("/jobseekers", response_model=list[JobSeekerOut])
 def list_jobseekers(db: Session = Depends(database.get_db), admin=Depends(authorize_admin)):
@@ -128,6 +140,16 @@ def verify_jobseeker(id: int, verify: bool, db: Session = Depends(database.get_d
     js.is_verified = verify
     db.commit()
     return {"id": id, "is_verified": verify}
+
+@router.get("/jobseekers/{id}/applications", response_model=list[JobApplicationOut])
+def get_jobseeker_applications(id: int, db: Session = Depends(database.get_db), admin=Depends(authorize_admin)):
+    apps = db.query(models.JobApplication).filter(models.JobApplication.job_seeker_id == id).all()
+    return [serialize_job_application_for_admin(app) for app in apps]
+
+@router.get("/jobseekers/{id}/interviews", response_model=list[InterviewOut])
+def get_jobseeker_interviews(id: int, db: Session = Depends(database.get_db), admin=Depends(authorize_admin)):
+    interviews = db.query(models.Interview).filter(models.Interview.email == db.query(models.JobSeeker.email).filter(models.JobSeeker.id == id).scalar()).all()
+    return [serialize_interview_for_admin(interview) for interview in interviews]
 
 # --- Company Endpoints ---
 @router.get("/companies", response_model=list[CompanyOut])

@@ -131,5 +131,20 @@ export const adminApi = {
       headers: getAdminAuthHeaders(),
     });
   },
+  getJobSeeker: async (id: string | number) => {
+    return axios.get(`${config.API_BASE_URL}/admin/jobseekers/${id}`, {
+      headers: getAdminAuthHeaders(),
+    });
+  },
+  getJobSeekerApplications: async (id: string | number) => {
+    return axios.get(`${config.API_BASE_URL}/admin/jobseekers/${id}/applications`, {
+      headers: getAdminAuthHeaders(),
+    });
+  },
+  getJobSeekerInterviews: async (id: string | number) => {
+    return axios.get(`${config.API_BASE_URL}/admin/jobseekers/${id}/interviews`, {
+      headers: getAdminAuthHeaders(),
+    });
+  },
   // Add more admin API calls as needed
 }; 

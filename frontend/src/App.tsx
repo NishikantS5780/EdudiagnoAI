@@ -41,6 +41,7 @@ import CompanyDetailPage from "@/pages/JobSeeker/CompanyDetailPage";
 import CompanyProfilePage from "@/pages/Company/CompanyProfilePage";
 import InterviewOverview from "./pages/Interview/InterviewOverview";
 import PrivateInterviewPage from "@/pages/Interview/PrivateInterviewPage";
+import UserDetailPage from "@/pages/JobSeeker/UserDetailPage";
 
 // import { interviewAPI, jobAPI } from "@/lib/api";
 
@@ -176,6 +177,10 @@ const App = () => {
         <Route
           path="/admin-dashboard"
           element={<RequireAuth><AdminDashboard /></RequireAuth>}
+        />
+        <Route
+          path="/admin-dashboard/users/:id"
+          element={<RequireAuth><UserDetailPage /></RequireAuth>}
         />
         <Route path="*" element={<NotFound />} />
       </Routes>
