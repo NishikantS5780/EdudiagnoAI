@@ -60,10 +60,7 @@ const CompanyDashboard = () => {
   return (
     <DashboardLayout>
       <div className="space-y-4">
-        <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-2 bg-background rounded-lg shadow p-2">
-          <div className="col-span-full text-center text-xs text-muted-foreground pb-1">
-            <span>All values below are monthly unless specified otherwise.</span>
-          </div>
+        <div className="flex justify-around gap-2 bg-background rounded-lg shadow p-2">
           <div className="flex flex-col items-center py-2">
             <span className="text-xs text-muted-foreground">
               Total AI Interviewed Jobs
@@ -72,7 +69,7 @@ const CompanyDashboard = () => {
               {analytics?.total_jobs ?? "-"}
             </span>
           </div>
-          <div className="flex flex-col items-center py-2">
+          {/* <div className="flex flex-col items-center py-2">
             <span className="text-xs text-muted-foreground">
               Open AI Interviewed Jobs
             </span>
@@ -100,16 +97,16 @@ const CompanyDashboard = () => {
                 return `${percent > 0 ? "+" : ""}${percent.toFixed(1)}% from prev.`;
               })()}
             </span>
-          </div>
-          <div className="flex flex-col items-center py-2">
+          </div> */}
+          {/* <div className="flex flex-col items-center py-2">
             <span className="text-xs text-muted-foreground">Closed AI Interviewed Jobs</span>
             <span className="text-xl font-bold" style={{ color: (analytics?.total_closed_jobs ?? 0) > 0 ? '#ef4444' : '#22c55e' }}>
               {analytics?.total_closed_jobs ?? '-'}
             </span>
-          </div>
+          </div> */}
           <div className="flex flex-col items-center py-2">
             <span className="text-xs text-muted-foreground">
-              Total Interviews Conducted
+              Total Interviews Conducted (this month)
             </span>
             <span className="text-xl font-bold">
               {analytics?.total_interviews_conducted ?? "-"}
@@ -146,7 +143,7 @@ const CompanyDashboard = () => {
           </div>
           <div className="flex flex-col items-center py-2">
             <span className="text-xs text-muted-foreground">
-              Total Interviews Completed
+              Total Interviews Completed (this month)
             </span>
             <span className="text-xl font-bold">
               {analytics?.total_interviews_completed ?? "-"}
@@ -173,7 +170,7 @@ const CompanyDashboard = () => {
             </span>
           </div>
           <div className="flex flex-col items-center py-2">
-            <span className="text-xs text-muted-foreground">Total Candidates</span>
+            <span className="text-xs text-muted-foreground">Total Candidates (this month)</span>
             <span className="text-xl font-bold">
               {analytics?.total_candidates ?? "-"}
             </span>
