@@ -55,6 +55,7 @@ from app.models import (
 from app.services import brevo
 from app.services import gcs as gcs_service
 from app.company.schemas import CandidateInviteRequest
+from app.lib.security import hash_password
 
 
 router = APIRouter()
@@ -1569,6 +1570,7 @@ async def update_company_profile(
     logo: UploadFile = File(None),
     banner: UploadFile = File(None),
     name: Optional[str] = Form(None),
+    password: Optional[str] = Form(None),
     phone: Optional[str] = Form(None),
     designation: Optional[str] = Form(None),
     company_name: Optional[str] = Form(None),
@@ -1587,11 +1589,20 @@ async def update_company_profile(
     website_url: Optional[str] = Form(None),
     min_company_size: Optional[int] = Form(None),
     max_company_size: Optional[int] = Form(None),
+    email: Optional[str] = Form(None),
+    email_verified: Optional[bool] = Form(None),
+    country_code: Optional[str] = Form(None),
+    phone_verified: Optional[bool] = Form(None),
+    rating: Optional[int] = Form(None),
+    ratings_count: Optional[int] = Form(None),
+    verified: Optional[bool] = Form(None),
+    # created_at and updated_at should not be updated by user
     company_id=Depends(authorize_company),
     db: Session = Depends(database.get_db),
 ):
     update_data = {
         "name": name,
+        "password": password,
         "phone": phone,
         "designation": designation,
         "company_name": company_name,
@@ -1610,8 +1621,19 @@ async def update_company_profile(
         "website_url": website_url,
         "min_company_size": min_company_size,
         "max_company_size": max_company_size,
+        "email": email,
+        "email_verified": email_verified,
+        "country_code": country_code,
+        "phone_verified": phone_verified,
+        "rating": rating,
+        "ratings_count": ratings_count,
+        "verified": verified,
     }
     update_data = {k: v for k, v in update_data.items() if v is not None}
+
+    # Handle password hashing
+    if "password" in update_data:
+        update_data["password_hash"] = hash_password(update_data.pop("password"))
 
     # Handle logo upload
     if logo is not None:
@@ -1670,6 +1692,8 @@ async def update_company_profile(
         "created_at": company.created_at,
         "updated_at": company.updated_at,
     }
+
+
 @router.post("/invite-candidates/{ai_interviewed_job_id}")
 async def invite_candidates(
     ai_interviewed_job_id: int,
