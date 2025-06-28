@@ -108,8 +108,8 @@ const CompanyDetailPage: React.FC = () => {
                   )}
                 </div>
               </div>
-              {company?.website && (
-                <a href={company.website} target="_blank" rel="noopener noreferrer" className="ml-2 text-blue-600 hover:underline text-xs flex items-center gap-1">
+              {company?.website_url && (
+                <a href={company.website_url} target="_blank" rel="noopener noreferrer" className="ml-2 text-blue-600 hover:underline text-xs flex items-center gap-1">
                   <Globe className="h-3 w-3" /> Website
                 </a>
               )}
