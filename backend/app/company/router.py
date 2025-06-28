@@ -42,6 +42,7 @@ from app.models import (
     AiInterviewedJob,
     DSAQuestion,
     DSATestCase,
+    DSAResponse,
     Interview,
     QuizQuestion,
     Company,
@@ -1332,6 +1333,24 @@ async def get_interview_recruiter_view(
             Interview.feedback,
             Interview.ai_interviewed_job_id,
             Interview.report_file_url,
+            Interview.updated_at,
+            AiInterviewedJob.title.label('job_title'),
+            AiInterviewedJob.description.label('job_description'),
+            AiInterviewedJob.department.label('job_department'),
+            AiInterviewedJob.city.label('job_city'),
+            AiInterviewedJob.location.label('job_location'),
+            AiInterviewedJob.type.label('job_type'),
+            AiInterviewedJob.duration_months.label('job_duration_months'),
+            AiInterviewedJob.min_experience,
+            AiInterviewedJob.max_experience,
+            AiInterviewedJob.currency,
+            AiInterviewedJob.salary_min,
+            AiInterviewedJob.salary_max,
+            AiInterviewedJob.show_salary,
+            AiInterviewedJob.key_qualification.label('job_key_qualification'),
+            AiInterviewedJob.requirements,
+            AiInterviewedJob.benefits,
+            AiInterviewedJob.quiz_time_minutes,
         )
         .join(AiInterviewedJob, Interview.ai_interviewed_job_id == AiInterviewedJob.id)
         .join(Company, Company.id == AiInterviewedJob.company_id)
@@ -1354,6 +1373,62 @@ async def get_interview_recruiter_view(
         for blob_name in screenshot_blob_names
     ]
     interview["screenshot_urls"] = screenshot_urls
+
+    stmt = select(InterviewQuestionAndResponse).where(
+        InterviewQuestionAndResponse.interview_id == int(id),
+    )
+    result = db.execute(stmt)
+    interview_question_and_responses = result.scalars().all()
+    interview["interview_question_and_responses"] = interview_question_and_responses
+
+    stmt = (
+        select(
+            QuizQuestion.id,
+            QuizQuestion.description,
+            QuizQuestion.type,
+            QuizQuestion.category,
+            QuizQuestion.image_url,
+            QuizQuestion.time_seconds,
+        )
+        .where(QuizQuestion.ai_interviewed_job_id == interview["ai_interviewed_job_id"])
+    )
+    quiz_responses = db.execute(stmt).scalars().all()
+    quiz_responses = [
+        dict(quiz_response._mapping) for quiz_response in db.execute(stmt).all()
+    ]
+    for quiz_response in quiz_responses:
+        stmt = select(QuizOption.id, QuizOption.label, QuizOption.correct).where(
+            QuizOption.quiz_question_id == quiz_response["id"]
+        )
+        options = [option._mapping for option in db.execute(stmt).all()]
+        quiz_response["options"] = options
+        stmt = (
+            select(QuizResponse.quiz_option_id)
+            .where(QuizResponse.quiz_question_id == quiz_response["id"])
+        )
+        selected_options = db.execute(stmt).mappings().all()
+        quiz_response["selected_options"] = selected_options
+
+    interview["quiz_responses"] = quiz_responses
+
+    stmt = (
+        select(
+            DSAQuestion.id.label("question_id"),
+            DSAQuestion.title,
+            DSAQuestion.description,
+            DSAQuestion.difficulty,
+            DSAQuestion.time_minutes,
+            DSAResponse.id,
+            DSAResponse.code,
+            DSAResponse.passed,
+        )
+        .join(DSAResponse, DSAResponse.dsa_question_id == DSAQuestion.id)
+        .where(DSAResponse.interview_id == int(id))
+    )
+    dsa_responses = db.execute(stmt).mappings().all()
+
+    interview["dsa_responses"] = dsa_responses
+
     return interview
 
 @router.post("/generate-private-link/{interview_id}")
