@@ -87,7 +87,7 @@ const CompanyLogin = () => {
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Password</Label>
                 <Link
-                  to="/forgot-password"
+                  to="/employer/forgot-password"
                   className="text-sm text-brand hover:underline"
                 >
                   Forgot password?

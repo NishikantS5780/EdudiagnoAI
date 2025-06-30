@@ -29,6 +29,7 @@ const JobsPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const appContext = useContext(AppContext);
 
+
   useEffect(() => {
     fetchJobs();
   }, []);
@@ -36,7 +37,10 @@ const JobsPage: React.FC = () => {
   const fetchJobs = async (search?: string) => {
     setLoading(true);
     try {
-      const res = await companyApi.listJobs(search);
+      const res = await companyApi.listJobs({
+        search,
+        company_id: appContext?.company?.id,
+      });
       setJobs(res.data || res || []);
     } catch {
       // handle error

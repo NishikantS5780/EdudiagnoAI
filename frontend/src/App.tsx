@@ -26,6 +26,7 @@ import DSAPlayground from "@/pages/Interview/DSAPlayground";
 import NotFound from "@/pages/NotFound";
 import JobSeekerAuthRequired from "@/components/auth/JobSeekerAuthRequired";
 import CompanyLogin from "@/pages/Company/CompanyLogin";
+import CompanyForgotPassword from "@/pages/Company/CompanyForgotPassword";
 import AdminDashboard from "@/pages/AdminDashboard";
 import RequireAuth from "@/components/auth/RequireAuth";
 import RequireCompanyAuth from "@/components/auth/RequireCompanyAuth";
@@ -59,6 +60,7 @@ const App = () => {
         <Route path="/changelog" element={<Changelog />} />
         <Route path="/how-it-works" element={<HowItWorks />} />
         <Route path="/employer/login" element={<CompanyLogin />} />
+        <Route path="/employer/forgot-password" element={<CompanyForgotPassword />} />
         <Route path="/employer/signup" element={<Signup />} />
         <Route path="/jobseeker/signup" element={<JobSeekerSignup />} />
         <Route path="/jobseeker/login" element={<JobSeekerLogin />} />

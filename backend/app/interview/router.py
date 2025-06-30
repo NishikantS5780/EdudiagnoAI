@@ -722,27 +722,30 @@ async def analyze_resume(
     data = db.execute(stmt).one()
 
     prompt = f"""Analyze how well this resume matches the job description and requirements.
-    Return ONLY a JSON object with these exact fields:
-    {{
-        "resume_match_score": number between 0 and 100,
-        "resume_match_feedback": "Detailed feedback about the match"
-    }}
+Return ONLY a JSON object with these exact fields:
+{{
+    "resume_match_score": number between 0 and 100,
+    "resume_match_feedback": "Detailed feedback about the match"
+}}
 
-    Resume Text:
-    {data.resume_text}
+Resume Text:
+{data.resume_text}
 
-    Job Description:
-    {data.description}
+Job Description:
+{data.description}
 
-    Job Requirements:
-    {data.requirements}
+Job Requirements:
+{data.requirements}
 
-    Important:
-    - Return ONLY the JSON object, no other text
-    - All fields must be present
-    - match_score must be a number between 0 and 100
-    - Arrays should not be empty (use empty string if no data)
-    - All other values must be strings
+Important:
+- Return ONLY the JSON object, no other text
+- All fields must be present
+- resume_match_score must be a number between 0 and 100, with accurate granularity (e.g. 63, 78, 42) — not rounded or bucketed
+- Arrays should not be empty (use empty string if no data)
+- All other values must be strings
+- Be strict in scoring: prioritize exact skill match, relevant and recent experience, and alignment with job responsibilities
+- Penalize for missing keywords, outdated or irrelevant experience, vague roles, and lack of measurable achievements
+- Justify the exact score in resume_match_feedback with specific examples from the resume vs. job description and requirements
     """
 
     response = await openai.client.chat.completions.create(
@@ -869,56 +872,57 @@ async def generate_feedback(
             """
 
     prompt = f"""
-        You are evaluating an interview transcript. The candidate is applying for a specific job. Carefully analyze their responses and assess their performance. Be critical, especially when answers are insufficient or irrelevant.
+        You are evaluating an interview transcript. The candidate is applying for a specific job. Carefully analyze their responses and assess their performance. Be strict and fair — do not assign points unless there's clear evidence.
 
-        Follow these rules:
-        - If the candidate gave minimal responses (e.g., just "hello" or didn't answer), clearly reflect this in the score and feedback.
-        - Use the job role's requirements (implied or given) to evaluate the candidate's suitability.
-        - Do NOT be generous with scores if there is no evidence of skill.
-        - Feedback for the recruiter should reflect how well the candidate performed, highlighting strengths, weaknesses, red flags, and overall potential for the role.
-        - Consider the job requirements and evaluate the candidate's performance across multiple dimensions.
+Follow these rules:
+- If the candidate gave minimal or irrelevant responses (e.g., just "yes", "no", or "hello"), reflect that harshly in all scores and feedback.
+- Do NOT assign high scores unless the candidate has clearly demonstrated knowledge, relevance, and depth.
+- Base scoring strictly on the content: no assumptions should be made if the candidate didn’t mention or demonstrate a skill.
+- Use the job description and requirements to frame your evaluation.
+- If a category (e.g., technicalSkills) wasn’t demonstrated at all, the score for that category must be near 0.
+- Feedback for the recruiter must provide a fair but critical assessment of the candidate's readiness for the role, with supporting examples.
+- Suggestions should help the candidate understand how to improve in future interviews.
 
-        Return ONLY a JSON object with this exact format:
+Return ONLY a JSON object in the following format:
+{{
+    "feedback_for_candidate": "Detailed, specific feedback on their performance, mentioning what they did well or poorly",
+    "feedback_for_recruiter": "Detailed evaluation of the candidate's responses. Explain whether the candidate is suitable, why or why not, and which areas were lacking or strong.",
+    "score": number between 0 and 100,
+    "scoreBreakdown": {{
+        "technicalSkills": number between 0 and 100,
+        "communication": number between 0 and 100,
+        "problemSolving": number between 0 and 100,
+        "culturalFit": number between 0 and 100
+    }},
+    "suggestions": [
+        "Each item must be a concrete, actionable suggestion for the candidate",
+        "Be specific: e.g., 'Provide examples when answering', 'Work on articulating thoughts clearly'"
+    ],
+    "keywords": [
         {{
-            "feedback_for_candidate": "Detailed, specific feedback on their performance, mentioning what they did well or poorly",
-            "feedback_for_recruiter": "Detailed evaluation of the candidate's responses. Explain whether the candidate is suitable, why or why not, and which areas were lacking or strong.",
-            "score": number between 0 and 100,
-            "scoreBreakdown": {{
-                "technicalSkills": number between 0 and 100,
-                "communication": number between 0 and 100,
-                "problemSolving": number between 0 and 100,
-                "culturalFit": number between 0 and 100
-            }}
-            "suggestions": [
-                "Each item must be a concrete, actionable suggestion for the candidate",
-                "Be specific: e.g., 'Provide examples when answering', 'Work on articulating thoughts clearly'"
-            ],
-            "keywords": [
-                {{
-                    "term": "string",
-                    "count": number,
-                    "sentiment": "positive" | "neutral" | "negative"
-                }}
-            ]
+            "term": "string",
+            "count": number,
+            "sentiment": "positive" | "neutral" | "negative"
         }}
+    ]
+}}
 
-        Conversation:
-        {conversation}
+Conversation:
+{conversation}
 
-        Job Description:
-        {data.description}
+Job Description:
+{data.description}
 
-        Job Requirements:
-        {job_requirements or data.requirements}
+Job Requirements:
+{job_requirements or data.requirements}
 
-        Important:
-        - Return ONLY the JSON object, no other text
-        - All fields must be present
-        - All scores must be numbers between 0 and 100
-        - Keywords should be relevant to the job and interview
-        - Suggestions should be specific and actionable
-        - Be critical and honest in your evaluation
-        - Consider both the content and quality of responses
+Important:
+- Return ONLY the JSON object, no other text
+- All fields must be present
+- All scores must be accurate, evidence-based numbers between 0 and 100 — do not round up arbitrarily
+- If the candidate gave weak or no answers, most scores should be low, even 0–20
+- Suggestions must be actionable and tailored to what the candidate actually said or failed to say
+- Keywords must be relevant, pulled from the conversation, and include a count and sentiment
         """
 
     response = await openai.client.chat.completions.create(

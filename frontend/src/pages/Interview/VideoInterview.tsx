@@ -964,7 +964,7 @@ export default function VideoInterview({ onComplete }: { onComplete?: () => void
       fullInterviewRecorderRef.current = fullInterviewRecorder;
 
       // Start full interview recording immediately
-      fullInterviewRecorder.start(1000);
+      fullInterviewRecorder.start(3000);
       setIsFullInterviewRecording(true);
 
       // Start screenshot capture after devices are initialized

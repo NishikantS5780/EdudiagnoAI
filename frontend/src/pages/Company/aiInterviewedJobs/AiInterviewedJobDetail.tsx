@@ -104,7 +104,8 @@ const JobDetail = () => {
   const fetchInterviews = async () => {
     if (!id) return;
     try {
-      const response = await interviewApi.getInterviews({ job_id: id });
+      // Use correct param name for backend filtering
+      const response = await interviewApi.getInterviews({ ai_interviewed_job_id: id });
       let data = response.data;
       // Ensure interviews is always an array
       if (!Array.isArray(data)) {
@@ -464,7 +465,7 @@ const JobDetail = () => {
                                 <div>
                                   <h3 className="text-lg font-semibold">
                                     {interview.firstname}{" "}
-                                    {interview.firstname}
+                                    {interview.lastname}
                                   </h3>
                                   <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
                                     <Mail className="h-4 w-4" />
@@ -505,7 +506,7 @@ const JobDetail = () => {
                                   </div>
                                   <div className="flex items-center gap-2 text-sm">
                                     <MapPin className="h-4 w-4 text-muted-foreground" />
-                                    {interview.location}
+                                    {interview.city}
                                   </div>
                                   <div className="flex items-center gap-2 text-sm">
                                     <GraduationCap className="h-4 w-4 text-muted-foreground" />
@@ -513,8 +514,8 @@ const JobDetail = () => {
                                   </div>
                                   <div className="flex items-center gap-2 text-sm">
                                     <Briefcase className="h-4 w-4 text-muted-foreground" />
-                                    {interview.work_experience
-                                      ? `${interview.work_experience} years experience`
+                                    {interview.work_experience_yrs
+                                      ? `${interview.work_experience_yrs} years experience`
                                       : "Experience not specified"}
                                   </div>
                                 </div>
