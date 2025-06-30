@@ -35,26 +35,33 @@ const JobDetailPage: React.FC = () => {
     const items = parseCommaSeparated(value);
     if (items.length === 0) return <span className="text-muted-foreground">Not specified</span>;
     
-    // Different color schemes based on type
+    // Improved color schemes for better contrast in light mode
     const getBadgeStyle = (item: string, index: number) => {
       if (type === "skills") {
-        const colors = ["bg-blue-100 text-blue-800", "bg-green-100 text-green-800", "bg-purple-100 text-purple-800", "bg-orange-100 text-orange-800", "bg-pink-100 text-pink-800"];
-        return `text-xs ${colors[index % colors.length]} hover:opacity-80 transition-opacity`;
+        // Use more readable colors for light mode
+        const colors = [
+          "bg-blue-200 text-blue-900 dark:bg-blue-900 dark:text-blue-200",
+          "bg-green-200 text-green-900 dark:bg-green-900 dark:text-green-200",
+          "bg-purple-200 text-purple-900 dark:bg-purple-900 dark:text-purple-200",
+          "bg-orange-200 text-orange-900 dark:bg-orange-900 dark:text-orange-200",
+          "bg-pink-200 text-pink-900 dark:bg-pink-900 dark:text-pink-200"
+        ];
+        return `text-xs font-medium px-2 py-0.5 rounded ${colors[index % colors.length]} shadow-sm`;
       }
       if (type === "languages") {
-        return "text-xs bg-indigo-100 text-indigo-800 hover:bg-indigo-200 transition-colors";
+        return "text-xs font-medium px-2 py-0.5 rounded bg-indigo-200 text-indigo-900 dark:bg-indigo-900 dark:text-indigo-200 shadow-sm";
       }
       if (type === "benefits") {
-        return "text-xs bg-emerald-100 text-emerald-800 hover:bg-emerald-200 transition-colors";
+        return "text-xs font-medium px-2 py-0.5 rounded bg-emerald-200 text-emerald-900 dark:bg-emerald-900 dark:text-emerald-200 shadow-sm";
       }
       if (type === "qualifications") {
-        return "text-xs bg-amber-100 text-amber-800 hover:bg-amber-200 transition-colors";
+        return "text-xs font-medium px-2 py-0.5 rounded bg-amber-200 text-amber-900 dark:bg-amber-900 dark:text-amber-200 shadow-sm";
       }
-      return "text-xs";
+      return "text-xs font-medium px-2 py-0.5 rounded bg-secondary text-secondary-foreground shadow-sm";
     };
     
     return (
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 bg-muted/40 p-2 rounded-md">
         {items.map((item, index) => (
           <Badge 
             key={index} 
@@ -129,51 +136,58 @@ const JobDetailPage: React.FC = () => {
         <div className="max-w-4xl mx-auto">
           {/* Company Info Section (always at top) */}
           {(companyLoading || company) && (
-            <Link to={company ? `/jobseeker/company/${company.id}` : undefined} tabIndex={-1} className="block group mb-6 focus:outline-none">
-              <Card className="border-2 border-blue-100 bg-background group-hover:ring-2 group-hover:ring-blue-300 transition-shadow">
-                <CardHeader className="flex flex-row items-center gap-4 py-3 cursor-pointer">
-                  {companyLoading ? (
-                    <Skeleton className="h-12 w-12 rounded-full" />
-                  ) : company?.companyLogo ? (
-                    <img src={company.companyLogo} alt={company.name} className="h-12 w-12 rounded-full object-cover border" />
-                  ) : (
-                    <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center text-2xl font-bold text-gray-500">
-                      <Building className="h-7 w-7" />
-                    </div>
-                  )}
-                  <div className="flex-1 min-w-0">
-                    {companyLoading ? (
-                      <Skeleton className="h-6 w-32 mb-1" />
-                    ) : company && (
-                      <span className="text-lg font-semibold text-blue-700 group-hover:underline">{company.name}</span>
+            company ? (
+              <Link to={`/jobseeker/company/${company.id}`} tabIndex={-1} className="block group mb-6 focus:outline-none">
+                <Card className="border border-border bg-card group-hover:ring-2 group-hover:ring-blue-300 transition-shadow shadow-lg">
+                  <CardHeader className="flex flex-row items-center gap-4 py-3 cursor-pointer">
+                    {company.logo_url ? (
+                      <img src={company.logo_url} alt={company.name} className="h-12 w-12 rounded-full object-cover border" />
+                    ) : (
+                      <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center text-2xl font-bold text-gray-500">
+                        <Building className="h-7 w-7" />
+                      </div>
                     )}
-                    <div className="flex flex-wrap gap-2 mt-1">
-                      {companyLoading ? (
-                        <Skeleton className="h-4 w-20" />
-                      ) : company?.industry && (
-                        <Badge variant="secondary" className="text-xs flex items-center gap-1">
-                          <Briefcase className="h-3 w-3" /> {company.industry}
-                        </Badge>
-                      )}
-                      {companyLoading ? (
-                        <Skeleton className="h-4 w-20" />
-                      ) : company?.city && (
-                        <Badge variant="outline" className="text-xs flex items-center gap-1">
-                          <MapPin className="h-3 w-3" /> {company.city}{company.state ? `, ${company.state}` : ""}
-                        </Badge>
-                      )}
+                    <div className="flex-1 min-w-0">
+                      <span className="text-lg font-semibold text-blue-700 group-hover:underline">{company.name}</span>
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        {company.industry && (
+                          <Badge variant="secondary" className="text-xs flex items-center gap-1">
+                            <Briefcase className="h-3 w-3" /> {company.industry}
+                          </Badge>
+                        )}
+                        {company.city && (
+                          <Badge variant="outline" className="text-xs flex items-center gap-1">
+                            <MapPin className="h-3 w-3" /> {company.city}{company.state ? `, ${company.state}` : ""}
+                          </Badge>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  {company && company.website && (
-                    <a href={company.website} target="_blank" rel="noopener noreferrer" className="ml-2 text-blue-600 hover:underline text-xs" onClick={e => e.stopPropagation()}>Visit Website</a>
-                  )}
-                </CardHeader>
-              </Card>
-            </Link>
+                    {company.website && (
+                      <a href={company.website} target="_blank" rel="noopener noreferrer" className="ml-2 text-blue-600 hover:underline text-xs" onClick={e => e.stopPropagation()}>Visit Website</a>
+                    )}
+                  </CardHeader>
+                </Card>
+              </Link>
+            ) : (
+              <div className="block mb-6">
+                <Card className="border border-border bg-card transition-shadow shadow-lg">
+                  <CardHeader className="flex flex-row items-center gap-4 py-3">
+                    <Skeleton className="h-12 w-12 rounded-full" />
+                    <div className="flex-1 min-w-0">
+                      <Skeleton className="h-6 w-32 mb-1" />
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        <Skeleton className="h-4 w-20" />
+                        <Skeleton className="h-4 w-20" />
+                      </div>
+                    </div>
+                  </CardHeader>
+                </Card>
+              </div>
+            )
           )}
           {/* Job Detail Card */}
-          <Card className="shadow-lg border-0">
-            <CardHeader className="pb-6">
+          <Card className="shadow-xl border border-border/80 bg-card/95">
+            <CardHeader className="pb-6 border-b border-border/60 bg-muted/30 rounded-t-lg">
               <div className="space-y-4">
                 <CardTitle className="text-3xl font-bold text-foreground">
                   {loading ? (
@@ -260,7 +274,7 @@ const JobDetailPage: React.FC = () => {
                         <div className="space-y-3">
                           <div className="flex items-center gap-2">
                             <Briefcase className="h-5 w-5 text-primary" />
-                            <h3 className="text-lg font-semibold text-foreground">Job Role</h3>
+                            <h3 className="text-lg font-bold text-foreground tracking-tight uppercase">Job Role</h3>
                           </div>
                           <div className="text-muted-foreground">
                             {job.job_role}
@@ -274,7 +288,7 @@ const JobDetailPage: React.FC = () => {
                     <div className="space-y-3">
                       <div className="flex items-center gap-2">
                         <Star className="h-5 w-5 text-primary" />
-                        <h3 className="text-lg font-semibold text-foreground">Job Description</h3>
+                        <h3 className="text-lg font-bold text-foreground tracking-tight uppercase">Job Description</h3>
                       </div>
                       <div className="prose prose-sm max-w-none">
                         <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
@@ -289,7 +303,7 @@ const JobDetailPage: React.FC = () => {
                     <div className="space-y-3">
                       <div className="flex items-center gap-2">
                         <MapPin className="h-5 w-5 text-primary" />
-                        <h3 className="text-lg font-semibold text-foreground">Location Details</h3>
+                        <h3 className="text-lg font-bold text-foreground tracking-tight uppercase">Location Details</h3>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {job.job_location && (
@@ -313,7 +327,7 @@ const JobDetailPage: React.FC = () => {
                     <div className="space-y-3">
                       <div className="flex items-center gap-2">
                         <Briefcase className="h-5 w-5 text-primary" />
-                        <h3 className="text-lg font-semibold text-foreground">Required Skills</h3>
+                        <h3 className="text-lg font-bold text-foreground tracking-tight uppercase">Required Skills</h3>
                       </div>
                       {renderAsBadges(job.skills, "default", "skills")}
                     </div>
@@ -324,7 +338,7 @@ const JobDetailPage: React.FC = () => {
                     <div className="space-y-3">
                       <div className="flex items-center gap-2">
                         <GraduationCap className="h-5 w-5 text-primary" />
-                        <h3 className="text-lg font-semibold text-foreground">Qualifications & Education</h3>
+                        <h3 className="text-lg font-bold text-foreground tracking-tight uppercase">Qualifications & Education</h3>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
@@ -348,7 +362,7 @@ const JobDetailPage: React.FC = () => {
                     <div className="space-y-3">
                       <div className="flex items-center gap-2">
                         <Users className="h-5 w-5 text-primary" />
-                        <h3 className="text-lg font-semibold text-foreground">Candidate Requirements</h3>
+                        <h3 className="text-lg font-bold text-foreground tracking-tight uppercase">Candidate Requirements</h3>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {job.gender_preference && (
@@ -378,7 +392,7 @@ const JobDetailPage: React.FC = () => {
                     <div className="space-y-3">
                       <div className="flex items-center gap-2">
                         <Star className="h-5 w-5 text-primary" />
-                        <h3 className="text-lg font-semibold text-foreground">Additional Benefits</h3>
+                        <h3 className="text-lg font-bold text-foreground tracking-tight uppercase">Additional Benefits</h3>
                       </div>
                       {renderAsLines(job.additional_benefits)}
                     </div>
@@ -391,7 +405,7 @@ const JobDetailPage: React.FC = () => {
                         <div className="space-y-3">
                           <div className="flex items-center gap-2">
                             <Calendar className="h-5 w-5 text-primary" />
-                            <h3 className="text-lg font-semibold text-foreground">Posted Date</h3>
+                            <h3 className="text-lg font-bold text-foreground tracking-tight uppercase">Posted Date</h3>
                           </div>
                           <div className="text-muted-foreground">
                             {new Date(job.posted_at).toLocaleDateString('en-US', {
