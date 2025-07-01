@@ -86,7 +86,7 @@ const InterviewsPage = () => {
   useEffect(() => {
     interviewApi
       .getInterviews({
-        start: (currentPage - 1) * itemsPerPage,
+        offset: (currentPage - 1) * itemsPerPage,
         limit: itemsPerPage,
         search: searchQuery,
         score: scoreFilter,
@@ -141,7 +141,7 @@ const InterviewsPage = () => {
 
       interviewApi
         .getInterviews({
-          start: (currentPage - 1) * itemsPerPage,
+          offset: (currentPage - 1) * itemsPerPage,
           limit: itemsPerPage,
         })
         .then((res) => {
