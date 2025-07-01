@@ -71,6 +71,10 @@ export interface InterviewData {
 
 export interface GetInterviewsParams {
   ai_interviewed_job_id?: string;
+  search?: string;
+  score?: string;
+  department?: string;
+  job?: string;
   start?: number;
   limit?: number;
 }
