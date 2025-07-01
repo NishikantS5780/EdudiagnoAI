@@ -49,7 +49,6 @@ import RequireAuth from "@/components/auth/RequireAuth";
 import RequireCompanyAuth from "@/components/auth/RequireCompanyAuth";
 import RequireProfileVerified from "@/components/auth/RequireProfileVerified";
 import VideoInterview from "@/pages/Interview/VideoInterview";
-import InterviewReportWrapper from "@/components/interview/InterviewReportWrapper";
 import JobsPage from "./pages/Company/jobs/JobsPage";
 import JobPage from "./pages/Company/jobs/JobPage";
 import JobSearchPage from "@/pages/JobSeeker/JobSearchPage";
@@ -167,14 +166,6 @@ const App = () => {
                 </RequireAuth>
               }
             /> */}
-        <Route
-          path="/company/interviews/:id/report"
-          element={
-            <RequireCompanyAuth>
-              <InterviewReportWrapper />
-            </RequireCompanyAuth>
-          }
-        />
         <Route
           path="/company/ai-interviewed-jobs"
           element={<RequireCompanyAuth><AiInterviewedJobsPage /></RequireCompanyAuth>}

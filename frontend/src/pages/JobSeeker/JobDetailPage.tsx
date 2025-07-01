@@ -180,10 +180,13 @@ const JobDetailPage: React.FC = () => {
                         <Skeleton className="h-4 w-20" />
                       </div>
                     </div>
-                  </CardHeader>
-                </Card>
-              </div>
-            )
+                  </div>
+                  {company && company.website_url && (
+                    <a href={company.website_url} target="_blank" rel="noopener noreferrer" className="ml-2 text-blue-600 hover:underline text-xs" onClick={e => e.stopPropagation()}>Visit Website</a>
+                  )}
+                </CardHeader>
+              </Card>
+            </Link>
           )}
           {/* Job Detail Card */}
           <Card className="shadow-xl border border-border/80 bg-card/95">
