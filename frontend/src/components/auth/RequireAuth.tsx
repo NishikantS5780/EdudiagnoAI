@@ -1,28 +1,36 @@
-import { FC, useContext, useEffect } from "react";
+import { FC, useContext } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { AppContext } from "@/context/AppContext";
 import { toast } from "sonner";
 
-interface RequireCompanyAuthProps {
+interface RequireAuthProps {
   children: React.ReactNode;
 }
 
-const RequireCompanyAuth: FC<RequireCompanyAuthProps> = ({ children }) => {
+const RequireAuth: FC<RequireAuthProps> = ({ children }) => {
   const location = useLocation();
   const appContext = useContext(AppContext);
   if (!appContext) {
-    return toast.error("Something went wrong");
+    toast.error("Something went wrong");
+    return null;
   }
 
-  useEffect(() => {
-    if (!appContext.company) {
-      appContext.companyVerifyLogin?.().catch((_) => {
-        return <Navigate to="/login" state={{ from: location }} replace />;
-      });
+  // Protect /admin-dashboard with admin_token
+  if (location.pathname.startsWith("/admin-dashboard")) {
+    const adminToken = localStorage.getItem("admin_token");
+    if (!adminToken) {
+      return <Navigate to="/jobseeker/login" state={{ from: location }} replace />;
     }
-  }, []);
+    return <>{children}</>;
+  }
 
-  return <>{appContext && appContext.company && children}</>;
+  // Default: require jobseeker or company auth (expand as needed)
+  const jobseekerToken = localStorage.getItem("jobseeker_token");
+  const companyToken = localStorage.getItem("token");
+  if (!jobseekerToken && !companyToken) {
+    return <Navigate to="/jobseeker/login" state={{ from: location }} replace />;
+  }
+  return <>{children}</>;
 };
 
-export default RequireCompanyAuth;
+export default RequireAuth;

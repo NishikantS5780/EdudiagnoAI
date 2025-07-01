@@ -1,6 +1,7 @@
 from typing import List, Optional
 from pydantic import BaseModel
 from pydantic import validator
+from datetime import datetime
 
 
 class RecruiterRegistration(BaseModel):
@@ -292,6 +293,8 @@ class JobUpdate(BaseModel):
     languages: Optional[str] = None
     education_degree: Optional[str] = None
     job_description: Optional[str] = None
+
+
 class CandidateInviteRequest(BaseModel):
     candidates: list[dict]
     # Each dict should have at least 'email', and optionally 'firstname' and 'lastname'
@@ -304,3 +307,101 @@ class CandidateInviteRequest(BaseModel):
             if 'email' not in c:
                 raise ValueError('Each candidate must have an email')
         return v
+
+
+class CompanyBase(BaseModel):
+    name: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    industry: Optional[str] = None
+    country: Optional[str] = None
+    state: Optional[str] = None
+    city: Optional[str] = None
+    zip: Optional[str] = None
+    address: Optional[str] = None
+    logo_url: Optional[str] = None
+    tagline: Optional[str] = None
+    tags: Optional[str] = None
+    about_us: Optional[str] = None
+    about_us_poster_url: Optional[str] = None
+    foundation_year: Optional[int] = None
+    website_url: Optional[str] = None
+    min_company_size: Optional[int] = None
+    max_company_size: Optional[int] = None
+    banner_url: Optional[str] = None
+    verified: Optional[bool] = None
+    # Admin fields
+    is_suspended: Optional[bool] = None
+    is_deleted: Optional[bool] = None
+    admin_notes: Optional[str] = None
+
+
+class CompanyOut(CompanyBase):
+    id: int
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+
+class JobBase(BaseModel):
+    company_id: int
+    job_title: Optional[str] = None
+    job_role: Optional[str] = None
+    job_location: Optional[str] = None
+    job_locality: Optional[str] = None
+    work_mode: Optional[str] = None
+    min_work_experience: Optional[int] = None
+    max_work_experience: Optional[int] = None
+    min_salary_per_month: Optional[int] = None
+    max_salary_per_month: Optional[int] = None
+    additional_benefits: Optional[str] = None
+    skills: Optional[str] = None
+    qualification: Optional[str] = None
+    gender_preference: Optional[str] = None
+    candidate_prev_industry: Optional[str] = None
+    languages: Optional[str] = None
+    education_degree: Optional[str] = None
+    job_description: Optional[str] = None
+    # Admin fields
+    is_featured: Optional[bool] = None
+    is_approved: Optional[bool] = None
+    is_closed: Optional[bool] = None
+    is_deleted: Optional[bool] = None
+    admin_notes: Optional[str] = None
+
+
+class JobOut(JobBase):
+    id: int
+    posted_at: Optional[str] = None
+
+
+class AiInterviewedJobBase(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    department: Optional[str] = None
+    city: Optional[str] = None
+    location: Optional[str] = None
+    type: Optional[str] = None
+    duration_months: Optional[int] = None
+    min_experience: Optional[int] = None
+    max_experience: Optional[int] = None
+    currency: Optional[str] = None
+    salary_min: Optional[int] = None
+    salary_max: Optional[int] = None
+    show_salary: Optional[bool] = None
+    key_qualification: Optional[str] = None
+    requirements: Optional[str] = None
+    benefits: Optional[str] = None
+    status: Optional[str] = None
+    quiz_time_minutes: Optional[int] = None
+    # Admin fields
+    is_featured: Optional[bool] = None
+    is_approved: Optional[bool] = None
+    is_closed: Optional[bool] = None
+    is_deleted: Optional[bool] = None
+    admin_notes: Optional[str] = None
+
+
+class AiInterviewedJobOut(AiInterviewedJobBase):
+    id: int
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None

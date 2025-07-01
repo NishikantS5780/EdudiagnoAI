@@ -240,3 +240,83 @@ class UpdateQuizOption(BaseModel):
 class CreateQuizResponse(BaseModel):
     quiz_question_id: int
     quiz_option_id: int
+
+
+class InterviewBase(BaseModel):
+    firstname: Optional[str] = None
+    lastname: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    work_experience_yrs: Optional[int] = None
+    education: Optional[str] = None
+    skills: Optional[str] = None
+    city: Optional[str] = None
+    linkedin_url: Optional[str] = None
+    portfolio_url: Optional[str] = None
+    resume_url: Optional[str] = None
+    resume_text: Optional[str] = None
+    resume_match_score: Optional[int] = None
+    resume_match_feedback: Optional[str] = None
+    overall_score: Optional[int] = None
+    feedback: Optional[str] = None
+    ai_interviewed_job_id: Optional[int] = None
+    private_link_token: Optional[str] = None
+    # Admin fields
+    is_flagged: Optional[bool] = None
+    admin_notes: Optional[str] = None
+
+
+class InterviewOut(InterviewBase):
+    id: int
+    created_at: Optional[str] = None
+    updated_at: Optional[str] = None
+
+
+class QuizQuestionBase(BaseModel):
+    description: Optional[str] = None
+    type: Optional[str] = None
+    category: Optional[str] = None
+    time_seconds: Optional[int] = None
+    image_url: Optional[str] = None
+    ai_interviewed_job_id: Optional[int] = None
+    # Admin fields
+    is_approved: Optional[bool] = None
+    is_deleted: Optional[bool] = None
+    admin_notes: Optional[str] = None
+
+
+class QuizQuestionOut(QuizQuestionBase):
+    id: int
+    created_at: Optional[str] = None
+
+
+class DSAQuestionBase(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    difficulty: Optional[str] = None
+    time_minutes: Optional[int] = None
+    ai_interviewed_job_id: Optional[int] = None
+    # Admin fields
+    is_approved: Optional[bool] = None
+    is_deleted: Optional[bool] = None
+    admin_notes: Optional[str] = None
+
+
+class DSAQuestionOut(DSAQuestionBase):
+    id: int
+    created_at: Optional[str] = None
+
+
+class InterviewQuestionBase(BaseModel):
+    question: Optional[str] = None
+    question_type: Optional[str] = None
+    order_number: Optional[int] = None
+    ai_interviewed_job_id: Optional[int] = None
+    # Admin fields
+    is_approved: Optional[bool] = None
+    is_deleted: Optional[bool] = None
+    admin_notes: Optional[str] = None
+
+
+class InterviewQuestionOut(InterviewQuestionBase):
+    id: int

@@ -48,7 +48,7 @@ const InvitedCandidatesList: React.FC<InvitedCandidatesListProps> = ({ jobId }) 
   const fetchCandidates = async () => {
     try {
       setLoading(true);
-      const response = await interviewApi.getInterviews({ job_id: jobId });
+      const response = await interviewApi.getInterviews({ ai_interviewed_job_id: jobId });
       setCandidates(response.data.interviews || []);
     } catch (error) {
       console.error("Error fetching candidates:", error);

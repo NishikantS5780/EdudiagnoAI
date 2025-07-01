@@ -242,3 +242,18 @@ class UpdateQuizOption(BaseModel):
 class CreateQuizResponse(BaseModel):
     question_id: int
     option_id: int
+
+
+class JobApplicationBase(BaseModel):
+    job_seeker_id: Optional[int] = None
+    job_id: Optional[int] = None
+    status: Optional[str] = None
+    resume_url: Optional[str] = None
+    applied_at: Optional[str] = None
+    # Admin fields
+    is_flagged: Optional[bool] = None
+    admin_notes: Optional[str] = None
+
+
+class JobApplicationOut(JobApplicationBase):
+    id: int

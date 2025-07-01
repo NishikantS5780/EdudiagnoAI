@@ -1289,6 +1289,10 @@ async def get_interview_by_private_link(
     if not interview:
         logging.error(f"Token not found: {token}")
         raise HTTPException(status_code=404, detail="Invalid or expired private link")
+    # Check if the associated job is closed
+    job = db.execute(select(AiInterviewedJob).where(AiInterviewedJob.id == interview.ai_interviewed_job_id)).scalar_one_or_none()
+    if job and getattr(job, "is_closed", False):
+        raise HTTPException(status_code=403, detail="Job is closed")
     if email is None:
         logging.info(f"Token valid, email not provided. Interview ID: {interview.id}")
         return {
