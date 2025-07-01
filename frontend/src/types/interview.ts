@@ -76,6 +76,6 @@ export interface GetInterviewsParams {
   score?: string;
   department?: string;
   job?: string;
-  start?: number;
+  offset?: number;
   limit?: number;
 }
