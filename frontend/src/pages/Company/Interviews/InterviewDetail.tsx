@@ -554,7 +554,7 @@ const InterviewDetail = () => {
             <div className="flex items-center justify-between">
               <span>DSA Score:</span>
               <span className="text-xl font-bold text-green-600">
-                {interview.dsa_responses.filter(response => response.passed).length} / {interview.dsa_responses.length}
+                {!!interview.dsa_responses && interview.dsa_responses.filter(response => response.passed).length} / {!!interview.dsa_responses && interview.dsa_responses.length}
               </span>
             </div>
             <div className="space-y-4">
@@ -662,7 +662,7 @@ const InterviewDetail = () => {
                       </p>
                       <p className="font-medium">
                         {interview.salary_min.toLocaleString()} -{" "}
-                        {interview.salary_max.toLocaleString()} {job.currency}
+                        {interview.salary_max.toLocaleString()} {!!job && job.currency}
                       </p>
                     </div>
                   )}
@@ -820,9 +820,9 @@ const InterviewDetail = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {interview.interview_question_and_responses.length > 0 ? (
+              {!!interview.interview_question_and_response && interview.interview_question_and_response.length > 0 ? (
                 <div className="space-y-8">
-                  {interview.question_and_responses
+                  {interview.interview_question_and_response
                     .sort((a, b) => a.order_number - b.order_number)
                     .map((qr, index) => (
                       <div key={index} className="space-y-4">
@@ -875,7 +875,7 @@ const InterviewDetail = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {interview.quiz_responses.length > 0 ? (
+              {!!interview.quiz_responses && interview.quiz_responses.length > 0 ? (
                 <div className="space-y-8">
                   <div className="space-y-4">
                     <div className="space-y-6">
@@ -902,7 +902,7 @@ const InterviewDetail = () => {
                               {question.description}
                             </p>
                             <div className="space-y-2">
-                              {question.options.map((option) => (
+                              {!!question.options && question.options.map((option) => (
                                 <div
                                   key={option.id}
                                   className={`flex items-center gap-2 border rounded p-2 ${
@@ -913,7 +913,7 @@ const InterviewDetail = () => {
                                 >
                                   <div
                                     className={`w-4 h-4 rounded-full border ${
-                                      question.selected_options.filter((o)=>option.id == o.quiz_option_id).length > 0
+                                      !!question.selected_options && question.selected_options.filter((o)=>option.id == o.quiz_option_id).length > 0
                                         ? option.correct
                                           ? "bg-green-500 border-green-600"
                                           : "bg-red-500 border-red-600"
@@ -924,7 +924,7 @@ const InterviewDetail = () => {
                                   ></div>
                                   <p
                                     className={`text-sm ${
-                                      question.selected_options.filter((o)=>option.id == o.quiz_option_id).length > 0
+                                      !!question.selected_options && question.selected_options.filter((o)=>option.id == o.quiz_option_id).length > 0
                                         ? option.correct
                                           ? "text-green-600 font-medium dark:text-green-400"
                                           : "text-red-600 font-medium dark:text-red-400"
@@ -964,7 +964,7 @@ const InterviewDetail = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {interview.dsa_responses.length > 0 ? (
+              {!!interview.dsa_responses && interview.dsa_responses.length > 0 ? (
                 <div className="space-y-8">
                   <div className="space-y-4">
                     <div className="space-y-6">

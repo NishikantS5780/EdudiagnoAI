@@ -66,6 +66,7 @@ export interface InterviewData {
       time_minutes?: string;
       code?: string;
       passed?: boolean;
+      difficulty?: string;
   }[]
 }
 
