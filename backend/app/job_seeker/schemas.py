@@ -96,45 +96,9 @@ class AcademicAchievement(BaseModel):
     id: Optional[int] = None
     qualification: Optional[str] = None
     achievements: Optional[str] = None
-# --- JobSeeker Schemas ---
-class JobSeekerCreate(BaseModel):
-    firstname: str
-    lastname: str
-    email: str
-    phone: str
-    country_code: str
-    password: str
-    work_experience_yrs: Optional[int] = 0
-    email_verified: Optional[bool] = False
-    phone_verified: Optional[bool] = False
-    profile_picture_url: Optional[str] = None
-    gender: Optional[str] = None
-    date_of_birth: Optional[str] = None
-    current_location: Optional[str] = None
-    home_town: Optional[str] = None
-    country: Optional[str] = None
-    higher_educations: Optional[List[HigherEducation]] = None
-    hsc_education: Optional[HSCEducation] = None
-    ssc_education: Optional[SSCEducation] = None
-    key_skills: Optional[str] = None
-    languages: Optional[str] = None
-    profile_summary: Optional[str] = None
-    resume_url: Optional[str] = None
-    employment_details: Optional[List[EmploymentDetail]] = None
-    internships: Optional[List[Internship]] = None
-    preferred_work_location: Optional[str] = None
-    career_preference_jobs: Optional[bool] = None
-    career_preference_internships: Optional[bool] = None
-    min_duration_months: Optional[int] = None
-    projects: Optional[List[Project]] = None
-    certifications: Optional[List[Certification]] = None
-    clubs_and_committees: Optional[List[ClubAndCommittee]] = None
-    competitive_exams: Optional[List[CompetitiveExam]] = None
-    academic_achievements: Optional[List[AcademicAchievement]] = None
-    awards_and_accomplishments: Optional[str] = None
-    updates_subscription: Optional[bool] = None
 
-class JobSeekerUpdate(BaseModel):
+# --- JobSeeker Schemas ---
+class JobSeekerBase(BaseModel):
     firstname: Optional[str] = None
     lastname: Optional[str] = None
     email: Optional[str] = None
@@ -169,7 +133,27 @@ class JobSeekerUpdate(BaseModel):
     academic_achievements: Optional[List[AcademicAchievement]] = None
     awards_and_accomplishments: Optional[str] = None
     updates_subscription: Optional[bool] = None
-    # Add more fields as needed
+    # Admin fields
+    is_suspended: Optional[bool] = None
+    is_verified: Optional[bool] = None
+    is_deleted: Optional[bool] = None
+    admin_notes: Optional[str] = None
+
+class JobSeekerCreate(JobSeekerBase):
+    firstname: str
+    lastname: str
+    email: str
+    phone: str
+    country_code: str
+    password: str
+
+class JobSeekerUpdate(JobSeekerBase):
+    pass
+
+class JobSeekerOut(JobSeekerBase):
+    id: int
+    created_at: Optional[str] = None
+    updated_at: Optional[str] = None
 
 class JobSeekerLogin(BaseModel):
     email: str

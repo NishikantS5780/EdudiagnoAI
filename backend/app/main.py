@@ -14,6 +14,10 @@ from app.config import settings
 
 from .database import engine, Base
 
+from app.routes import admin as admin_router
+from app.models import AdminUser
+from app.lib.security import hash_password
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
@@ -59,11 +63,32 @@ app.include_router(public.router.router, prefix="/api/v1", tags=["Public"])
 app.include_router(company.router.router, prefix="/api/v1/company", tags=["Company"])
 app.include_router(interview.router.router, prefix="/api/v1/interview", tags=["Interview"])
 app.include_router(job_seeker.router.router, prefix="/api/v1/jobseeker", tags=["Job Seeker"])
+app.include_router(admin_router.router, prefix="/api/v1/admin", tags=["Admin"])
 
 
 @app.get("/api/v1", tags=["Health"])
 def read_root():
     return {"status": "healthy", "version": "1.0.0"}
+
+
+@app.on_event("startup")
+def create_default_admin():
+    from sqlalchemy.orm import Session
+    from .database import SessionLocal
+    db: Session = SessionLocal()
+    try:
+        admin = db.query(AdminUser).filter(AdminUser.email == "admin@edudiagno.com").first()
+        if not admin:
+            admin = AdminUser(
+                email="admin@edudiagno.com",
+                password_hash=hash_password("EdUdIaGnO364"),
+                is_active=True,
+                role="superadmin"
+            )
+            db.add(admin)
+            db.commit()
+    finally:
+        db.close()
 
 
 if __name__ == "__main__":

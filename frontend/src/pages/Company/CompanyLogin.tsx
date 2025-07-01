@@ -34,6 +34,8 @@ const CompanyLogin = () => {
     } catch (error: any) {
       if (error.response?.data?.message === "invalid credentials") {
         toast.error("Invalid email or password");
+      } else if (error.response?.data?.message === "Account suspended. Please contact support.") {
+        toast.error("Account suspended. Please contact support.");
       } else {
         toast.error("Failed to login");
       }

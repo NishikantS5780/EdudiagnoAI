@@ -6,6 +6,7 @@ import { Card, CardHeader, CardTitle, CardContent, CardFooter, CardDescription }
 import { interviewApi } from "@/services/interviewApi";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import { Lock } from "lucide-react";
+import JobClosedMessage from "./JobClosedMessage";
 
 const PrivateInterviewPage: React.FC = () => {
   const { token } = useParams<{ token: string }>();
@@ -14,6 +15,7 @@ const PrivateInterviewPage: React.FC = () => {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [jobClosed, setJobClosed] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,11 +40,21 @@ const PrivateInterviewPage: React.FC = () => {
       setError(
         err?.response?.data?.detail || "Invalid or expired link or email mismatch."
       );
+      if (
+        err?.response?.data?.detail &&
+        err.response.data.detail.toLowerCase().includes("job is closed")
+      ) {
+        setJobClosed(true);
+      }
       console.error("[PrivateInterviewPage] API error:", err);
     } finally {
       setLoading(false);
     }
   };
+
+  if (jobClosed) {
+    return <JobClosedMessage />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-background to-muted/50 py-12 px-2">
