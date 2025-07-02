@@ -764,3 +764,15 @@ class AdminUser(Base):
     role = Column(String, default="admin")  # e.g., admin, superadmin
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+
+
+class DSAPoolQuestion(Base):
+    __tablename__ = "dsa_pool_questions"
+
+    id = Column(Integer, primary_key=True)
+    title = Column(String)
+    description = Column(String)
+    topic = Column(String)
+    difficulty = Column(String)
+    time_minutes = Column(Integer)
+    created_at = Column(DateTime, default=func.now())
