@@ -1860,6 +1860,11 @@ async def invite_candidates(
             <a href='{private_link}'>{private_link}</a>
             <p>This link is unique to you and should not be shared.</p>
             <p>Best regards,<br/>Edudiagno Team</p>
+            <hr>
+            <p>🌐 Check us out: https://edudiagno.com</p>
+            <p>📱 Follow on IG: https://lnkd.in/gsJV9Pnr</p>
+            <p>🔗 LinkedIn: https://lnkd.in/ggMYfJ29</p>
+            <p>💼 Contact us: contact@edudiagno.com</p>
         """
         try:
             send_smtp_email = brevo.brevo_python.SendSmtpEmail(
