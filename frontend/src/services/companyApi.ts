@@ -470,5 +470,11 @@ export const companyApi = {
         otp
       });
       return res;
-  }
+  },
+  getDSAPoolQuestions: async () => {
+    const res = await axios.get(`${config.API_BASE_URL}/dsapool-questions`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+    });
+    return res;
+  },
 };

@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Request
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import and_, insert, select, update, delete
 from app import models, database
 from app.job_seeker.schemas import JobSeekerOut, JobSeekerUpdate
 from app.company.schemas import CompanyOut, CompanyBase, JobOut, JobBase, AiInterviewedJobOut, AiInterviewedJobBase
@@ -10,7 +11,6 @@ from app.lib import jwt as app_jwt
 from app.lib.security import verify_password
 from pydantic import BaseModel
 from typing import Optional
-from sqlalchemy import and_, insert, select, update, delete
 
 router = APIRouter(tags=["Admin"])
 
@@ -640,13 +640,12 @@ def list_dsapool_questions(
     db: Session = Depends(database.get_db),
     admin=Depends(authorize_admin),
 ):
-    stmt = select(DSAPoolQuestion)
+    query = db.query(DSAPoolQuestion).options(joinedload(DSAPoolQuestion.test_cases))
     if difficulty:
-        stmt = stmt.where(DSAPoolQuestion.difficulty == difficulty)
+        query = query.filter(DSAPoolQuestion.difficulty == difficulty)
     if search:
-        stmt = stmt.where((DSAPoolQuestion.title.ilike(f"%{search}%")) | (DSAPoolQuestion.topic.ilike(f"%{search}%")))
-    result = db.execute(stmt)
-    questions = result.scalars().all()
+        query = query.filter((DSAPoolQuestion.title.ilike(f"%{search}%")) | (DSAPoolQuestion.topic.ilike(f"%{search}%")))
+    questions = query.all()
     return questions
 
 @router.get("/dsapool-questions/{question_id}")

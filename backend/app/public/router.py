@@ -4,11 +4,11 @@ import json
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from pypdf import PdfReader
 from sqlalchemy import and_, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app import database, services
 from app.configs import openai
-from app.models import City, Country, State
+from app.models import City, Country, State, DSAPoolQuestion
 from app.public import schemas
 
 
@@ -201,3 +201,10 @@ async def get_interview_questions_by_job(
     job_id: int, db: Session = Depends(database.get_db)
 ):
     return services.interview_question.get_interview_question_by_job_id(job_id, db)
+
+
+@router.get("/dsapool-questions")
+def get_dsapool_questions(db: Session = Depends(database.get_db)):
+    # Return all DSA pool questions with their test cases
+    questions = db.query(DSAPoolQuestion).options(joinedload(DSAPoolQuestion.test_cases)).all()
+    return questions
