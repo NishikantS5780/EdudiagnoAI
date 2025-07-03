@@ -80,10 +80,18 @@ const InterviewsPage = () => {
   const itemsPerPage = 10;
 
   useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, scoreFilter, departmentFilter, jobFilter]);
+
+  useEffect(() => {
     interviewApi
       .getInterviews({
-        start: (currentPage - 1) * itemsPerPage,
+        offset: (currentPage - 1) * itemsPerPage,
         limit: itemsPerPage,
+        search: searchQuery,
+        score: scoreFilter,
+        department: departmentFilter,
+        job: jobFilter,
       })
       .then(async (res) => {
         const jobIds = res.data.interviews.map(
@@ -115,7 +123,7 @@ const InterviewsPage = () => {
 
         setInterviewsData(res.data.interviews);
       });
-  }, [currentPage]);
+  }, [currentPage, searchQuery, scoreFilter, departmentFilter, jobFilter]);
 
   const deleteInterview = async () => {
     if (!interviewToDelete) return;
@@ -133,7 +141,7 @@ const InterviewsPage = () => {
 
       interviewApi
         .getInterviews({
-          start: (currentPage - 1) * itemsPerPage,
+          offset: (currentPage - 1) * itemsPerPage,
           limit: itemsPerPage,
         })
         .then((res) => {
@@ -204,11 +212,17 @@ const InterviewsPage = () => {
               placeholder="Search candidates or jobs..."
               className="pl-8"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                // setCurrentPage(1); // now handled by useEffect
+              }}
             />
           </div>
           <div className="flex flex-wrap gap-2">
-            <Select value={scoreFilter} onValueChange={setScoreFilter}>
+            <Select value={scoreFilter} onValueChange={(val) => {
+              setScoreFilter(val);
+              // setCurrentPage(1); // now handled by useEffect
+            }}>
               <SelectTrigger className="w-[140px]">
                 <BarChart3 className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Score" />
@@ -223,10 +237,10 @@ const InterviewsPage = () => {
               </SelectContent>
             </Select>
 
-            <Select
-              value={departmentFilter}
-              onValueChange={setDepartmentFilter}
-            >
+            <Select value={departmentFilter} onValueChange={(val) => {
+              setDepartmentFilter(val);
+              // setCurrentPage(1); // now handled by useEffect
+            }}>
               <SelectTrigger className="w-[150px] hidden">
                 <Filter className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Department" />
@@ -241,7 +255,10 @@ const InterviewsPage = () => {
               </SelectContent>
             </Select>
 
-            <Select value={jobFilter} onValueChange={setJobFilter}>
+            <Select value={jobFilter} onValueChange={(val) => {
+              setJobFilter(val);
+              // setCurrentPage(1); // now handled by useEffect
+            }}>
               <SelectTrigger className="w-[180px] hidden">
                 <Filter className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Job" />
@@ -339,8 +356,8 @@ const InterviewsPage = () => {
                           "Unknown"}
                       </TableCell>
                       <TableCell>
-                        {interview.created_at &&
-                          new Date(interview.created_at).toLocaleDateString()}
+                        {interview.updated_at &&
+                          new Date(interview.updated_at).toLocaleDateString()}
                       </TableCell>
                       <TableCell>
                         {interview.overall_score ? (

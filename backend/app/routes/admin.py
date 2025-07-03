@@ -5,10 +5,12 @@ from app.job_seeker.schemas import JobSeekerOut, JobSeekerUpdate
 from app.company.schemas import CompanyOut, CompanyBase, JobOut, JobBase, AiInterviewedJobOut, AiInterviewedJobBase
 from app.interview.schemas import InterviewOut, InterviewBase, QuizQuestionOut, QuizQuestionBase, DSAQuestionOut, DSAQuestionBase, InterviewQuestionOut, InterviewQuestionBase
 from app.schemas import JobApplicationOut, JobApplicationBase
-from app.models import AdminUser
+from app.models import AdminUser, DSAPoolQuestion
 from app.lib import jwt as app_jwt
 from app.lib.security import verify_password
 from pydantic import BaseModel
+from typing import Optional
+from sqlalchemy import and_, insert, select, update, delete
 
 router = APIRouter(tags=["Admin"])
 
@@ -580,4 +582,102 @@ def flag_job_application(id: int, flag: bool, db: Session = Depends(database.get
         raise HTTPException(404, "JobApplication not found")
     app.is_flagged = flag
     db.commit()
-    return {"id": id, "is_flagged": flag} 
+    return {"id": id, "is_flagged": flag}
+
+
+
+# --- DSAPoolQuestion Schemas ---
+class DSAPoolQuestionCreate(BaseModel):
+    title: str
+    description: str
+    topic: str
+    difficulty: str
+    time_minutes: int
+
+class DSAPoolQuestionUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    topic: Optional[str] = None
+    difficulty: Optional[str] = None
+    time_minutes: Optional[int] = None
+
+@router.post("/dsapool-questions")
+def create_dsapool_question(data: DSAPoolQuestionCreate, db: Session = Depends(database.get_db), admin=Depends(authorize_admin)):
+    stmt = insert(DSAPoolQuestion).values(
+        title=data.title,
+        description=data.description,
+        topic=data.topic,
+        difficulty=data.difficulty,
+        time_minutes=data.time_minutes,
+    ).returning(
+        DSAPoolQuestion.id,
+        DSAPoolQuestion.title,
+        DSAPoolQuestion.description,
+        DSAPoolQuestion.topic,
+        DSAPoolQuestion.difficulty,
+        DSAPoolQuestion.time_minutes,
+        DSAPoolQuestion.created_at
+    )
+    result = db.execute(stmt)
+    db.commit()
+    return result.mappings().one_or_none()
+
+@router.get("/dsapool-questions")
+def list_dsapool_questions(
+    difficulty: Optional[str] = None,
+    search: Optional[str] = None,
+    db: Session = Depends(database.get_db),
+    admin=Depends(authorize_admin),
+):
+    stmt = select(DSAPoolQuestion)
+    if difficulty:
+        stmt = stmt.where(DSAPoolQuestion.difficulty == difficulty)
+    if search:
+        stmt = stmt.where(DSAPoolQuestion.title.ilike(f"%{search}%") | DSAPoolQuestion.topic.ilike(f"%{search}%"))
+    result = db.execute(stmt)
+    return result.mappings().all()
+
+@router.get("/dsapool-questions/{question_id}")
+def get_dsapool_question(question_id: int, db: Session = Depends(database.get_db), admin=Depends(authorize_admin)):
+    stmt = select(DSAPoolQuestion).where(DSAPoolQuestion.id == question_id)
+    result = db.execute(stmt)
+    row = result.mappings().one_or_none()
+    if not row:
+        raise HTTPException(404, "DSA Question not found")
+    return row
+
+@router.put("/dsapool-questions/{question_id}")
+def update_dsapool_question(question_id: int, data: DSAPoolQuestionUpdate, db: Session = Depends(database.get_db), admin=Depends(authorize_admin)):
+    update_data = data.dict(exclude_unset=True)
+    if not update_data:
+        raise HTTPException(400, "No fields to update")
+    stmt = (
+        update(DSAPoolQuestion)
+        .where(DSAPoolQuestion.id == question_id)
+        .values(**update_data)
+        .returning(
+            DSAPoolQuestion.id,
+            DSAPoolQuestion.title,
+            DSAPoolQuestion.description,
+            DSAPoolQuestion.topic,
+            DSAPoolQuestion.difficulty,
+            DSAPoolQuestion.time_minutes,
+            DSAPoolQuestion.created_at
+        )
+    )
+    result = db.execute(stmt)
+    db.commit()
+    row = result.mappings().one_or_none()
+    if not row:
+        raise HTTPException(404, "DSA Question not found")
+    return row
+
+@router.delete("/dsapool-questions/{question_id}")
+def delete_dsapool_question(question_id: int, db: Session = Depends(database.get_db), admin=Depends(authorize_admin)):
+    stmt = delete(DSAPoolQuestion).where(DSAPoolQuestion.id == question_id).returning(DSAPoolQuestion.id)
+    result = db.execute(stmt)
+    db.commit()
+    row = result.fetchone()
+    if not row:
+        raise HTTPException(404, "DSA Question not found")
+    return {"ok": True}

@@ -36,6 +36,7 @@ import {
   Link as LinkIcon,
   FileText,
   Image,
+  Download
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import VideoJS from "@/components/common/VideoJs";
@@ -98,9 +99,9 @@ interface QuizResponse {
 const InterviewDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [isLinkCopied, setIsLinkCopied] = useState(false);
   const [interviewTab, setInterviewTab] = useState("overview");
-  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+  // const [isLinkCopied, setIsLinkCopied] = useState(false);
+  // const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [interview, setInterview] = useState<InterviewData | null>(null);
   const [job, setJob] = useState<AiInterviewedJobData | null>(null);
@@ -134,9 +135,9 @@ const InterviewDetail = () => {
         setInterview(res.data);
 
         // Fetch job details
-        if (res.data.job_id) {
+        if (res.data.ai_interviewed_job_id) {
           const jobResponse = await companyApi.getAiInterviewedJobById(
-            res.data.job_id.toString()
+            res.data.ai_interviewed_job_id.toString()
           );
           const jobData = jobResponse.data;
           setJob({
@@ -417,7 +418,7 @@ const InterviewDetail = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <Card className="md:col-span-2">
-          <CardHeader className="flex flex-row items-start justify-between pb-2">
+          <CardHeader className="flex flex-row flex-wrap items-start justify-between pb-2">
             <div className="flex items-center gap-4">
               <Avatar className="h-14 w-14">
                 <AvatarFallback className="text-lg">
@@ -432,7 +433,7 @@ const InterviewDetail = () => {
                 <CardDescription>{interview.email}</CardDescription>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-4">
               <Badge
                 variant={
                   interview.status === "completed" ? "success" : "warning"
@@ -440,12 +441,30 @@ const InterviewDetail = () => {
               >
                 {interview.status}
               </Badge>
-              <Button
-                variant="outline"
-                onClick={() => navigate(`/company/interviews/${id}/report`)}
-              >
-                View Report
-              </Button>
+              {interview.report_file_url ? (
+                <a
+                  href={interview.report_file_url}
+                  className="flex gap-1 items-center bg-accent rounded p-2 hover:bg-accent/90 transition-all cursor-pointer"
+                  target="_blank"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Export Report
+                </a>
+              ) : interview.status == "incomplete" ? (
+                <div className="text-destructive">Interview incomplete!</div>
+              ) : (
+                <div className="text-amber-600">Report not Generated yet!</div>
+              )}
+                {interview.resume_url && (
+                    <a
+                      className="flex items-center gap-2 border rounded px-4 py-2"
+                      href={interview.resume_url}
+                      target="_blank"
+                    >
+                      <FileText className="h-4 w-4" />
+                      Resume
+                    </a>
+                )}
             </div>
           </CardHeader>
           <CardContent className="pt-4">
@@ -483,18 +502,6 @@ const InterviewDetail = () => {
                 ))}
               </div>
             </div>
-            {interview.resume_url && (
-              <div className="mt-6">
-                <a
-                  className="flex items-center gap-2"
-                  href={interview.resume_url}
-                  target="_blank"
-                >
-                  <FileText className="h-4 w-4" />
-                  Download Resume
-                </a>
-              </div>
-            )}
           </CardContent>
         </Card>
 
@@ -504,14 +511,10 @@ const InterviewDetail = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
-              <span>Status:</span>
-              {interview.status && getStatusBadge(interview.status)}
-            </div>
-            <div className="flex items-center justify-between">
               <span>Date:</span>
               <div className="flex items-center text-sm">
                 <Calendar className="h-4 w-4 mr-1 text-muted-foreground" />
-                {new Date(interview.created_at || "").toLocaleDateString()}
+                {new Date(interview.updated_at || "").toLocaleDateString()}
               </div>
             </div>
             <div className="flex items-center justify-between">
@@ -521,7 +524,7 @@ const InterviewDetail = () => {
                   interview.overall_score || 0
                 )}`}
               >
-                {interview.overall_score || 0}%
+                {interview.overall_score || 0} / 100
               </span>
             </div>
             <div className="flex items-center justify-between">
@@ -548,15 +551,11 @@ const InterviewDetail = () => {
                 </span>
               </div>
             </div>
-            <div className="pt-4">
-              <Button
-                variant="outline"
-                className="w-full flex items-center justify-center gap-2"
-                onClick={() => setInterviewTab("mcq")}
-              >
-                <FileText className="h-4 w-4" />
-                View MCQ Responses
-              </Button>
+            <div className="flex items-center justify-between">
+              <span>DSA Score:</span>
+              <span className="text-xl font-bold text-green-600">
+                {!!interview.dsa_responses && interview.dsa_responses.filter(response => response.passed).length} / {!!interview.dsa_responses && interview.dsa_responses.length}
+              </span>
             </div>
             <div className="space-y-4">
               <div>
@@ -570,8 +569,8 @@ const InterviewDetail = () => {
                       }}
                     />
                   </div>
-                  <span className="text-sm font-medium">
-                    {interview.technical_skills_score || 0}%
+                  <span className="text-sm font-medium whitespace-nowrap">
+                    {interview.technical_skills_score || 0} / 100
                   </span>
                 </div>
               </div>
@@ -587,8 +586,8 @@ const InterviewDetail = () => {
                       }}
                     />
                   </div>
-                  <span className="text-sm font-medium">
-                    {interview.communication_skills_score || 0}%
+                  <span className="text-sm font-medium whitespace-nowrap">
+                    {interview.communication_skills_score || 0} / 100
                   </span>
                 </div>
               </div>
@@ -606,8 +605,8 @@ const InterviewDetail = () => {
                       }}
                     />
                   </div>
-                  <span className="text-sm font-medium">
-                    {interview.problem_solving_skills_score || 0}%
+                  <span className="text-sm font-medium whitespace-nowrap">
+                    {interview.problem_solving_skills_score || 0} / 100
                   </span>
                 </div>
               </div>
@@ -623,8 +622,8 @@ const InterviewDetail = () => {
                       }}
                     />
                   </div>
-                  <span className="text-sm font-medium">
-                    {interview.cultural_fit_score || 0}%
+                  <span className="text-sm font-medium whitespace-nowrap">
+                    {interview.cultural_fit_score || 0} / 100
                   </span>
                 </div>
               </div>
@@ -641,6 +640,7 @@ const InterviewDetail = () => {
           <TabsTrigger value="screenshots">Screenshots</TabsTrigger>
           <TabsTrigger value="questions">Questions & Responses</TabsTrigger>
           <TabsTrigger value="mcq">MCQ Responses</TabsTrigger>
+          <TabsTrigger value="dsa">DSA Responses</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -649,24 +649,20 @@ const InterviewDetail = () => {
               <CardTitle>Resume Match Analysis</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {job ? (
+              {
                 <>
                   <div>
                     <p className="text-sm text-muted-foreground">Job Title</p>
-                    <p className="font-medium">{job.title}</p>
+                    <p className="font-medium">{interview.job_title}</p>
                   </div>
-                  {job.show_salary && job.salary_min && job.salary_max && (
+                  {interview.show_salary && interview.salary_min && interview.salary_max && (
                     <div>
                       <p className="text-sm text-muted-foreground">
                         Salary Range
                       </p>
                       <p className="font-medium">
-                        {job.currency === "INR" && "₹"}
-                        {job.currency === "USD" && "$"}
-                        {job.currency === "EUR" && "€"}
-                        {job.currency === "GBP" && "£"}
-                        {job.salary_min.toLocaleString()} -{" "}
-                        {job.salary_max.toLocaleString()} {job.currency}
+                        {interview.salary_min.toLocaleString()} -{" "}
+                        {interview.salary_max.toLocaleString()} {!!job && job.currency}
                       </p>
                     </div>
                   )}
@@ -681,8 +677,8 @@ const InterviewDetail = () => {
                           }}
                         />
                       </div>
-                      <span className="text-sm font-medium">
-                        {interview.resume_match_score || 0}%
+                      <span className="text-sm font-medium whitespace-nowrap">
+                        {interview.resume_match_score || 0} / 100
                       </span>
                     </div>
                   </div>
@@ -694,13 +690,7 @@ const InterviewDetail = () => {
                     </p>
                   </div>
                 </>
-              ) : (
-                <div className="text-center py-4">
-                  <p className="text-muted-foreground">
-                    Job details not available for match analysis
-                  </p>
-                </div>
-              )}
+              }
             </CardContent>
           </Card>
         </TabsContent>
@@ -885,80 +875,45 @@ const InterviewDetail = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {quizResponses.length > 0 ? (
+              {!!interview.quiz_responses && interview.quiz_responses.length > 0 ? (
                 <div className="space-y-8">
-                  {/* Technical Questions Section */}
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-foreground">
-                      Technical Questions
-                    </h3>
                     <div className="space-y-6">
-                      {Array.from(
-                        new Set(quizResponses.map((r) => r.question_id))
-                      ).map((questionId) => {
-                        const question = quizQuestions.find(
-                          (q) => q.id === questionId
-                        );
-                        if (!question || question.category !== "technical")
-                          return null;
-
-                        // Get all responses for this question
-                        const questionResponses = quizResponses.filter(
-                          (r) => r.question_id === questionId
-                        );
-                        const selectedOptionIds = questionResponses.map(
-                          (r) => r.option_id
-                        );
-
-                        // Check if all selected options are correct
-                        const isFullyCorrect = selectedOptionIds.every(
-                          (optionId) => {
-                            const option = question.options.find(
-                              (opt) => opt.id === optionId
-                            );
-                            return option?.correct;
-                          }
-                        );
-
-                        // Check if all correct options were selected
-                        const allCorrectOptionsSelected = question.options
-                          .filter((opt) => opt.correct)
-                          .every((opt) => selectedOptionIds.includes(opt.id));
-
-                        const isCorrect =
-                          isFullyCorrect && allCorrectOptionsSelected;
-
+                      {interview.quiz_responses.map((question) => {
                         return (
                           <div
-                            key={questionId}
+                            key={question.id}
                             className={`border rounded-lg p-4 ${
-                              isCorrect
-                                ? "bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800"
-                                : "bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800"
+                              //isCorrect
+                              //  ? "bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800"
+                              //  : "bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800"
+                              ""
                             }`}
                           >
                             <div className="flex justify-between items-start mb-2">
-                              <p className="font-medium text-foreground">
-                                Question {questionId}
-                              </p>
-                              <Badge
-                                variant={isCorrect ? "success" : "destructive"}
+                              {/*<Badge
+                                // variant={isCorrect ? "success" : "destructive"}
                               >
                                 {isCorrect ? "Correct" : "Incorrect"}
                               </Badge>
+                              */}
                             </div>
                             <p className="text-sm text-muted-foreground mb-4">
                               {question.description}
                             </p>
                             <div className="space-y-2">
-                              {question.options.map((option) => (
+                              {!!question.options && question.options.map((option) => (
                                 <div
                                   key={option.id}
-                                  className="flex items-center gap-2"
+                                  className={`flex items-center gap-2 border rounded p-2 ${
+                                        option.correct
+                                          ? "border-green-600"
+                                          : "rder-red-600"
+                                  }`}
                                 >
                                   <div
                                     className={`w-4 h-4 rounded-full border ${
-                                      selectedOptionIds.includes(option.id)
+                                      !!question.selected_options && question.selected_options.filter((o)=>option.id == o.quiz_option_id).length > 0
                                         ? option.correct
                                           ? "bg-green-500 border-green-600"
                                           : "bg-red-500 border-red-600"
@@ -969,109 +924,7 @@ const InterviewDetail = () => {
                                   ></div>
                                   <p
                                     className={`text-sm ${
-                                      selectedOptionIds.includes(option.id)
-                                        ? option.correct
-                                          ? "text-green-600 font-medium dark:text-green-400"
-                                          : "text-red-600 font-medium dark:text-red-400"
-                                        : option.correct
-                                        ? "text-green-600 dark:text-green-400"
-                                        : "text-muted-foreground"
-                                    }`}
-                                  >
-                                    {option.label}
-                                  </p>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Aptitude Questions Section */}
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-foreground">
-                      Aptitude Questions
-                    </h3>
-                    <div className="space-y-6">
-                      {Array.from(
-                        new Set(quizResponses.map((r) => r.question_id))
-                      ).map((questionId) => {
-                        const question = quizQuestions.find(
-                          (q) => q.id === questionId
-                        );
-                        if (!question || question.category !== "aptitude")
-                          return null;
-
-                        // Get all responses for this question
-                        const questionResponses = quizResponses.filter(
-                          (r) => r.question_id === questionId
-                        );
-                        const selectedOptionIds = questionResponses.map(
-                          (r) => r.option_id
-                        );
-
-                        // Check if all selected options are correct
-                        const isFullyCorrect = selectedOptionIds.every(
-                          (optionId) => {
-                            const option = question.options.find(
-                              (opt) => opt.id === optionId
-                            );
-                            return option?.correct;
-                          }
-                        );
-
-                        // Check if all correct options were selected
-                        const allCorrectOptionsSelected = question.options
-                          .filter((opt) => opt.correct)
-                          .every((opt) => selectedOptionIds.includes(opt.id));
-
-                        const isCorrect =
-                          isFullyCorrect && allCorrectOptionsSelected;
-
-                        return (
-                          <div
-                            key={questionId}
-                            className={`border rounded-lg p-4 ${
-                              isCorrect
-                                ? "bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800"
-                                : "bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800"
-                            }`}
-                          >
-                            <div className="flex justify-between items-start mb-2">
-                              <p className="font-medium text-foreground">
-                                Question {questionId}
-                              </p>
-                              <Badge
-                                variant={isCorrect ? "success" : "destructive"}
-                              >
-                                {isCorrect ? "Correct" : "Incorrect"}
-                              </Badge>
-                            </div>
-                            <p className="text-sm text-muted-foreground mb-4">
-                              {question.description}
-                            </p>
-                            <div className="space-y-2">
-                              {question.options.map((option) => (
-                                <div
-                                  key={option.id}
-                                  className="flex items-center gap-2"
-                                >
-                                  <div
-                                    className={`w-4 h-4 rounded-full border ${
-                                      selectedOptionIds.includes(option.id)
-                                        ? option.correct
-                                          ? "bg-green-500 border-green-600"
-                                          : "bg-red-500 border-red-600"
-                                        : option.correct
-                                        ? "border-green-600"
-                                        : "border-gray-300"
-                                    }`}
-                                  ></div>
-                                  <p
-                                    className={`text-sm ${
-                                      selectedOptionIds.includes(option.id)
+                                      !!question.selected_options && question.selected_options.filter((o)=>option.id == o.quiz_option_id).length > 0
                                         ? option.correct
                                           ? "text-green-600 font-medium dark:text-green-400"
                                           : "text-red-600 font-medium dark:text-red-400"
@@ -1095,6 +948,69 @@ const InterviewDetail = () => {
                 <div className="text-center py-4">
                   <p className="text-muted-foreground">
                     No quiz responses available
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="dsa" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">DSA Responses</CardTitle>
+              <CardDescription>
+                Review the candidate's answers to DSA questions
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {!!interview.dsa_responses && interview.dsa_responses.length > 0 ? (
+                <div className="space-y-8">
+                  <div className="space-y-4">
+                    <div className="space-y-6">
+                      {interview.dsa_responses.map((response) => {
+                        return (
+                          <div
+                            key={response.id}
+                            className={`border rounded-lg p-4 ${
+                              response.passed
+                                ? "bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800"
+                                : "bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800"
+                            }`}
+                          >
+                          <div className="flex gap-4 mb-2">
+                            <h1 className="text-muted-foreground">
+                              {response.title}
+                            </h1>
+                            <span>
+                                {response.difficulty}
+                            </span>
+                            {
+                                !!response.time_minutes &&
+                                <span>
+                                    {response.time_minutes} min(s)
+                                </span>
+                            }
+                              <Badge variant={response.passed ? "success" : "destructive"} >
+                                {response.passed ? "Passed" : "Failed"}
+                              </Badge>
+                          </div>
+                            <p className="text-sm text-muted-foreground mb-4">
+                              {response.description}
+                            </p>
+                            <pre className="space-y-2">
+                                {response.code}
+                            </pre>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-4">
+                  <p className="text-muted-foreground">
+                    No dsa responses available
                   </p>
                 </div>
               )}
