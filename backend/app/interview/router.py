@@ -961,7 +961,7 @@ Important:
             DSAResponse.passed,
         )
         .join(DSAResponse, DSAResponse.dsa_question_id == DSAQuestion.id)
-        .where(DSAResponse.interview_id == int(id))
+        .where(DSAResponse.interview_id == int(interview_id))
     )
     dsa_responses = db.execute(stmt).mappings().all()
 
