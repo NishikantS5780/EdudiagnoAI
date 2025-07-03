@@ -490,28 +490,36 @@ const MCQTest = ({ onComplete }: { onComplete?: () => void }) => {
     const i_id = urlParams.get("i_id");
     const company = urlParams.get("company");
 
-    if (i_id && company) {
-      interviewApi
-        .candidateGetInterview()
-        .then((interviewResponse) => {
-          const jobId = interviewResponse.data.ai_interviewed_job_id;
-          return interviewApi.getAiInterviewedJob(jobId);
-        })
-        .then((response) => {
-          const jobData: AiInterviewedJobData = response.data;
-          if (jobData.hasDSATest) {
-            navigate(
-              `/interview/dsa-playground?i_id=${i_id}&company=${company}`
-            );
-          } else {
+    interviewApi.updateInterview({status: "Quiz Completed"}).then(() => {
+      console.log("Interview updated successfully");
+
+      if (i_id && company) {
+        interviewApi
+          .candidateGetInterview()
+          .then((interviewResponse) => {
+            const jobId = interviewResponse.data.ai_interviewed_job_id;
+            return interviewApi.getAiInterviewedJob(jobId);
+          })
+          .then((response) => {
+            const jobData: AiInterviewedJobData = response.data;
+            if (jobData.hasDSATest) {
+              navigate(
+                `/interview/dsa-playground?i_id=${i_id}&company=${company}`
+              );
+            } else {
+              navigate(`/interview/video?i_id=${i_id}&company=${company}`);
+            }
+          })
+          .catch((error) => {
+            console.error("Error fetching job data:", error);
             navigate(`/interview/video?i_id=${i_id}&company=${company}`);
-          }
-        })
-        .catch((error) => {
-          console.error("Error fetching job data:", error);
-          navigate(`/interview/video?i_id=${i_id}&company=${company}`);
-        });
-    }
+          });
+      }
+    }).catch((err) => {
+      console.error("Error updating interview:", err);
+    });
+
+    
   };
 
   const handleNext = () => {

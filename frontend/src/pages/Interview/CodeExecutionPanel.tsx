@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+import { interviewApi } from "@/services/interviewApi";
 
 interface CodeExecutionPanelProps {
   questionId: number;
@@ -294,6 +295,11 @@ function CodeExecutionPanel({
             onClick={() => {
               console.log("Submit button (last question) clicked");
               onSubmit && onSubmit();
+              interviewApi.updateInterview({status: "DSA Test Completed"}).then(() => {
+                    console.log("Interview updated successfully");
+              }).catch((err: any) => {
+                    console.error("Error updating interview:", err);
+              });
             }}
             variant="default"
           >

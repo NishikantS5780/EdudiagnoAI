@@ -310,13 +310,18 @@ const InterviewPage = () => {
             <Button
               size="lg"
               className="w-full"
-              onClick={() =>
-                navigate(
+              onClick={() =>{
+                interviewApi.updateInterview({status: "Resume Submitted"}).then(() => {
+                  console.log("Interview updated successfully");
+                  navigate(
                   `/interview/compatibility?job_id=${urlSearchParams.get(
                     "job_id"
                   )}`
                 )
-              }
+                }).catch((err) => {
+                  console.error("Error updating interview:", err);
+                });
+              }}
             >
               Let's Proceed
             </Button>
