@@ -30,6 +30,8 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
+import AdminDSAPool from "./AdminDSAPool";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 const navigation = [
   { key: "users", label: "Users (Job Seekers)", icon: Users },
@@ -567,7 +569,7 @@ export default function AdminDashboard() {
                 <CardTitle>Questions</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-muted-foreground">Questions management coming soon...</div>
+                <AdminDSAPool />
               </CardContent>
             </Card>
           )}

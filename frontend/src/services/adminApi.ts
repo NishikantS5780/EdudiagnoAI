@@ -146,5 +146,25 @@ export const adminApi = {
       headers: getAdminAuthHeaders(),
     });
   },
+  getDSAPoolQuestions: async () => {
+    return axios.get(`${config.API_BASE_URL}/admin/dsapool-questions`, {
+      headers: getAdminAuthHeaders(),
+    });
+  },
+  createDSAPoolQuestion: async (data: any) => {
+    return axios.post(`${config.API_BASE_URL}/admin/dsapool-questions`, data, {
+      headers: getAdminAuthHeaders(),
+    });
+  },
+  updateDSAPoolQuestion: async (id: number, data: any) => {
+    return axios.put(`${config.API_BASE_URL}/admin/dsapool-questions/${id}`, data, {
+      headers: getAdminAuthHeaders(),
+    });
+  },
+  deleteDSAPoolQuestion: async (id: number) => {
+    return axios.delete(`${config.API_BASE_URL}/admin/dsapool-questions/${id}`, {
+      headers: getAdminAuthHeaders(),
+    });
+  },
   // Add more admin API calls as needed
 }; 

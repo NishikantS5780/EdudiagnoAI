@@ -15,6 +15,8 @@ import { Plus, Trash2, Edit, Trash } from "lucide-react";
 import { toast } from "sonner";
 import { DSAQuestion, TestCase } from "@/types/aiInterviewedJob";
 import { companyApi } from "@/services/companyApi";
+import DSAPoolSelector from "./DSAPoolSelector";
+import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 interface DsaManagementProps {
   jobId: number;
@@ -31,6 +33,7 @@ const DsaManagement = ({ jobId }: DsaManagementProps) => {
   const [editingNewTestCase, setEditingNewTestCase] = useState<TestCase | null>(
     {}
   );
+  const [showDSAPoolModal, setShowDSAPoolModal] = useState(false);
 
   const fetchQuestions = async () => {
     try {
@@ -191,13 +194,33 @@ const DsaManagement = ({ jobId }: DsaManagementProps) => {
 
   return (
     <div className="space-y-8">
+      {/* DSA Pool Selector for company side */}
+      <Dialog open={showDSAPoolModal} onOpenChange={setShowDSAPoolModal}>
+        <DialogTrigger asChild>
+          <Button variant="outline" onClick={() => setShowDSAPoolModal(true)}>
+            Select from DSA Pool
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="max-w-2xl w-full">
+          <DialogTitle>Select a DSA Pool Question</DialogTitle>
+          <DialogDescription>
+            Browse and select a DSA pool question to add to this job.
+          </DialogDescription>
+          <DSAPoolSelector
+            onSelectPoolQuestion={(q) => {
+              setNewQuestion(q);
+              setShowDSAPoolModal(false);
+            }}
+          />
+        </DialogContent>
+      </Dialog>
       <div className="grid gap-6">
         <Card className="bg-card">
           <CardContent className="p-6 space-y-6">
             <div className="space-y-4">
               <div className="flex items-center gap-4">
                 <Input
-                  value={newQuestion.title}
+                  value={newQuestion.title || ""}
                   onChange={(e) =>
                     handleNewQuestionChange("title", e.target.value)
                   }
@@ -222,7 +245,7 @@ const DsaManagement = ({ jobId }: DsaManagementProps) => {
               </div>
 
               <Textarea
-                value={newQuestion.description}
+                value={newQuestion.description || ""}
                 onChange={(e) =>
                   handleNewQuestionChange("description", e.target.value)
                 }
@@ -331,7 +354,7 @@ const DsaManagement = ({ jobId }: DsaManagementProps) => {
                 <div className="flex items-center gap-4">
                   {editingQuestion?.id == question.id ? (
                     <Input
-                      value={editingQuestion?.title}
+                      value={editingQuestion?.title || ""}
                       onChange={(e) =>
                         handleEditingQuestionChange("title", e.target.value)
                       }
@@ -387,7 +410,7 @@ const DsaManagement = ({ jobId }: DsaManagementProps) => {
 
                 {editingQuestion?.id == question.id ? (
                   <Textarea
-                    value={editingQuestion?.description}
+                    value={editingQuestion?.description || ""}
                     onChange={(e) =>
                       handleEditingQuestionChange("description", e.target.value)
                     }
@@ -421,7 +444,7 @@ const DsaManagement = ({ jobId }: DsaManagementProps) => {
                           </p>
                           {editingQuestion?.id == question.id && (
                             <Textarea
-                              value={editingNewTestCase?.input}
+                              value={editingNewTestCase?.input || ""}
                               onChange={(e) =>
                                 handleEditingNewTestCaseChange(
                                   "input",
@@ -439,7 +462,7 @@ const DsaManagement = ({ jobId }: DsaManagementProps) => {
                           </p>
                           {editingQuestion?.id == question.id && (
                             <Textarea
-                              value={editingNewTestCase?.expected_output}
+                              value={editingNewTestCase?.expected_output || ""}
                               onChange={(e) =>
                                 handleEditingNewTestCaseChange(
                                   "expected_output",

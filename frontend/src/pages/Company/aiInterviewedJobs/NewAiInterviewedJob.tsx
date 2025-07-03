@@ -52,6 +52,7 @@ import {
 import { autoCompletionApi } from "@/services/autoCompletionApi";
 import AIGeneratePopup from "@/components/company/aiInterviewedJobs/AIGeneratePopup";
 import QuestionEditor from "@/components/company/QuestionEditor";
+import DSAPoolSelector from "@/components/company/aiInterviewedJobs/DSAPoolSelector";
 
 const NewJob = () => {
   const navigate = useNavigate();
