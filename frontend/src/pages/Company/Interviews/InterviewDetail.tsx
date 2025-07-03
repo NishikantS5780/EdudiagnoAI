@@ -833,7 +833,6 @@ const InterviewDetail = () => {
               {questionsAndResponses.length > 0 ? (
                 <div className="space-y-8">
                   {questionsAndResponses
-                  {questionsAndResponses
                     .sort((a, b) => a.order_number - b.order_number)
                     .map((qr, index) => (
                       <div key={index} className="space-y-4">
