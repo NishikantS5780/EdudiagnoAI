@@ -151,9 +151,6 @@ export default function VideoInterview({ onComplete }: { onComplete?: () => void
   const [isAiSpeaking, setIsAiSpeaking] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
-  const [recordedVideos, setRecordedVideos] = useState<
-    { questionId: string; blob: Blob }[]
-  >([]);
   const [isProcessingResponse, setIsProcessingResponse] = useState(false);
   const [hasRecordedCurrentQuestion, setHasRecordedCurrentQuestion] =
     useState(false);
@@ -200,7 +197,6 @@ export default function VideoInterview({ onComplete }: { onComplete?: () => void
   const analyser = useRef<AnalyserNode | null>(null);
   const microphone = useRef<MediaStreamAudioSourceNode | null>(null);
   const dataArray = useRef<Uint8Array | null>(null);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -453,8 +449,6 @@ export default function VideoInterview({ onComplete }: { onComplete?: () => void
 
   const handleStartRecording = () => {
     if (
-      !mediaRecorderRef.current ||
-      mediaRecorderRef.current.state === "recording" ||
       !audioRecorderRef.current ||
       audioRecorderRef.current.state === "recording"
     ) {
@@ -467,7 +461,6 @@ export default function VideoInterview({ onComplete }: { onComplete?: () => void
     recordingStartTimeRef.current = performance.now();
 
     // Start recording with 1-second chunks
-    mediaRecorderRef.current.start(1000);
     audioRecorderRef.current.start(1000);
     setIsRecording(true);
     setRecordingTime(0);
@@ -480,8 +473,6 @@ export default function VideoInterview({ onComplete }: { onComplete?: () => void
 
   const handleStopRecording = () => {
     if (
-      !mediaRecorderRef.current ||
-      mediaRecorderRef.current.state !== "recording" ||
       !audioRecorderRef.current ||
       audioRecorderRef.current.state !== "recording"
     ) {
@@ -489,7 +480,6 @@ export default function VideoInterview({ onComplete }: { onComplete?: () => void
     }
 
     // Stop recording
-    mediaRecorderRef.current.stop();
     audioRecorderRef.current.stop();
     setIsRecording(false);
 
@@ -726,9 +716,8 @@ export default function VideoInterview({ onComplete }: { onComplete?: () => void
       audioChunksRef.current = [];
       setIsAiTyping(true);
     } else {
-      if (mediaRecorderRef.current) mediaRecorderRef.current.stop();
       if (audioRecorderRef.current) audioRecorderRef.current.stop();
-      if (fullInterviewRecorderRef) fullInterviewRecorderRef.current?.stop();
+      if (fullInterviewRecorderRef.current) fullInterviewRecorderRef.current?.stop();
       stopCamera();
       analyzeInterview();
       setShowCompletionScreen(true);
@@ -932,6 +921,12 @@ export default function VideoInterview({ onComplete }: { onComplete?: () => void
         video: false,
       });
 
+      // Combine video and audio tracks for main recording
+      const combinedStream = new MediaStream([
+        ...videoStream.getVideoTracks(),
+        ...audioStream.getAudioTracks(),
+      ]);
+
       // Use video stream for display
       streamRef.current = videoStream;
       audioStreamRef.current = audioStream;
@@ -943,21 +938,23 @@ export default function VideoInterview({ onComplete }: { onComplete?: () => void
         });
       }
 
-      // Set up video media recorder with screen capture
-      const videoRecorder = new MediaRecorder(screenStream, {
-        mimeType: "video/webm;codecs=vp9,opus",
-      });
-
-      // Set up audio-only media recorder
+      // Set up audio-only media recorder (for answer transcription)
       const audioRecorder = new MediaRecorder(audioStream, {
         mimeType: "audio/webm;codecs=opus",
       });
 
-      mediaRecorderRef.current = videoRecorder;
       audioRecorderRef.current = audioRecorder;
 
-      // Set up full interview recorder with screen capture
-      const fullInterviewRecorder = new MediaRecorder(screenStream, {
+      // Combine screen video and microphone audio for full interview recording
+      const screenVideoTrack = screenStream.getVideoTracks()[0];
+      const micAudioTrack = audioStream.getAudioTracks()[0];
+      const combinedFullStream = new MediaStream([
+        screenVideoTrack,
+        micAudioTrack,
+      ]);
+
+      // Set up full interview recorder with combined stream
+      const fullInterviewRecorder = new MediaRecorder(combinedFullStream, {
         mimeType: "video/webm;codecs=vp9,opus",
       });
       fullInterviewRecorderRef.current = fullInterviewRecorder;
@@ -978,30 +975,9 @@ export default function VideoInterview({ onComplete }: { onComplete?: () => void
       );
 
       // Set up all the event handlers and data handlers as before
-      videoRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) {
-          recordedChunksRef.current.push(e.data);
-        }
-      };
-
       audioRecorder.ondataavailable = (e) => {
         if (e.data.size > 0) {
           audioChunksRef.current.push(e.data);
-        }
-      };
-
-      videoRecorder.onstop = () => {
-        const videoBlob = new Blob(recordedChunksRef.current, {
-          type: "video/webm",
-        });
-        if (videoBlob.size > 0) {
-          setRecordedVideos((prev) => [
-            ...prev,
-            {
-              questionId: `question-${currentQuestionIndex}`,
-              blob: videoBlob,
-            },
-          ]);
         }
       };
 
@@ -1061,11 +1037,6 @@ export default function VideoInterview({ onComplete }: { onComplete?: () => void
           console.error("Failed to upload full interview video:", error);
           setIsConvertingVideo(false);
         }
-      };
-
-      videoRecorder.onerror = (error) => {
-        toast.error("Recording error occurred");
-        setIsRecording(false);
       };
 
       audioRecorder.onerror = (error) => {
@@ -1134,9 +1105,6 @@ export default function VideoInterview({ onComplete }: { onComplete?: () => void
 
     if (i_id && company) {
       // Stop recording if active
-      if (mediaRecorderRef.current && isRecording) {
-        mediaRecorderRef.current.stop();
-      }
       if (audioRecorderRef.current && isRecording) {
         audioRecorderRef.current.stop();
       }

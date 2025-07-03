@@ -820,9 +820,9 @@ const InterviewDetail = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {!!interview.interview_question_and_response && interview.interview_question_and_response.length > 0 ? (
+              {questionsAndResponses.length > 0 ? (
                 <div className="space-y-8">
-                  {interview.interview_question_and_response
+                  {questionsAndResponses
                     .sort((a, b) => a.order_number - b.order_number)
                     .map((qr, index) => (
                       <div key={index} className="space-y-4">
