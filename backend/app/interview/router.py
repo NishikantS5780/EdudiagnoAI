@@ -1037,7 +1037,7 @@ Important:
     pdf.cell(half_width, 16.8, safe_text("City"), border=1)
     pdf.cell(half_width, 16.8, safe_text(data["city"]), border=1, ln=1)
     pdf.cell(half_width, 16.8, safe_text("Education"), border=1)
-    pdf.cell(half_width, 16.8, safe_text(data["education"]), border=1, ln=1)
+    pdf.multi_cell(half_width, 16.8, safe_text(data["education"]), border=1)
     pdf.cell(half_width, 16.8, safe_text("Experience"), border=1)
     pdf.cell(
         half_width, 16.8, safe_text(f"{data['work_experience_yrs']} years"), border=1, ln=1
