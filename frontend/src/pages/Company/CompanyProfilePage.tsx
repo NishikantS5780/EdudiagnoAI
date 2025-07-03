@@ -94,7 +94,7 @@ const CompanyProfilePage: React.FC = () => {
                   <div className="font-semibold flex items-center gap-2 mb-1"><MapPin className="h-4 w-4 text-blue-400" /> Address</div>
                   <div className="text-muted-foreground mb-3">{company?.address || <span className="italic text-red-400">Not specified</span>}</div>
                   <div className="font-semibold flex items-center gap-2 mb-1"><Globe className="h-4 w-4 text-blue-400" /> Website</div>
-                  <div className="text-muted-foreground mb-3">{company?.website ? <a href={company.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">{company.website}</a> : <span className="italic text-red-400">Not specified</span>}</div>
+                  <div className="text-muted-foreground mb-3">{company?.website_url ? <a href={company.website_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">{company.website_url}</a> : <span className="italic text-red-400">Not specified</span>}</div>
                   <div className="font-semibold flex items-center gap-2 mb-1"><Calendar className="h-4 w-4 text-blue-400" /> Foundation Year</div>
                   <div className="text-muted-foreground mb-3">{company?.foundation_year || <span className="italic text-red-400">Not specified</span>}</div>
                 </div>

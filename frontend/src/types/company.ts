@@ -7,7 +7,7 @@ export interface CompanyData {
   company_name?: string;
   designation?: string;
   phone?: string;
-  website?: string;
+  website_url?: string;
   industry?: string;
   address?: string;
   city?: string;
@@ -51,7 +51,7 @@ export interface CompanyPublicData {
   phone_otp?: string;
   phone_otp_expiry?: string;
   phone_verified?: boolean;
-  website?: string;
+  website_url?: string;
   industry?: string;
   min_company_size?: number;
   max_company_size?: number;

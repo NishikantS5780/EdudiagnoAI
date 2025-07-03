@@ -79,10 +79,6 @@ const EditCompanyProfileModal: React.FC<EditCompanyProfileModalProps> = ({ open,
             <Input name="about_us_poster_url" value={form.about_us_poster_url || ""} onChange={handleChange} />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Website</label>
-            <Input name="website" value={form.website || ""} onChange={handleChange} />
-          </div>
-          <div>
             <label className="block text-sm font-medium mb-1">Website URL</label>
             <Input name="website_url" value={form.website_url || ""} onChange={handleChange} />
           </div>
