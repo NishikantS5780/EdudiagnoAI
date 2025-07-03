@@ -53,6 +53,7 @@ import { autoCompletionApi } from "@/services/autoCompletionApi";
 import AIGeneratePopup from "@/components/company/aiInterviewedJobs/AIGeneratePopup";
 import QuestionEditor from "@/components/company/QuestionEditor";
 import DSAPoolSelector from "@/components/company/aiInterviewedJobs/DSAPoolSelector";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 const NewJob = () => {
   const navigate = useNavigate();
@@ -110,6 +111,7 @@ const NewJob = () => {
   const [cityPopupOpen, setCityPopupOpen] = useState(false);
   const [currencySearchTerm, setCurrencySearchTerm] = useState("");
   const [currencyPopupOpen, setCurrencyPopupOpen] = useState(false);
+  const [showDSAPoolModal, setShowDSAPoolModal] = useState(false);
 
   const jobFormSchema = z.object({
     title: z
@@ -1233,6 +1235,28 @@ const NewJob = () => {
                   <CardTitle>DSA Questions</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
+                  <div className="flex justify-end mb-4">
+                    <Button variant="outline" onClick={() => setShowDSAPoolModal(true)}>
+                      Add from DSA Pool
+                    </Button>
+                  </div>
+                  <Dialog open={showDSAPoolModal} onOpenChange={setShowDSAPoolModal}>
+                    <DialogContent className="max-w-2xl w-full">
+                      <DialogTitle>Select a DSA Pool Question</DialogTitle>
+                      <DialogDescription>
+                        Browse and select a DSA pool question to add to this job.
+                      </DialogDescription>
+                      <DSAPoolSelector
+                        onSelectPoolQuestion={(q) => {
+                          setJobData((prev) => ({
+                            ...prev,
+                            dsa_questions: [...(prev.dsa_questions || []), q],
+                          }));
+                          setShowDSAPoolModal(false);
+                        }}
+                      />
+                    </DialogContent>
+                  </Dialog>
                   {jobData.dsa_questions?.map(
                     (question: DSAQuestion, questionIndex: number) => (
                       <Card key={questionIndex} className="p-4">
