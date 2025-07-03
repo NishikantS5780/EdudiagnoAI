@@ -141,6 +141,7 @@ class CreateInterview(BaseModel):
 class UpdateInterview(BaseModel):
     firstname: Optional[str] = None
     lastname: Optional[str] = None
+    status: Optional[str] = None
     email: Optional[str] = None
     phone: Optional[str] = None
     work_experience_yrs: Optional[int] = None

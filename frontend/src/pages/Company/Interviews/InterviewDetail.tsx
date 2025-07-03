@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import videojs from "video.js";
 import "video.js/dist/video-js.css";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { InterviewData } from "@/types/interview";
 import { AiInterviewedJobData } from "@/types/aiInterviewedJob";
@@ -15,69 +15,19 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ArrowLeft,
-  ArrowRight,
   Calendar,
-  CheckCircle,
-  Clock,
-  ThumbsDown,
-  ThumbsUp,
   Video,
-  Copy,
-  Share2,
-  Mail,
-  Phone,
-  MapPin,
-  GraduationCap,
-  Briefcase,
-  Link as LinkIcon,
   FileText,
   Image,
   Download
 } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import VideoJS from "@/components/common/VideoJs";
 import { companyApi } from "@/services/companyApi";
 
-interface ScoreBreakdown {
-  technicalSkills: number;
-  communication: number;
-  problemSolving: number;
-  culturalFit: number;
-}
-
-interface Keyword {
-  term: string;
-  count: number;
-  sentiment: string;
-}
-
-interface Question {
-  id: string;
-  text: string;
-  type: string;
-  answer: string;
-  score: number;
-}
-
-interface RecordedResponse {
-  id: string;
-  questionId: string;
-  audioUrl: string;
-  transcript: string;
-  analysis: string;
-  score: number;
-  videoUrl: string;
-}
-
-interface QuizOption {
-  id: number;
-  label: string;
-  correct: boolean;
-}
 
 interface QuizQuestion {
   id: number;
@@ -355,33 +305,6 @@ const InterviewDetail = () => {
   }, [quizResponses, quizQuestions]);
 
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "completed":
-        return (
-          <Badge variant="outline" className="bg-success/10 text-success">
-            <CheckCircle className="h-3 w-3 mr-1" /> Completed
-          </Badge>
-        );
-      case "pending":
-        return (
-          <Badge variant="outline" className="bg-warning/10 text-warning">
-            <Clock className="h-3 w-3 mr-1" /> Pending
-          </Badge>
-        );
-      case "cancelled":
-        return (
-          <Badge
-            variant="outline"
-            className="bg-destructive/10 text-destructive"
-          >
-            <ThumbsDown className="h-3 w-3 mr-1" /> Cancelled
-          </Badge>
-        );
-      default:
-        return null;
-    }
-  };
 
   const getScoreColor = (score: number) => {
     if (score >= 85) return "text-success";
@@ -441,20 +364,20 @@ const InterviewDetail = () => {
               >
                 {interview.status}
               </Badge>
-              {interview.report_file_url ? (
-                <a
-                  href={interview.report_file_url}
-                  className="flex gap-1 items-center bg-accent rounded p-2 hover:bg-accent/90 transition-all cursor-pointer"
-                  target="_blank"
-                >
-                  <Download className="w-4 h-4 mr-2" />
-                  Export Report
-                </a>
-              ) : interview.status == "incomplete" ? (
-                <div className="text-destructive">Interview incomplete!</div>
-              ) : (
-                <div className="text-amber-600">Report not Generated yet!</div>
-              )}
+                {interview.report_file_url ? (
+                  <a
+                    href={interview.report_file_url}
+                    className="flex gap-1 items-center bg-accent rounded p-2 hover:bg-accent/90 transition-all cursor-pointer"
+                    target="_blank"
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Export Report
+                  </a>
+                ) : interview.status == "incomplete" ? (
+                  <div className="text-destructive">Interview incomplete!</div>
+                ) : (
+                  <div className="text-amber-600">Report not Generated yet!</div>
+                )}
                 {interview.resume_url && (
                     <a
                       className="flex items-center gap-2 border rounded px-4 py-2"

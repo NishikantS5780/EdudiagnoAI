@@ -218,6 +218,7 @@ export function ResumeUploadStage({
         const updateData = {
           firstname: candidateData.firstname,
           lastname: candidateData.lastname,
+          status: "Resume Submitted",
           email: candidateData.email,
           phone: candidateData.phone,
           city: candidateData.city,
