@@ -652,7 +652,7 @@ export default function VideoInterview({ onComplete }: { onComplete?: () => void
 
   const analyzeInterview = async () => {
     try {
-      interviewApi.updateInterview({status: "Quiz Completed"}).then(() => {
+      interviewApi.updateInterview({status: "Ai Interview Completed"}).then(() => {
         console.log("Interview updated successfully");
       }).catch((err: any) => {
         console.error("Error updating interview:", err);

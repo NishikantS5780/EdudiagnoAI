@@ -311,16 +311,10 @@ const InterviewPage = () => {
               size="lg"
               className="w-full"
               onClick={() =>{
-                interviewApi.updateInterview({status: "Resume Submitted"}).then(() => {
-                  console.log("Interview updated successfully");
-                  navigate(
-                  `/interview/compatibility?job_id=${urlSearchParams.get(
-                    "job_id"
-                  )}`
-                )
-                }).catch((err) => {
-                  console.error("Error updating interview:", err);
-                });
+                navigate(
+                `/interview/compatibility?job_id=${urlSearchParams.get(
+                  "job_id"
+                )}`)
               }}
             >
               Let's Proceed

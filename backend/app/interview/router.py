@@ -676,6 +676,8 @@ async def update_interview(
     interview_id=Depends(authorize_candidate),
 ):
     interview_data = interview_data.model_dump(exclude_unset=True)
+    print("=" * 20)
+    print(interview_data)
 
     stmt = (
         update(Interview)

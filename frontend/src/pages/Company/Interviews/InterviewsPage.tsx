@@ -367,7 +367,7 @@ const InterviewsPage = () => {
                             {interview.overall_score}%
                           </span>
                         ) : (
-                          <span className="text-muted-foreground">-</span>
+                            <span className="text-amber-600">{interview.status}</span>
                         )}
                       </TableCell>
                       <TableCell className="text-right">
