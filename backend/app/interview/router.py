@@ -961,7 +961,7 @@ Important:
             DSAResponse.passed,
         )
         .join(DSAResponse, DSAResponse.dsa_question_id == DSAQuestion.id)
-        .where(DSAResponse.interview_id == int(id))
+        .where(DSAResponse.interview_id == int(interview_id))
     )
     dsa_responses = db.execute(stmt).mappings().all()
 
@@ -1043,7 +1043,7 @@ Important:
         half_width, 16.8, safe_text(f"{data['work_experience_yrs']} years"), border=1, ln=1
     )
     pdf.cell(half_width, 16.8, safe_text("Skills"), border=1)
-    pdf.multi_cell(half_width, 16.8, safe_text(data["skills"]), border=1, ln=1)
+    pdf.multi_cell(half_width, 16.8, safe_text(data["skills"]), border=1)
     pdf.ln(14)
     # pdf.set_font("Arial", size=16)
     # pdf.set_text_color(0, 0, 200)

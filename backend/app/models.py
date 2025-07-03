@@ -775,4 +775,21 @@ class DSAPoolQuestion(Base):
     topic = Column(String)
     difficulty = Column(String)
     time_minutes = Column(Integer)
+
     created_at = Column(DateTime, default=func.now())
+
+    # Relationships
+    test_cases = relationship("DSAPoolTestCase", back_populates="dsa_pool_question")
+
+
+# Model for DSA Pool Test Cases
+class DSAPoolTestCase(Base):
+    __tablename__ = "dsa_pool_test_cases"
+
+    id = Column(Integer, primary_key=True)
+    input = Column(String, nullable=False)
+    expected_output = Column(String, nullable=False)
+    dsa_pool_question_id = Column(Integer, ForeignKey("dsa_pool_questions.id", ondelete="CASCADE"), nullable=False)
+
+    # Relationships
+    dsa_pool_question = relationship("DSAPoolQuestion", back_populates="test_cases")

@@ -5,7 +5,7 @@ from app.job_seeker.schemas import JobSeekerOut, JobSeekerUpdate
 from app.company.schemas import CompanyOut, CompanyBase, JobOut, JobBase, AiInterviewedJobOut, AiInterviewedJobBase
 from app.interview.schemas import InterviewOut, InterviewBase, QuizQuestionOut, QuizQuestionBase, DSAQuestionOut, DSAQuestionBase, InterviewQuestionOut, InterviewQuestionBase
 from app.schemas import JobApplicationOut, JobApplicationBase
-from app.models import AdminUser, DSAPoolQuestion
+from app.models import AdminUser, DSAPoolQuestion, DSAPoolTestCase
 from app.lib import jwt as app_jwt
 from app.lib.security import verify_password
 from pydantic import BaseModel
@@ -587,12 +587,18 @@ def flag_job_application(id: int, flag: bool, db: Session = Depends(database.get
 
 
 # --- DSAPoolQuestion Schemas ---
+
+class DSAPoolTestCaseCreate(BaseModel):
+    input: str
+    expected_output: str
+
 class DSAPoolQuestionCreate(BaseModel):
     title: str
     description: str
     topic: str
     difficulty: str
     time_minutes: int
+    test_cases: list[DSAPoolTestCaseCreate] = []
 
 class DSAPoolQuestionUpdate(BaseModel):
     title: Optional[str] = None
@@ -609,18 +615,23 @@ def create_dsapool_question(data: DSAPoolQuestionCreate, db: Session = Depends(d
         topic=data.topic,
         difficulty=data.difficulty,
         time_minutes=data.time_minutes,
-    ).returning(
-        DSAPoolQuestion.id,
-        DSAPoolQuestion.title,
-        DSAPoolQuestion.description,
-        DSAPoolQuestion.topic,
-        DSAPoolQuestion.difficulty,
-        DSAPoolQuestion.time_minutes,
-        DSAPoolQuestion.created_at
-    )
+    ).returning(DSAPoolQuestion.id)
     result = db.execute(stmt)
+    question_id = result.scalar()
+    # Add test cases
+    for tc in data.test_cases:
+        db.execute(
+            insert(DSAPoolTestCase).values(
+                input=tc.input,
+                expected_output=tc.expected_output,
+                dsa_pool_question_id=question_id
+            )
+        )
     db.commit()
-    return result.mappings().one_or_none()
+    # Return the created question with test cases
+    stmt = select(DSAPoolQuestion).where(DSAPoolQuestion.id == question_id)
+    question = db.execute(stmt).scalar_one_or_none()
+    return question
 
 @router.get("/dsapool-questions")
 def list_dsapool_questions(
@@ -633,18 +644,18 @@ def list_dsapool_questions(
     if difficulty:
         stmt = stmt.where(DSAPoolQuestion.difficulty == difficulty)
     if search:
-        stmt = stmt.where(DSAPoolQuestion.title.ilike(f"%{search}%") | DSAPoolQuestion.topic.ilike(f"%{search}%"))
+        stmt = stmt.where((DSAPoolQuestion.title.ilike(f"%{search}%")) | (DSAPoolQuestion.topic.ilike(f"%{search}%")))
     result = db.execute(stmt)
-    return result.mappings().all()
+    questions = result.scalars().all()
+    return questions
 
 @router.get("/dsapool-questions/{question_id}")
 def get_dsapool_question(question_id: int, db: Session = Depends(database.get_db), admin=Depends(authorize_admin)):
     stmt = select(DSAPoolQuestion).where(DSAPoolQuestion.id == question_id)
-    result = db.execute(stmt)
-    row = result.mappings().one_or_none()
-    if not row:
+    question = db.execute(stmt).scalar_one_or_none()
+    if not question:
         raise HTTPException(404, "DSA Question not found")
-    return row
+    return question
 
 @router.put("/dsapool-questions/{question_id}")
 def update_dsapool_question(question_id: int, data: DSAPoolQuestionUpdate, db: Session = Depends(database.get_db), admin=Depends(authorize_admin)):
@@ -655,29 +666,57 @@ def update_dsapool_question(question_id: int, data: DSAPoolQuestionUpdate, db: S
         update(DSAPoolQuestion)
         .where(DSAPoolQuestion.id == question_id)
         .values(**update_data)
-        .returning(
-            DSAPoolQuestion.id,
-            DSAPoolQuestion.title,
-            DSAPoolQuestion.description,
-            DSAPoolQuestion.topic,
-            DSAPoolQuestion.difficulty,
-            DSAPoolQuestion.time_minutes,
-            DSAPoolQuestion.created_at
-        )
     )
     result = db.execute(stmt)
     db.commit()
-    row = result.mappings().one_or_none()
-    if not row:
+    # Return the updated question
+    stmt = select(DSAPoolQuestion).where(DSAPoolQuestion.id == question_id)
+    question = db.execute(stmt).scalar_one_or_none()
+    if not question:
         raise HTTPException(404, "DSA Question not found")
-    return row
+    return question
 
 @router.delete("/dsapool-questions/{question_id}")
 def delete_dsapool_question(question_id: int, db: Session = Depends(database.get_db), admin=Depends(authorize_admin)):
-    stmt = delete(DSAPoolQuestion).where(DSAPoolQuestion.id == question_id).returning(DSAPoolQuestion.id)
-    result = db.execute(stmt)
-    db.commit()
-    row = result.fetchone()
-    if not row:
+    stmt = select(DSAPoolQuestion).where(DSAPoolQuestion.id == question_id)
+    question = db.execute(stmt).scalar_one_or_none()
+    if not question:
         raise HTTPException(404, "DSA Question not found")
+    db.delete(question)
+    db.commit()
+    return {"ok": True}
+# --- DSAPoolTestCase Endpoints ---
+@router.post("/dsapool-questions/{question_id}/test-cases")
+def add_dsapool_test_case(question_id: int, data: DSAPoolTestCaseCreate, db: Session = Depends(database.get_db), admin=Depends(authorize_admin)):
+    stmt = select(DSAPoolQuestion).where(DSAPoolQuestion.id == question_id)
+    question = db.execute(stmt).scalar_one_or_none()
+    if not question:
+        raise HTTPException(404, "DSA Question not found")
+    stmt = insert(DSAPoolTestCase).values(
+        input=data.input,
+        expected_output=data.expected_output,
+        dsa_pool_question_id=question_id
+    ).returning(DSAPoolTestCase.id)
+    result = db.execute(stmt)
+    test_case_id = result.scalar()
+    db.commit()
+    stmt = select(DSAPoolTestCase).where(DSAPoolTestCase.id == test_case_id)
+    test_case = db.execute(stmt).scalar_one_or_none()
+    return test_case
+
+@router.get("/dsapool-questions/{question_id}/test-cases")
+def list_dsapool_test_cases(question_id: int, db: Session = Depends(database.get_db), admin=Depends(authorize_admin)):
+    stmt = select(DSAPoolTestCase).where(DSAPoolTestCase.dsa_pool_question_id == question_id)
+    result = db.execute(stmt)
+    test_cases = result.scalars().all()
+    return test_cases
+
+@router.delete("/dsapool-questions/{question_id}/test-cases/{test_case_id}")
+def delete_dsapool_test_case(question_id: int, test_case_id: int, db: Session = Depends(database.get_db), admin=Depends(authorize_admin)):
+    stmt = select(DSAPoolTestCase).where(DSAPoolTestCase.id == test_case_id, DSAPoolTestCase.dsa_pool_question_id == question_id)
+    test_case = db.execute(stmt).scalar_one_or_none()
+    if not test_case:
+        raise HTTPException(404, "Test case not found")
+    db.delete(test_case)
+    db.commit()
     return {"ok": True}
