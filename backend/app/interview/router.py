@@ -24,6 +24,7 @@ from app.configs import openai
 import json
 import random
 from app.services import brevo, gcs
+from app import services
 
 from app.services import gcs as gcs_service
 
@@ -725,7 +726,7 @@ async def analyze_resume(
 Return ONLY a JSON object with these exact fields:
 {{
     "resume_match_score": number between 0 and 100,
-    "resume_match_feedback": "Detailed feedback about the match"
+    "resume_match_feedback": "A detailed breakdown and justification for the score, as described below."
 }}
 
 Resume Text:
@@ -737,16 +738,30 @@ Job Description:
 Job Requirements:
 {data.requirements}
 
+Strict Scoring and Feedback Instructions:
+- Be extremely strict: Only award points for clear, direct, and recent evidence of required skills, experience, and achievements relevant to the job.
+- Penalize heavily for missing, irrelevant, outdated, or generic content, and for vague or unverifiable claims.
+- If the resume is generic, fake, or not tailored to the job, the score should be very low (below 30).
+- Do NOT give points for skills or experience not explicitly mentioned or clearly demonstrated in the resume.
+- Do NOT give high scores for resumes that lack measurable achievements, relevant keywords, or recent experience.
+- If the resume is empty, generic, or irrelevant, the score should be near 0.
+
+Feedback Format (all in the resume_match_feedback string):
+- Start with a breakdown in this format (sum must be 100):
+  Breakdown: Skills: X/40, Experience: Y/30, Education: Z/10, Achievements: W/10, Other: V/10
+- For each part, provide a justification sentence (e.g., "Skills: Only 2 of 8 required skills found; missing X, Y, Z.").
+- End with a summary sentence justifying the total score (e.g., "Overall, the resume lacks most required skills and relevant experience, resulting in a low match score.").
+- Example feedback string:
+  Breakdown: Skills: 10/40, Experience: 5/30, Education: 5/10, Achievements: 0/10, Other: 2/10. Skills: Only 1 of 7 required skills found. Experience: No relevant experience listed. Education: Degree matches requirement. Achievements: No measurable achievements. Other: Resume is generic. Overall, the resume is a poor match for the job.
+- Do NOT return arrays or objects in feedback; only a single string as above.
+
 Important:
 - Return ONLY the JSON object, no other text
 - All fields must be present
 - resume_match_score must be a number between 0 and 100, with accurate granularity (e.g. 63, 78, 42) — not rounded or bucketed
-- Arrays should not be empty (use empty string if no data)
-- All other values must be strings
-- Be strict in scoring: prioritize exact skill match, relevant and recent experience, and alignment with job responsibilities
-- Penalize for missing keywords, outdated or irrelevant experience, vague roles, and lack of measurable achievements
-- Justify the exact score in resume_match_feedback with specific examples from the resume vs. job description and requirements
-    """
+- All values must be strings or numbers as specified
+- Be strict and critical in both scoring and feedback breakdown
+"""
 
     response = await openai.client.chat.completions.create(
         model="gpt-3.5-turbo",
@@ -877,9 +892,9 @@ async def generate_feedback(
 Follow these rules:
 - If the candidate gave minimal or irrelevant responses (e.g., just "yes", "no", or "hello"), reflect that harshly in all scores and feedback.
 - Do NOT assign high scores unless the candidate has clearly demonstrated knowledge, relevance, and depth.
-- Base scoring strictly on the content: no assumptions should be made if the candidate didn’t mention or demonstrate a skill.
+- Base scoring strictly on the content: no assumptions should be made if the candidate didn't mention or demonstrate a skill.
 - Use the job description and requirements to frame your evaluation.
-- If a category (e.g., technicalSkills) wasn’t demonstrated at all, the score for that category must be near 0.
+- If a category (e.g., technicalSkills) wasn't demonstrated at all, the score for that category must be near 0.
 - Feedback for the recruiter must provide a fair but critical assessment of the candidate's readiness for the role, with supporting examples.
 - Suggestions should help the candidate understand how to improve in future interviews.
 
