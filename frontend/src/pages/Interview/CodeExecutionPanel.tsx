@@ -284,6 +284,7 @@ function CodeExecutionPanel({
             onClick={() => {
               console.log("Go to Next Question button clicked");
               setCompilationStatus("");
+              setCode(codeTemplates[selectedLanguage]);
               onNext && onNext();
             }}
             variant="default"
