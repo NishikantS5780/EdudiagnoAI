@@ -286,7 +286,7 @@ async def execution_callback(request: Request, db: Session = Depends(database.ge
     total_count = db.execute(stmt).all()[0]._mapping["total_count"]
 
     if total_count == passed_count:
-        stmt = update(DSAResponse).values(passed=True).where(id == dsa_response_id)
+        stmt = update(DSAResponse).values(passed=True).where(DSAResponse.id == dsa_response_id)
         db.execute(stmt)
         db.commit()
 
